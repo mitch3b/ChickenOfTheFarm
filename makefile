@@ -2,7 +2,7 @@
 CC65 = ../../cc65/bin/cc65
 CA65 = ../../cc65/bin/ca65
 LD65 = ../../cc65/bin/ld65
-NAME = test
+NAME = ChickenOfTheFarm
 
 
 $(NAME).nes: $(NAME).o main.o asm4c.o nes.cfg
