@@ -39,12 +39,15 @@ static unsigned int  gSpeed;
 static unsigned int  gSpeedDirection;
 static unsigned int  gStage;
 static unsigned int  gCounter;
+static unsigned int  gHealth;
+static unsigned int  gIframes;
 
 extern void pMusicInit(unsigned char);
 extern void pMusicPlay(void);
 
 void __fastcall__ UnRLE(const unsigned char *data);
 
+#include "Background/Level0Bottom.h"
 #include "Background/Level1Top.h"
 #include "Background/Level1Bottom.h"
 #include "Background/Level2Top.h"
@@ -96,18 +99,23 @@ unsigned char bird[2] = {0x04,0x05,};
 
 #pragma data-name ("CHARS")
 
-unsigned char pattern[192] = {0x00,0x00,0x00,0x01,0x01,0x07,0x09,0x17,0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x08, // frog
-                              0x60,0xD0,0xA8,0xA8,0x86,0x3E,0xF3,0x7C,0x00,0x20,0x70,0x70,0x78,0xC0,0x0C,0x80, // frog
+unsigned char pattern[288] = {0x00,0x00,0x00,0x01,0x01,0x07,0x09,0x17,0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x08, // frog
+                              0x60,0xD0,0x88,0x88,0x86,0x3E,0xF3,0x7C,0x00,0x20,0x50,0x50,0x78,0xC0,0x0C,0x80, // frog
                               0x2F,0x59,0x7E,0xF6,0xEC,0x9C,0x38,0x3F,0x10,0x20,0x00,0x00,0x00,0x01,0x00,0x00, // frog
                               0x60,0xC0,0xC0,0xC0,0xE6,0x7C,0x1E,0x80,0x80,0x00,0x18,0x10,0x00,0x00,0x00,0x00, // frog
                               0x18,0x2C,0xF9,0x03,0x03,0x01,0x01,0x00,0x00,0x00,0xE6,0x04,0x00,0x00,0x00,0x00, // bird
                               0x00,0x00,0xF0,0xFE,0xFF,0xDF,0xC0,0xE0,0x00,0x00,0x00,0x00,0x00,0x00,0x1C,0x0E, // bird
-                              0x00,0x03,0x09,0x1D,0x07,0x37,0x0B,0x07,0x19,0x04,0x70,0x00,0x61,0x86,0x22,0x47, // portal
+                              0x19,0x04,0x70,0x00,0x61,0x86,0x22,0x47,0x19,0x07,0x79,0x1D,0x66,0xB1,0x29,0x40, // portal
+                              0x00,0x00,0x30,0x21,0x03,0x06,0x1E,0x18,0x18,0x7E,0x7E,0xFE,0xFC,0x78,0x60,0x00, // health
                               0xFF,0x00,0x78,0x40,0x5F,0x1F,0x3F,0x00,0x00,0xFF,0xFF,0xFF,0xE0,0xE0,0xC0,0xFF,
                               0xFF,0x03,0xFF,0x0F,0xEF,0xE3,0x8F,0x3F,0x00,0xFC,0x00,0xF0,0x10,0x1C,0x70,0xC0,
                               0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                              0x18,0x38,0x78,0x58,0x18,0x18,0x7E,0x00,0x18,0x38,0x78,0x58,0x18,0x18,0x7E,0x00,
-                              0x3C,0x66,0x06,0x1E,0x38,0x70,0x7E,0x00,0x3C,0x66,0x06,0x1E,0x38,0x70,0x7E,0x00,};
+                              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                              0x3C,0x7E,0x61,0x3C,0x1E,0x43,0x3F,0x1E,0x3C,0x42,0x40,0x3C,0x02,0x42,0x3C,0x00, // S
+                              0xFE,0x3F,0x18,0x18,0x18,0x18,0x18,0x08,0xFE,0x10,0x10,0x10,0x10,0x10,0x10,0x00, // T
+                              0x18,0x2C,0x52,0x63,0x7F,0x7F,0x63,0x21,0x18,0x24,0x42,0x42,0x7E,0x42,0x42,0x00, // A
+                              0x7C,0x7E,0x63,0x7D,0x6E,0x64,0x62,0x21,0x7C,0x42,0x42,0x7C,0x48,0x44,0x42,0x00, // R
+                              };
 
 void vblank(void)
 {
@@ -186,7 +194,7 @@ void ppuinit(void)
 
     // Set PPU registers
     PPU_CTRL = 0x84;
-    PPU_MASK = 0x1E;
+    PPU_MASK = 0x0E;
 }
 
 void ppudisable(void)
@@ -246,13 +254,13 @@ void palattes(void)
     PPU_DATA =    0x0E;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x01;
-    PPU_DATA    = 0x0A;
+    PPU_DATA    = 0x00;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x02;
-    PPU_DATA    = 0x1A;
+    PPU_DATA    = 0x10;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x03;
-    PPU_DATA    = 0x08;
+    PPU_DATA    = 0x30;
 
     // Background 1
     PPU_ADDRESS = 0x3F;
@@ -278,7 +286,7 @@ void palattes(void)
     PPU_DATA    = 0x1A;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x13;
-    PPU_DATA    = 0x08;
+    PPU_DATA    = 0x30;
 
     // Sprite 1
     PPU_ADDRESS = 0x3F;
@@ -294,13 +302,24 @@ void palattes(void)
     // Sprite 2
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x19;
-    PPU_DATA    = 0x1A;
+    PPU_DATA    = 0x06;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x1A;
-    PPU_DATA    = 0x30;
+    PPU_DATA    = 0x16;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x1B;
-    PPU_DATA    = 0x09;
+    PPU_DATA    = 0x30;
+
+    // Sprite 3
+    PPU_ADDRESS = 0x3F;
+    PPU_ADDRESS = 0x1D;
+    PPU_DATA    = 0x16;
+    PPU_ADDRESS = 0x3F;
+    PPU_ADDRESS = 0x1E;
+    PPU_DATA    = 0x30;
+    PPU_ADDRESS = 0x3F;
+    PPU_ADDRESS = 0x1F;
+    PPU_DATA    = 0x30;
 }
 
 //void ppu_copy( unsigned char* addr, unsigned int len )
@@ -330,10 +349,10 @@ void fade_out(void)
     PPU_DATA    = 0x0E;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x02;
-    PPU_DATA    = 0x0A;
+    PPU_DATA    = 0x00;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x03;
-    PPU_DATA    = 0x1A;
+    PPU_DATA    = 0x10;
 
     PPU_CTRL = 0x84 + gYNametable;
     set_scroll();
@@ -347,7 +366,7 @@ void fade_out(void)
     PPU_DATA    = 0x0E;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x03;
-    PPU_DATA    = 0x0A;
+    PPU_DATA    = 0x00;
 
     PPU_CTRL = 0x84 + gYNametable;
     set_scroll();
@@ -376,7 +395,7 @@ void fade_in(void)
     // Background 0
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x03;
-    PPU_DATA    = 0x0A;
+    PPU_DATA    = 0x00;
 
     PPU_CTRL = 0x84 + gYNametable;
     PPU_MASK = 0x0E;
@@ -388,10 +407,10 @@ void fade_in(void)
     // Background 0
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x02;
-    PPU_DATA    = 0x0A;
+    PPU_DATA    = 0x00;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x03;
-    PPU_DATA    = 0x1A;
+    PPU_DATA    = 0x10;
 
     PPU_CTRL = 0x84 + gYNametable;
     set_scroll();
@@ -402,16 +421,23 @@ void fade_in(void)
     // Background 0
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x01;
-    PPU_DATA    = 0x0A;
+    PPU_DATA    = 0x00;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x02;
-    PPU_DATA    = 0x1A;
+    PPU_DATA    = 0x10;
     PPU_ADDRESS = 0x3F;
     PPU_ADDRESS = 0x03;
-    PPU_DATA    = 0x08;
+    PPU_DATA    = 0x30;
 
     PPU_CTRL = 0x84 + gYNametable;
-    PPU_MASK = 0x1E;
+    if( gStage != 0 )
+    {
+        PPU_MASK = 0x1E;
+    }
+    else
+    {
+        PPU_MASK = 0x0E;
+    }
     set_scroll();
 
     gCounter = 20;
@@ -440,6 +466,23 @@ void patterntables(void)
     //}
 }
 
+void draw_health(void)
+{
+    for( i = 0; i < 8; i++)
+    {
+        sprites[40 + (i<<2)] = 0x0F + (i<<3) + i;
+        sprites[41 + (i<<2)] = 0x07;
+        if( gHealth > i )
+        {
+            sprites[42 + (i<<2)] = 0x02;
+        }
+        else
+        {
+            sprites[42 + (i<<2)] = 0x03;
+        }
+        sprites[43 + (i<<2)] = 0x10;
+    }
+}
 
 void setup_sprites(void)
 {
@@ -490,8 +533,8 @@ void setup_sprites(void)
     sprites[14] = 0x00;
     sprites[15] = 0x58;
 
-    gX = 0x40;
-    gY = 0x50;
+    gX = 0x10;
+    gY = 0xD0;
     gVelocity = 0;
     gVelocityDirection = 0;
     gSpeed = 0;
@@ -502,6 +545,8 @@ void setup_sprites(void)
     gJumping = 1;
     gBounceCounter = 0;
     gStage = 0;
+    gHealth = 8;
+    gIframes = 0;
 
     // bird
     sprites[16] = 0x30;
@@ -514,27 +559,7 @@ void setup_sprites(void)
     sprites[22] = 0x02;
     sprites[23] = 0x58;
 
-    // portal
-    //sprites[24] = 0x20;
-    //sprites[25] = 0x06;
-    //sprites[26] = 0x02;
-    //sprites[27] = 0xE0;
-    //
-    //sprites[28] = 0x20;
-    //sprites[29] = 0x06;
-    //sprites[30] = 0x42;
-    //sprites[31] = 0xE8;
-    //
-    //sprites[32] = 0x28;
-    //sprites[33] = 0x06;
-    //sprites[34] = 0x82;
-    //sprites[35] = 0xE0;
-    //
-    //sprites[36] = 0x28;
-    //sprites[37] = 0x06;
-    //sprites[38] = 0xC2;
-    //sprites[39] = 0xE8;
-
+    draw_health();
 }
 
 void dma_sprites(void)
@@ -709,10 +734,112 @@ void update_sprites(void)
     sprites[11] = gX;
     sprites[12] = gY+8;
     sprites[15] = gX+8;
+
+    if( gIframes > 0 )
+    {
+        sprites[2]  ^= 2;
+        sprites[6]  ^= 2;
+        sprites[10] ^= 2;
+        sprites[14] ^= 2;
+    }
+    else
+    {
+        sprites[2]  &= 0xFC;
+        sprites[6]  &= 0xFC;
+        sprites[10] &= 0xFC;
+        sprites[14] &= 0xFC;
+    }
+}
+
+void load_stage(void)
+{
+    fade_out();
+
+    if( gStage == 0 )
+    {
+        PPU_ADDRESS = 0x28; // address of nametable #2
+        PPU_ADDRESS = 0x00;
+        UnRLE(Level0Bottom);	// uncompresses our data
+    }
+    if( gStage == 1 )
+    {
+        PPU_ADDRESS = 0x28; // address of nametable #2
+        PPU_ADDRESS = 0x00;
+        UnRLE(Level1Bottom);	// uncompresses our data
+        PPU_ADDRESS = 0x20; // address of nametable #2
+        PPU_ADDRESS = 0x00;
+        UnRLE(Level1Top);	// uncompresses our data
+    }
+    if( gStage == 2 )
+    {
+        PPU_ADDRESS = 0x28; // address of nametable #2
+        PPU_ADDRESS = 0x00;
+        UnRLE(Level2Bottom);	// uncompresses our data
+        PPU_ADDRESS = 0x20; // address of nametable #2
+        PPU_ADDRESS = 0x00;
+        UnRLE(Level2Top);	// uncompresses our data
+    }
+
+    vblank();
+
+    gX = 0x10;
+    gY = 0xD0;
+    gYNametable = 2;
+    gVelocity = 0;
+    gVelocityDirection = 0;
+    gXScroll = 0;
+    gYScroll = 0;
+    gSpeed = 0;
+    gSpeedDirection = 1;
+    gJumping = 1;
+    gBounceCounter = 0;
+
+    // Frog direction
+    sprites[1] = 0x00;
+    sprites[2] = 0x00;
+    sprites[5] = 0x01;
+    sprites[6] = 0x00;
+    sprites[9] = 0x02;
+    sprites[10] = 0x00;
+    sprites[13] = 0x03;
+    sprites[14] = 0x00;
+
+    // Portal
+    sprites[24] = 0x00;
+    sprites[25] = 0x00;
+    sprites[26] = 0x00;
+    sprites[27] = 0x00;
+
+    sprites[28] = 0x00;
+    sprites[29] = 0x00;
+    sprites[30] = 0x00;
+    sprites[31] = 0x00;
+
+    sprites[32] = 0x00;
+    sprites[33] = 0x00;
+    sprites[34] = 0x00;
+    sprites[35] = 0x00;
+
+    sprites[36] = 0x00;
+    sprites[37] = 0x00;
+    sprites[38] = 0x00;
+    sprites[39] = 0x00;
+
+    update_sprites();
+    dma_sprites();
+    set_scroll();
+
+    fade_in();
 }
 
 void do_physics(void)
 {
+    if( (gController1 & BUTTON_START) != 0 )
+    {
+        gStage = 1;
+        load_stage();
+    }
+
     // 0-15 Frog 4 sprites
     // 16-23 Bird
     if( sprites[16] != gY )
@@ -1077,12 +1204,12 @@ void do_physics(void)
         {
             sprites[24] = 0x0F - gYScroll;
             sprites[25] = 0x06;
-            sprites[26] = 0x02;
+            sprites[26] = 0x00;
             sprites[27] = 0xE0;
 
             sprites[28] = 0x0F - gYScroll;
             sprites[29] = 0x06;
-            sprites[30] = 0x42;
+            sprites[30] = 0x40;
             sprites[31] = 0xE8;
         }
         else
@@ -1100,12 +1227,12 @@ void do_physics(void)
 
         sprites[32] = 0x17 - gYScroll;
         sprites[33] = 0x06;
-        sprites[34] = 0x82;
+        sprites[34] = 0x80;
         sprites[35] = 0xE0;
 
         sprites[36] = 0x17 - gYScroll;
         sprites[37] = 0x06;
-        sprites[38] = 0xC2;
+        sprites[38] = 0xC0;
         sprites[39] = 0xE8;
     }
     else
@@ -1133,57 +1260,38 @@ void do_physics(void)
 
     if( gYNametable == 0 && gY == 0x0F && gX == 0xE0 )
     {
-        if( gStage == 0 )
+        if( gStage == 1 )
         {
-            fade_out();
-
-            PPU_ADDRESS = 0x28; // address of nametable #2
-            PPU_ADDRESS = 0x00;
-            UnRLE(Level2Bottom);	// uncompresses our data
-            PPU_ADDRESS = 0x20; // address of nametable #2
-            PPU_ADDRESS = 0x00;
-            UnRLE(Level2Top);	// uncompresses our data
-
-            vblank();
-
-            gStage = 1;
-            gX = 0x20;
-            gY = 0x80;
-            gYNametable = 2;
-            gVelocity = 0;
-            gVelocityDirection = 0;
-            gSpeed = 0;
-            gSpeedDirection = 1;
-            gJumping = 1;
-            gBounceCounter = 0;
-
-            // Portal
-            sprites[24] = 0x00;
-            sprites[25] = 0x00;
-            sprites[26] = 0x00;
-            sprites[27] = 0x00;
-
-            sprites[28] = 0x00;
-            sprites[29] = 0x00;
-            sprites[30] = 0x00;
-            sprites[31] = 0x00;
-
-            sprites[32] = 0x00;
-            sprites[33] = 0x00;
-            sprites[34] = 0x00;
-            sprites[35] = 0x00;
-
-            sprites[36] = 0x00;
-            sprites[37] = 0x00;
-            sprites[38] = 0x00;
-            sprites[39] = 0x00;
-
-            update_sprites();
-            dma_sprites();
-            set_scroll();
-
-            fade_in();
+            gStage = 2;
+            load_stage();
         }
+    }
+
+    if( sprites[16] == gY && sprites[19] == gX && gIframes == 0)
+    {
+        if( gHealth > 0 )
+        {
+            if( gStage != 0 )
+            {
+                --gHealth;
+            }
+            draw_health();
+            if( gHealth == 0 )
+            {
+                gHealth = 8;
+                gStage = 0;
+                load_stage();
+                draw_health();
+            }
+            else
+            {
+                gIframes = 120;
+            }
+        }
+    }
+    if( gIframes > 0 )
+    {
+        --gIframes;
     }
 }
 
@@ -1200,14 +1308,10 @@ void main(void)
     vblank();
     patterntables();
 
-    //TODO should move th
-    PPU_ADDRESS = 0x20; // address of nametable #0 \
-  	PPU_ADDRESS = 0x00;
-  	UnRLE(Level1Top);	// uncompresses our data
-
   	PPU_ADDRESS = 0x28; // address of nametable #2
   	PPU_ADDRESS = 0x00;
-  	UnRLE(Level1Bottom);	// uncompresses our data
+  	UnRLE(Level0Bottom);	// uncompresses our data
+
 
     vblank();
     setup_sprites();
@@ -1219,7 +1323,8 @@ void main(void)
     gCounter = 5;
     vblank_counter();
 
-    ppuinit();
+    gStage = 0;
+    fade_in();
 
     while(1)
     {
