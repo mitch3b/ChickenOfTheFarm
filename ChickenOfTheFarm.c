@@ -128,8 +128,9 @@ void vblank_counter(void)
     do
     {
         vblank();
+        gCounter = gCounter - 1;
     }
-    while( --gCounter != 0 );
+    while( gCounter != 0 );
 }
 
 void ppuinit(void)
