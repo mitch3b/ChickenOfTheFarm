@@ -1389,55 +1389,64 @@ void init_game_state(void)
 
 void game_running_sm(void)
 {
-    vblank();
+    while( gGameState == GAME_RUNNING_STATE )
+    {
+        vblank();
 
-    input_poll();
+        input_poll();
 
-    update_sprites();
+        update_sprites();
 
-    dma_sprites();
+        dma_sprites();
 
-    // set bits [1:0] to 0 for nametable
-    PPU_CTRL = 0x84 + gYNametable;
-    set_scroll();
+        // set bits [1:0] to 0 for nametable
+        PPU_CTRL = 0x84 + gYNametable;
+        set_scroll();
 
-    do_physics();
+        do_physics();
+    }
 }
 
 void title_screen_sm(void)
 {
-    vblank();
-
-    input_poll();
-
-    // set bits [1:0] to 0 for nametable
-    PPU_CTRL = 0x84 + gYNametable;
-    set_scroll();
-
-    if( (gController1 & BUTTON_START) != 0 )
+    while( gGameState == TITLE_SCREEN_STATE )
     {
-        gStage = 1;
-        gGameState = GAME_RUNNING_STATE;
-        init_game_state();
-        load_stage();
+        vblank();
+
+        input_poll();
+
+        // set bits [1:0] to 0 for nametable
+        PPU_CTRL = 0x84 + gYNametable;
+        set_scroll();
+
+        if( (gController1 & BUTTON_START) != 0 )
+        {
+            gStage = 1;
+            gGameState = GAME_RUNNING_STATE;
+            init_game_state();
+            load_stage();
+        }
     }
 }
 
 void end_screen_sm(void)
 {
-    vblank();
-
-    input_poll();
-
-    // set bits [1:0] to 0 for nametable
-    PPU_CTRL = 0x84 + gYNametable;
-    set_scroll();
-
-    if( (gController1 & BUTTON_START) != 0 )
+    while( gGameState == ENDING_STATE )
     {
-        gStage = 0;
-        gGameState = TITLE_SCREEN_STATE;
-        load_stage();
+        vblank();
+
+        input_poll();
+
+        // set bits [1:0] to 0 for nametable
+        PPU_CTRL = 0x84 + gYNametable;
+        set_scroll();
+
+        if( (gController1 & BUTTON_START) != 0 )
+        {
+            gStage = 0;
+            gGameState = TITLE_SCREEN_STATE;
+            load_stage();
+        }
     }
 }
 
