@@ -6,22 +6,22 @@ NAME = ChickenOfTheFarm
 
 
 $(NAME).nes: $(NAME).o main.o asm4c.o nes.cfg
-	$(LD65) -C nes.cfg -o $(NAME).nes $(NAME).o main.o asm4c.o nes.lib
+	$(LD65) -C nes.cfg --dbgfile vars.txt -o $(NAME).nes $(NAME).o main.o asm4c.o nes.lib
 
 	rm *.o
-	rm test.s
+	rm $(NAME).s
 
 main.o: main.asm
-	$(CA65) main.asm
+	$(CA65) -g main.asm
 
 asm4c.o: asm4c.s
-	$(CA65) asm4c.s
+	$(CA65) -g asm4c.s
 
 $(NAME).o: $(NAME).s
-	$(CA65) $(NAME).s
+	$(CA65) -g $(NAME).s
 
 $(NAME).s: $(NAME).c
-	$(CC65) -Oi $(NAME).c --add-source
+	$(CC65) -g -Oi $(NAME).c --add-source
 
 clean:
 # if linux uncomment the next line
