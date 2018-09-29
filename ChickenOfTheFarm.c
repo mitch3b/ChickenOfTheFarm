@@ -111,6 +111,48 @@
 #define SPRITE3_2                0x1E
 #define SPRITE3_3                0x1F
 
+#define PATTERN_FROG_NORMAL_0    0x00
+#define PATTERN_FROG_NORMAL_1    0x01
+#define PATTERN_FROG_NORMAL_2    0x02
+#define PATTERN_FROG_NORMAL_3    0x03
+#define PATTERN_FROG_HOP_0       0x04
+#define PATTERN_FROG_HOP_1       0x05
+#define PATTERN_FROG_HOP_2       0x06
+#define PATTERN_FROG_HOP_3       0x07
+#define PATTERN_FROG_JUMP_0      0x08
+#define PATTERN_FROG_JUMP_1      0x09
+#define PATTERN_FROG_JUMP_2      0x0A
+#define PATTERN_FROG_JUMP_3      0x0B
+#define PATTERN_FROG_SUSPENDED_0 0x0C
+#define PATTERN_FROG_SUSPENDED_1 0x0D
+#define PATTERN_FROG_SUSPENDED_2 0x0E
+#define PATTERN_FROG_SUSPENDED_3 0x0F
+#define PATTERN_FROG_FALLING_0   0x00
+#define PATTERN_FROG_FALLING_1   0x11
+#define PATTERN_FROG_FALLING_2   0x12
+#define PATTERN_FROG_FALLING_3   0x13
+#define PATTERN_FROG_LANDING_0   0x14
+#define PATTERN_FROG_LANDING_1   0x15
+#define PATTERN_FROG_LANDING_2   0x16
+#define PATTERN_FROG_LANDING_3   0x17
+#define PATTERN_BIRD_0           0x18
+#define PATTERN_BIRD_1           0x19
+#define PATTERN_PORTAL           0x1A
+#define PATTERN_HEALTH           0x1B
+#define PATTERN_BACKGROUND_0     0x1C
+#define PATTERN_BACKGROUND_1     0x1D
+#define PATTERN_BLANK_0          0x1E
+#define PATTERN_BLANK_1          0x1F
+#define PATTERN_S                0x20
+#define PATTERN_T                0x21
+#define PATTERN_A                0x22
+#define PATTERN_R                0x23
+#define PATTERN_BLANK_2          0x24
+#define PATTERN_E                0x25
+#define PATTERN_N                0x26
+#define PATTERN_D                0x27
+
+
 // Registers
 #define PPU_CTRL    *((unsigned char*)0x2000)
 #define PPU_MASK    *((unsigned char*)0x2001)
@@ -131,6 +173,16 @@ typedef enum _GameState_t
     ENDING_STATE,
 } GameState_t;
 
+typedef enum _FrogAnimationState_t
+{
+    FROG_NORMAL = 0,
+    FROG_HOP,
+    FROG_JUMP,
+    FROG_SUSPENDED,
+    FROG_FALLING,
+    FROG_LANDING,
+} FrogAnimationState_t;
+
 //
 // GLOBALS
 //
@@ -147,36 +199,38 @@ unsigned char collision[480] = {};
 
 #pragma bss-name (push, "BSS")
 
-static unsigned char gController1;
-static unsigned char gPrevController1;
-static unsigned char gPrevController1Change;
-static unsigned char gX;
-static unsigned char gY;
-static unsigned long gXScroll;
-static unsigned char gYScroll;
-static unsigned char gYNametable;
-static unsigned char devnull;
-static unsigned int  i;
-static unsigned int  j;
-static unsigned int  garbage;
-static unsigned int  gJumping; // 0 if not currently in the air from a jump, 1 if yes
-static unsigned int  gBounceCounter;
-static unsigned int  gVelocity;
-static unsigned int  gVelocityDirection;
-static unsigned int  gSpeed;
-static unsigned int  gSpeedDirection;
-static unsigned int  gStage;
-static unsigned int  gCounter;
-static unsigned int  gHealth;
-static unsigned int  gIframes;
-static GameState_t   gGameState;
+static unsigned char        gController1;
+static unsigned char        gPrevController1;
+static unsigned char        gPrevController1Change;
+static unsigned char        gX;
+static unsigned char        gY;
+static unsigned long        gXScroll;
+static unsigned char        gYScroll;
+static unsigned char        gYNametable;
+static unsigned char        devnull;
+static unsigned int         i;
+static unsigned int         j;
+static unsigned int         garbage;
+static unsigned int         gJumping; // 0 if not currently in the air from a jump, 1 if yes
+static unsigned int         gBounceCounter;
+static unsigned int         gVelocity;
+static unsigned int         gVelocityDirection;
+static unsigned int         gSpeed;
+static unsigned int         gSpeedDirection;
+static unsigned int         gStage;
+static unsigned int         gCounter;
+static unsigned int         gHealth;
+static unsigned int         gIframes;
+static GameState_t          gGameState;
+static FrogAnimationState_t gFrogAnimationState;
 
 extern void pMusicInit(unsigned char);
 extern void pMusicPlay(void);
 
 void __fastcall__ UnRLE(const unsigned char *data);
 
-#include "Background/Level0Bottom.h"
+#include "Background/TitleScreen.h"
+#include "Background/EndingScreen.h"
 #include "Background/Level1Top.h"
 #include "Background/Level1Bottom.h"
 #include "Background/Level2Top.h"
@@ -193,23 +247,47 @@ unsigned char bird[2] = {0x04,0x05,};
 
 #pragma data-name ("CHARS")
 
-unsigned char pattern[288] = {0x00,0x00,0x00,0x01,0x01,0x07,0x09,0x17,0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x08, // frog
-                              0x60,0xD0,0x88,0x88,0x86,0x3E,0xF3,0x7C,0x00,0x20,0x50,0x50,0x78,0xC0,0x0C,0x80, // frog
-                              0x2F,0x59,0x7E,0xF6,0xEC,0x9C,0x38,0x3F,0x10,0x20,0x00,0x00,0x00,0x01,0x00,0x00, // frog
-                              0x60,0xC0,0xC0,0xC0,0xE6,0x7C,0x1E,0x80,0x80,0x00,0x18,0x10,0x00,0x00,0x00,0x00, // frog
-                              0x18,0x2C,0xF9,0x03,0x03,0x01,0x01,0x00,0x00,0x00,0xE6,0x04,0x00,0x00,0x00,0x00, // bird
-                              0x00,0x00,0xF0,0xFE,0xFF,0xDF,0xC0,0xE0,0x00,0x00,0x00,0x00,0x00,0x00,0x1C,0x0E, // bird
-                              0x19,0x04,0x70,0x00,0x61,0x86,0x22,0x47,0x19,0x07,0x79,0x1D,0x66,0xB1,0x29,0x40, // portal
-                              0x00,0x00,0x30,0x21,0x03,0x06,0x1E,0x18,0x18,0x7E,0x7E,0xFE,0xFC,0x78,0x60,0x00, // health
-                              0xFF,0x00,0x78,0x40,0x5F,0x1F,0x3F,0x00,0x00,0xFF,0xFF,0xFF,0xE0,0xE0,0xC0,0xFF,
-                              0xFF,0x03,0xFF,0x0F,0xEF,0xE3,0x8F,0x3F,0x00,0xFC,0x00,0xF0,0x10,0x1C,0x70,0xC0,
-                              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                              0x3C,0x7E,0x61,0x3C,0x1E,0x43,0x3F,0x1E,0x3C,0x42,0x40,0x3C,0x02,0x42,0x3C,0x00, // S
-                              0xFE,0x3F,0x18,0x18,0x18,0x18,0x18,0x08,0xFE,0x10,0x10,0x10,0x10,0x10,0x10,0x00, // T
-                              0x18,0x2C,0x52,0x63,0x7F,0x7F,0x63,0x21,0x18,0x24,0x42,0x42,0x7E,0x42,0x42,0x00, // A
-                              0x7C,0x7E,0x63,0x7D,0x6E,0x64,0x62,0x21,0x7C,0x42,0x42,0x7C,0x48,0x44,0x42,0x00, // R
-                              };
+unsigned char pattern[0x280] = {0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x08,0x00,0x00,0x00,0x01,0x01,0x07,0x09,0x17, // frog
+                                0x00,0x20,0x50,0x50,0x78,0xC0,0x0C,0x80,0x60,0xD0,0x88,0x88,0x86,0x3E,0xF3,0x7C, // frog
+                                0x10,0x20,0x00,0x00,0x00,0x01,0x00,0x00,0x2F,0x59,0x7E,0xF6,0xEC,0x9C,0x38,0x3F, // frog
+                                0x80,0x00,0x18,0x10,0x00,0x00,0x00,0x00,0x60,0xC0,0xC0,0xC0,0xE6,0x7C,0x1E,0x80, // frog
+                                0x00,0x00,0x00,0x00,0x00,0x02,0x0C,0x10,0x00,0x00,0x00,0x01,0x03,0x0D,0x13,0x2F, // frog hop
+                                0x00,0x00,0x10,0x28,0x28,0x3C,0x60,0x00,0x00,0x30,0xE8,0xC4,0xC4,0xC2,0x9F,0xFE, // frog hop
+                                0x20,0x07,0x02,0x00,0x00,0x04,0x0E,0x00,0x5F,0x78,0x3C,0x0C,0x1C,0x38,0x70,0x78, // frog hop
+                                0x40,0x0C,0x08,0x00,0x00,0x00,0x00,0x00,0xA0,0xE0,0x60,0x73,0x3E,0x0F,0x00,0x00, // frog hop
+                                0x00,0x03,0x02,0x03,0x01,0x00,0x04,0x0A,0x03,0x04,0x04,0x04,0x02,0x07,0x0B,0x15, // frog jump
+                                0x07,0x8E,0xD4,0x80,0x00,0x00,0x80,0x40,0x80,0x70,0x2B,0x72,0xE7,0xEE,0x7C,0xB8, // frog jump
+                                0x14,0x08,0x00,0x70,0x60,0xE0,0xA0,0x00,0x2B,0x37,0x3F,0x03,0x07,0x06,0x0E,0x0A, // frog jump
+                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xE0,0x80,0x00,0x80,0x00,0x00,0x00,0x00, // frog jump
+                                0x00,0x00,0x00,0x00,0x00,0x08,0x10,0x08,0x00,0x00,0x00,0x01,0x0F,0x17,0x2F,0x37, // frog suspended
+                                0x00,0x00,0x50,0x78,0x80,0x0C,0x80,0xC0,0x00,0x70,0x88,0x84,0x7E,0xF2,0x7C,0x30, // frog suspended
+                                0xD0,0x40,0xC0,0x00,0x00,0x00,0x00,0x00,0x2F,0x3F,0x3F,0xF8,0x70,0xE0,0x00,0x00, // frog suspended
+                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFB,0xBE,0x1F,0x00,0x00,0x00,0x00,0x00, // frog suspended
+                                0x60,0x38,0x78,0x09,0x02,0x01,0x00,0x00,0x00,0x00,0x07,0x06,0xC5,0x76,0xFF,0x1F, // frog falling
+                                0x00,0x00,0x00,0x00,0x80,0x40,0x8E,0x1A,0x00,0x00,0x00,0x80,0x40,0xAE,0x71,0xE1, // frog falling
+                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0B,0x01,0x01,0x00,0x00,0x00,0x00,0x00, // frog falling
+                                0x4E,0x84,0x00,0x04,0x02,0x07,0x03,0x01,0xB1,0x7A,0xFE,0xCA,0xE4,0x70,0x3C,0x14, // frog falling
+                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,0x1F, // frog landing
+                                0x00,0x00,0x00,0x00,0x10,0x28,0x28,0x7C,0x00,0x00,0x00,0x30,0x68,0xC4,0xC4,0x82, // frog landing
+                                0x0E,0x10,0xC0,0xE0,0xC0,0x00,0x00,0x00,0x31,0x6F,0x3F,0x1C,0x0E,0x7E,0x7C,0x30, // frog landing
+                                0x00,0x80,0x40,0x08,0x0C,0x00,0x00,0x00,0xFF,0x7E,0xA0,0x60,0x60,0x73,0x3E,0x0F, // frog landing
+                                0x18,0x2C,0xF9,0x03,0x03,0x01,0x01,0x00,0x00,0x00,0xE6,0x04,0x00,0x00,0x00,0x00, // bird
+                                0x00,0x00,0xF0,0xFE,0xFF,0xDF,0xC0,0xE0,0x00,0x00,0x00,0x00,0x00,0x00,0x1C,0x0E, // bird
+                                0x19,0x04,0x70,0x00,0x61,0x86,0x22,0x47,0x19,0x07,0x79,0x1D,0x66,0xB1,0x29,0x40, // portal
+                                0x00,0x00,0x30,0x21,0x03,0x06,0x1E,0x18,0x18,0x7E,0x7E,0xFE,0xFC,0x78,0x60,0x00, // health
+                                0xFF,0x00,0x78,0x40,0x5F,0x1F,0x3F,0x00,0x00,0xFF,0xFF,0xFF,0xE0,0xE0,0xC0,0xFF,
+                                0xFF,0x03,0xFF,0x0F,0xEF,0xE3,0x8F,0x3F,0x00,0xFC,0x00,0xF0,0x10,0x1C,0x70,0xC0,
+                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                                0x3C,0x7E,0x61,0x3C,0x1E,0x43,0x3F,0x1E,0x3C,0x42,0x40,0x3C,0x02,0x42,0x3C,0x00, // S
+                                0xFE,0x3F,0x18,0x18,0x18,0x18,0x18,0x08,0xFE,0x10,0x10,0x10,0x10,0x10,0x10,0x00, // T
+                                0x18,0x2C,0x52,0x63,0x7F,0x7F,0x63,0x21,0x18,0x24,0x42,0x42,0x7E,0x42,0x42,0x00, // A
+                                0x7C,0x7E,0x63,0x7D,0x6E,0x64,0x62,0x21,0x7C,0x42,0x42,0x7C,0x48,0x44,0x42,0x00, // R
+                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                                0x7E,0x7F,0x60,0x78,0x7C,0x60,0x7E,0x7F,0x7E,0x40,0x40,0x78,0x40,0x40,0x7E,0x00, // E
+                                0x42,0x63,0x73,0x6B,0x67,0x63,0x63,0x21,0x42,0x62,0x52,0x4A,0x46,0x42,0x42,0x00, // N
+                                0x78,0x7C,0x62,0x63,0x67,0x65,0x7A,0x3C,0x78,0x44,0x42,0x42,0x42,0x44,0x78,0x00, // D
+                                };
 
 void vblank(void)
 {
@@ -351,7 +429,7 @@ void loadCollisionFromNametables(void)
   i = *((unsigned char*)0x2007);
 
   for(i = 0 ; i < 240 ;) {
-    collision[i] = (*((unsigned char*)0x2007) == 0x08) ? 0x01 : 0x00;
+    collision[i] = (*((unsigned char*)0x2007) == PATTERN_BACKGROUND_0) ? 0x01 : 0x00;
     j = *((unsigned char*)0x2007);
 
     i++;
@@ -369,7 +447,7 @@ void loadCollisionFromNametables(void)
   i = *((unsigned char*)0x2007);
 
   for(i = 0 ; i < 240 ;) {
-    collision[i + 240] = (*((unsigned char*)0x2007) == 0x08) ? 0x01 : 0x00;
+    collision[i + 240] = (*((unsigned char*)0x2007) == PATTERN_BACKGROUND_0) ? 0x01 : 0x00;
     j = *((unsigned char*)0x2007);
 
     i++;
@@ -493,13 +571,13 @@ void fade_in(void)
     SET_COLOR(BACKGROUND0_3, WHITE);
 
     PPU_CTRL = 0x84 + gYNametable;
-    if( gStage != 0 )
+    if( gStage == 0 || gStage > 2 )
     {
-        PPU_MASK = 0x1E;
+        PPU_MASK = 0x0E;
     }
     else
     {
-        PPU_MASK = 0x0E;
+        PPU_MASK = 0x1E;
     }
     set_scroll();
 
@@ -534,7 +612,7 @@ void draw_health(void)
     for( i = 0; i < 8; i++)
     {
         sprites[40 + (i<<2)] = 0x0F + (i<<3) + i;
-        sprites[41 + (i<<2)] = 0x07;
+        sprites[41 + (i<<2)] = PATTERN_HEALTH;
         if( gHealth > i )
         {
             sprites[42 + (i<<2)] = 0x02;
@@ -605,7 +683,7 @@ void setup_sprites(void)
     gXScroll = 0;
     gYScroll = 0;
     gYNametable = 2;
-    gJumping = 1;
+    gJumping = 0;
     gBounceCounter = 0;
     gStage = 0;
     gHealth = 8;
@@ -613,12 +691,12 @@ void setup_sprites(void)
 
     // bird
     sprites[16] = 0x30;
-    sprites[17] = 0x04;
+    sprites[17] = PATTERN_BIRD_0;
     sprites[18] = 0x02;
     sprites[19] = 0x50;
 
     sprites[20] = 0x30;
-    sprites[21] = 0x05;
+    sprites[21] = PATTERN_BIRD_1;
     sprites[22] = 0x02;
     sprites[23] = 0x58;
 
@@ -692,10 +770,165 @@ void small_jump(void)
 void big_jump(void)
 {
     if(gJumping == 0) {
-      gJumping = 1;
+      gJumping = 2;
       gVelocity = 16;
       gVelocityDirection = 1;
       gPrevController1Change |= BUTTON_A;
+    }
+}
+
+void update_frog_sprite(void)
+{
+    if( gVelocity <= 2 && gJumping != 0 )
+    {
+        gFrogAnimationState = FROG_SUSPENDED;
+    }
+    else if( gVelocityDirection == 1 && gJumping != 0 )
+    {
+        if( gJumping == 1 )
+        {
+            gFrogAnimationState = FROG_HOP;
+        }
+        else
+        {
+            gFrogAnimationState = FROG_JUMP;
+        }
+    }
+    else if( gVelocityDirection == 0 && gJumping != 0 )
+    {
+        if( gJumping == 1 )
+        {
+            gFrogAnimationState = FROG_LANDING;
+        }
+        else
+        {
+            gFrogAnimationState = FROG_FALLING;
+        }
+    }
+    else
+    {
+        gFrogAnimationState = FROG_NORMAL;
+    }
+
+    switch( gFrogAnimationState )
+    {
+        case FROG_HOP:
+            if( gSpeedDirection == 1 )
+            {
+                sprites[1]  = PATTERN_FROG_HOP_0;
+                sprites[5]  = PATTERN_FROG_HOP_1;
+                sprites[9]  = PATTERN_FROG_HOP_2;
+                sprites[13] = PATTERN_FROG_HOP_3;
+            }
+            else
+            {
+                sprites[1]  = PATTERN_FROG_HOP_1;
+                sprites[5]  = PATTERN_FROG_HOP_0;
+                sprites[9]  = PATTERN_FROG_HOP_3;
+                sprites[13] = PATTERN_FROG_HOP_2;
+            }
+            break;
+
+        case FROG_JUMP:
+            if( gSpeedDirection == 1 )
+            {
+                sprites[1]  = PATTERN_FROG_JUMP_0;
+                sprites[5]  = PATTERN_FROG_JUMP_1;
+                sprites[9]  = PATTERN_FROG_JUMP_2;
+                sprites[13] = PATTERN_FROG_JUMP_3;
+            }
+            else
+            {
+                sprites[1]  = PATTERN_FROG_JUMP_1;
+                sprites[5]  = PATTERN_FROG_JUMP_0;
+                sprites[9]  = PATTERN_FROG_JUMP_3;
+                sprites[13] = PATTERN_FROG_JUMP_2;
+            }
+            break;
+
+        case FROG_SUSPENDED:
+            if( gSpeedDirection == 1 )
+            {
+                sprites[1]  = PATTERN_FROG_SUSPENDED_0;
+                sprites[5]  = PATTERN_FROG_SUSPENDED_1;
+                sprites[9]  = PATTERN_FROG_SUSPENDED_2;
+                sprites[13] = PATTERN_FROG_SUSPENDED_3;
+            }
+            else
+            {
+                sprites[1]  = PATTERN_FROG_SUSPENDED_1;
+                sprites[5]  = PATTERN_FROG_SUSPENDED_0;
+                sprites[9]  = PATTERN_FROG_SUSPENDED_3;
+                sprites[13] = PATTERN_FROG_SUSPENDED_2;
+            }
+            break;
+
+        case FROG_FALLING:
+            if( gSpeedDirection == 1 )
+            {
+                sprites[1]  = PATTERN_FROG_FALLING_0;
+                sprites[5]  = PATTERN_FROG_FALLING_1;
+                sprites[9]  = PATTERN_FROG_FALLING_2;
+                sprites[13] = PATTERN_FROG_FALLING_3;
+            }
+            else
+            {
+                sprites[1]  = PATTERN_FROG_FALLING_1;
+                sprites[5]  = PATTERN_FROG_FALLING_0;
+                sprites[9]  = PATTERN_FROG_FALLING_3;
+                sprites[13] = PATTERN_FROG_FALLING_2;
+            }
+            break;
+
+        case FROG_LANDING:
+            if( gSpeedDirection == 1 )
+            {
+                sprites[1]  = PATTERN_FROG_LANDING_0;
+                sprites[5]  = PATTERN_FROG_LANDING_1;
+                sprites[9]  = PATTERN_FROG_LANDING_2;
+                sprites[13] = PATTERN_FROG_LANDING_3;
+            }
+            else
+            {
+                sprites[1]  = PATTERN_FROG_LANDING_1;
+                sprites[5]  = PATTERN_FROG_LANDING_0;
+                sprites[9]  = PATTERN_FROG_LANDING_3;
+                sprites[13] = PATTERN_FROG_LANDING_2;
+            }
+            break;
+
+        case FROG_NORMAL:
+        default:
+            if( gSpeedDirection == 1 )
+            {
+                sprites[1]  = PATTERN_FROG_NORMAL_0;
+                sprites[5]  = PATTERN_FROG_NORMAL_1;
+                sprites[9]  = PATTERN_FROG_NORMAL_2;
+                sprites[13] = PATTERN_FROG_NORMAL_3;
+            }
+            else
+            {
+                sprites[1]  = PATTERN_FROG_NORMAL_1;
+                sprites[5]  = PATTERN_FROG_NORMAL_0;
+                sprites[9]  = PATTERN_FROG_NORMAL_3;
+                sprites[13] = PATTERN_FROG_NORMAL_2;
+            }
+            break;
+    }
+
+    if( gSpeedDirection == 1 )
+    {
+        sprites[2] = 0x00;
+        sprites[6] = 0x00;
+        sprites[10] = 0x00;
+        sprites[14] = 0x00;
+    }
+    else
+    {
+        sprites[2] = 0x40;
+        sprites[6] = 0x40;
+        sprites[10] = 0x40;
+        sprites[14] = 0x40;
     }
 }
 
@@ -723,14 +956,14 @@ void update_sprites(void)
                 gSpeed = 1;
                 gSpeedDirection = 0;
 
-                sprites[1] = 0x01;
-                sprites[2] = 0x40;
-                sprites[5] = 0x00;
-                sprites[6] = 0x40;
-                sprites[9] = 0x03;
-                sprites[10] = 0x40;
-                sprites[13] = 0x02;
-                sprites[14] = 0x40;
+                //sprites[1] = 0x01;
+                //sprites[2] = 0x40;
+                //sprites[5] = 0x00;
+                //sprites[6] = 0x40;
+                //sprites[9] = 0x03;
+                //sprites[10] = 0x40;
+                //sprites[13] = 0x02;
+                //sprites[14] = 0x40;
             }
             else
             {
@@ -755,14 +988,14 @@ void update_sprites(void)
                 gSpeed = 1;
                 gSpeedDirection = 1;
 
-                sprites[1] = 0x00;
-                sprites[2] = 0x00;
-                sprites[5] = 0x01;
-                sprites[6] = 0x00;
-                sprites[9] = 0x02;
-                sprites[10] = 0x00;
-                sprites[13] = 0x03;
-                sprites[14] = 0x00;
+                //sprites[1] = 0x00;
+                //sprites[2] = 0x00;
+                //sprites[5] = 0x01;
+                //sprites[6] = 0x00;
+                //sprites[9] = 0x02;
+                //sprites[10] = 0x00;
+                //sprites[13] = 0x03;
+                //sprites[14] = 0x00;
             }
             else
             {
@@ -788,6 +1021,8 @@ void update_sprites(void)
         // Stop making the sound
         //*((unsigned char*)0x4000) = 0x30;
     }
+
+    update_frog_sprite();
 
     sprites[0] = gY;
     sprites[3] = gX;
@@ -818,29 +1053,37 @@ void load_stage(void)
 {
     fade_out();
 
-    if( gStage == 0 )
+    switch( gStage )
     {
-        PPU_ADDRESS = 0x28; // address of nametable #2
-        PPU_ADDRESS = 0x00;
-        UnRLE(Level0Bottom);	// uncompresses our data
-    }
-    if( gStage == 1 )
-    {
-        PPU_ADDRESS = 0x28; // address of nametable #2
-        PPU_ADDRESS = 0x00;
-        UnRLE(Level1Bottom);	// uncompresses our data
-        PPU_ADDRESS = 0x20; // address of nametable #2
-        PPU_ADDRESS = 0x00;
-        UnRLE(Level1Top);	// uncompresses our data
-    }
-    if( gStage == 2 )
-    {
-        PPU_ADDRESS = 0x28; // address of nametable #2
-        PPU_ADDRESS = 0x00;
-        UnRLE(Level2Bottom);	// uncompresses our data
-        PPU_ADDRESS = 0x20; // address of nametable #2
-        PPU_ADDRESS = 0x00;
-        UnRLE(Level2Top);	// uncompresses our data
+        case 0:
+            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x00;
+            UnRLE(TitleScreen);	// uncompresses our data
+            break;
+
+        case 1:
+            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x00;
+            UnRLE(Level1Bottom);	// uncompresses our data
+            PPU_ADDRESS = 0x20; // address of nametable #2
+            PPU_ADDRESS = 0x00;
+            UnRLE(Level1Top);	// uncompresses our data
+            break;
+
+        case 2:
+            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x00;
+            UnRLE(Level2Bottom);	// uncompresses our data
+            PPU_ADDRESS = 0x20; // address of nametable #2
+            PPU_ADDRESS = 0x00;
+            UnRLE(Level2Top);	// uncompresses our data
+            break;
+
+        default:
+            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x00;
+            UnRLE(EndingScreen);	// uncompresses our data
+            break;
     }
 
     loadCollisionFromNametables();
@@ -856,7 +1099,7 @@ void load_stage(void)
     gYScroll = 0;
     gSpeed = 0;
     gSpeedDirection = 1;
-    gJumping = 1;
+    gJumping = 0;
     gBounceCounter = 0;
 
     // Frog direction
@@ -902,9 +1145,7 @@ void next_stage(void)
     switch( gStage )
     {
         case 2:
-            gStage = 0;
             gGameState = ENDING_STATE;
-            break;
 
         default:
             gStage++;
@@ -936,9 +1177,9 @@ void do_physics(void)
             sprites[19] += 1;
             sprites[23] += 1;
             // Tiles
-            sprites[21] = 0x04;
+            sprites[21] = PATTERN_BIRD_0;
             sprites[22] = 0x41;
-            sprites[17] = 0x05;
+            sprites[17] = PATTERN_BIRD_1;
             sprites[18] = 0x41;
         }
         else
@@ -947,9 +1188,9 @@ void do_physics(void)
             sprites[19] -= 1;
             sprites[23] -= 1;
             // Tiles
-            sprites[21] = 0x05;
+            sprites[21] = PATTERN_BIRD_1;
             sprites[22] = 0x01;
-            sprites[17] = 0x04;
+            sprites[17] = PATTERN_BIRD_0;
             sprites[18] = 0x01;
         }
     }
@@ -1190,7 +1431,6 @@ void do_physics(void)
                     if(gY < 0xCF)
                     {
                         gY += 1;
-                        gJumping = 1;
                     }
                     else
                     {
@@ -1214,7 +1454,6 @@ void do_physics(void)
                     if(gY < 0xCF)
                     {
                         gY += 1;
-                        gJumping = 1;
                     }
                     else
                     {
@@ -1229,7 +1468,6 @@ void do_physics(void)
                         else
                         {
                             gYScroll+=1;
-                            gJumping = 1;
                         }
                     }
                 }
@@ -1253,7 +1491,6 @@ void do_physics(void)
                     {
                         gYScroll+=1;
                     }
-                    gJumping = 1;
                 }
                 else
                 {
@@ -1276,12 +1513,12 @@ void do_physics(void)
         if( gYScroll < 0x20 )
         {
             sprites[24] = 0x0F - gYScroll;
-            sprites[25] = 0x06;
+            sprites[25] = PATTERN_PORTAL;
             sprites[26] = 0x00;
             sprites[27] = 0xE0;
 
             sprites[28] = 0x0F - gYScroll;
-            sprites[29] = 0x06;
+            sprites[29] = PATTERN_PORTAL;
             sprites[30] = 0x40;
             sprites[31] = 0xE8;
         }
@@ -1299,12 +1536,12 @@ void do_physics(void)
         }
 
         sprites[32] = 0x17 - gYScroll;
-        sprites[33] = 0x06;
+        sprites[33] = PATTERN_PORTAL;
         sprites[34] = 0x80;
         sprites[35] = 0xE0;
 
         sprites[36] = 0x17 - gYScroll;
-        sprites[37] = 0x06;
+        sprites[37] = PATTERN_PORTAL;
         sprites[38] = 0xC0;
         sprites[39] = 0xE8;
     }
@@ -1382,9 +1619,10 @@ void init_game_state(void)
     gYScroll = 0;
     gSpeed = 0;
     gSpeedDirection = 1;
-    gJumping = 1;
+    gJumping = 0;
     gBounceCounter = 0;
     gHealth = 8;
+    gFrogAnimationState = FROG_NORMAL;
 }
 
 void game_running_sm(void)
@@ -1465,7 +1703,7 @@ void main(void)
 
   	PPU_ADDRESS = 0x28; // address of nametable #2
   	PPU_ADDRESS = 0x00;
-  	UnRLE(Level0Bottom);	// uncompresses our data
+  	UnRLE(TitleScreen);	// uncompresses our data
 
     loadCollisionFromNametables();
 
