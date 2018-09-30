@@ -151,6 +151,8 @@
 #define PATTERN_E                0x25
 #define PATTERN_N                0x26
 #define PATTERN_D                0x27
+#define PATTERN_TONGUE_MIDDLE    0x28
+#define PATTERN_TONGUE_END       0x29
 
 
 // Registers
@@ -182,6 +184,17 @@ typedef enum _FrogAnimationState_t
     FROG_FALLING,
     FROG_LANDING,
 } FrogAnimationState_t;
+
+typedef enum _TongueState_t
+{
+    TONGUE_NORMAL = 0,
+    TONGUE_EXTENDING,
+    TONGUE_EXTENDING2,
+    TONGUE_OUT,
+    TONGUE_RETRACTING,
+    TONGUE_RETRACTING2,
+}
+TongueState_t;
 
 //
 // GLOBALS
@@ -223,6 +236,8 @@ static unsigned int         gHealth;
 static unsigned int         gIframes;
 static GameState_t          gGameState;
 static FrogAnimationState_t gFrogAnimationState;
+static TongueState_t        gTongueState;
+static unsigned int         gTongueCounter;
 
 extern void pMusicInit(unsigned char);
 extern void pMusicPlay(void);
@@ -247,7 +262,7 @@ unsigned char bird[2] = {0x04,0x05,};
 
 #pragma data-name ("CHARS")
 
-unsigned char pattern[0x280] = {0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x08,0x00,0x00,0x00,0x01,0x01,0x07,0x09,0x17, // frog
+unsigned char pattern[0x2A0] = {0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x08,0x00,0x00,0x00,0x01,0x01,0x07,0x09,0x17, // frog
                                 0x00,0x20,0x50,0x50,0x78,0xC0,0x0C,0x80,0x60,0xD0,0x88,0x88,0x86,0x3E,0xF3,0x7C, // frog
                                 0x10,0x20,0x00,0x00,0x00,0x01,0x00,0x00,0x2F,0x59,0x7E,0xF6,0xEC,0x9C,0x38,0x3F, // frog
                                 0x80,0x00,0x18,0x10,0x00,0x00,0x00,0x00,0x60,0xC0,0xC0,0xC0,0xE6,0x7C,0x1E,0x80, // frog
@@ -287,6 +302,8 @@ unsigned char pattern[0x280] = {0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x08,0x00,0x0
                                 0x7E,0x7F,0x60,0x78,0x7C,0x60,0x7E,0x7F,0x7E,0x40,0x40,0x78,0x40,0x40,0x7E,0x00, // E
                                 0x42,0x63,0x73,0x6B,0x67,0x63,0x63,0x21,0x42,0x62,0x52,0x4A,0x46,0x42,0x42,0x00, // N
                                 0x78,0x7C,0x62,0x63,0x67,0x65,0x7A,0x3C,0x78,0x44,0x42,0x42,0x42,0x44,0x78,0x00, // D
+                                0x00,0x83,0x44,0x38,0x83,0x44,0x38,0x00,0x00,0x00,0x83,0xC7,0x7C,0x38,0x00,0x00, // tongue middle
+                                0x0E,0x93,0x51,0x31,0x81,0x46,0x38,0x00,0x00,0x0C,0x8E,0xCE,0x7E,0x38,0x00,0x00, // tongue end
                                 };
 
 void vblank(void)
@@ -932,6 +949,331 @@ void update_frog_sprite(void)
     }
 }
 
+void update_tongue_sprite(void)
+{
+    switch( gTongueState )
+    {
+        case TONGUE_EXTENDING:
+            if( gTongueCounter == 0 )
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[78] = 0x02;
+                    sprites[79] = gX + 24;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[78] = 0x42;
+                    sprites[79] = gX - 16;
+                }
+                gTongueState = TONGUE_EXTENDING2;
+                gTongueCounter = 2;
+            }
+            else
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+                }
+                gTongueCounter--;
+            }
+            break;
+        case TONGUE_EXTENDING2:
+            if( gTongueCounter == 0 )
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_MIDDLE;
+                    sprites[78] = 0x02;
+                    sprites[79] = gX + 24;
+
+                    sprites[80] = gY + 4;
+                    sprites[81] = PATTERN_TONGUE_END;
+                    sprites[82] = 0x02;
+                    sprites[83] = gX + 32;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_MIDDLE;
+                    sprites[78] = 0x42;
+                    sprites[79] = gX - 16;
+
+                    sprites[80] = gY + 4;
+                    sprites[81] = PATTERN_TONGUE_END;
+                    sprites[82] = 0x42;
+                    sprites[83] = gX - 24;
+                }
+                gTongueState = TONGUE_OUT;
+                gTongueCounter = 5;
+            }
+            else
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[78] = 0x02;
+                    sprites[79] = gX + 24;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[78] = 0x42;
+                    sprites[79] = gX - 16;
+                }
+                gTongueCounter--;
+            }
+            break;
+        case TONGUE_OUT:
+            if( gTongueCounter == 0 )
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[78] = 0x02;
+                    sprites[79] = gX + 24;
+
+                    sprites[80] = 0x00;
+                    sprites[81] = 0x00;
+                    sprites[82] = 0x00;
+                    sprites[83] = 0x00;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[78] = 0x42;
+                    sprites[79] = gX - 16;
+
+                    sprites[80] = 0x00;
+                    sprites[81] = 0x00;
+                    sprites[82] = 0x00;
+                    sprites[83] = 0x00;
+                }
+                gTongueState = TONGUE_RETRACTING;
+                gTongueCounter = 5;
+            }
+            else
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_MIDDLE;
+                    sprites[78] = 0x02;
+                    sprites[79] = gX + 24;
+
+                    sprites[80] = gY + 4;
+                    sprites[81] = PATTERN_TONGUE_END;
+                    sprites[82] = 0x02;
+                    sprites[83] = gX + 32;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_MIDDLE;
+                    sprites[78] = 0x42;
+                    sprites[79] = gX - 16;
+
+                    sprites[80] = gY + 4;
+                    sprites[81] = PATTERN_TONGUE_END;
+                    sprites[82] = 0x42;
+                    sprites[83] = gX - 24;
+                }
+                gTongueCounter--;
+            }
+            break;
+        case TONGUE_RETRACTING:
+            if( gTongueCounter == 0 )
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+
+                    sprites[76] = 0x00;
+                    sprites[77] = 0x00;
+                    sprites[78] = 0x00;
+                    sprites[79] = 0x00;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+
+                    sprites[76] = 0x00;
+                    sprites[77] = 0x00;
+                    sprites[78] = 0x00;
+                    sprites[79] = 0x00;
+                }
+                gTongueState = TONGUE_RETRACTING2;
+                gTongueCounter = 5;
+            }
+            else
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[78] = 0x02;
+                    sprites[79] = gX + 24;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+
+                    sprites[76] = gY + 4;
+                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[78] = 0x42;
+                    sprites[79] = gX - 16;
+                }
+                gTongueCounter--;
+            }
+            break;
+        case TONGUE_RETRACTING2:
+            if( gTongueCounter == 0 )
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = 0x00;
+                    sprites[73] = 0x00;
+                    sprites[74] = 0x00;
+                    sprites[75] = 0x00;
+                }
+                else
+                {
+                    sprites[72] = 0x00;
+                    sprites[73] = 0x00;
+                    sprites[74] = 0x00;
+                    sprites[75] = 0x00;
+                }
+                gTongueState = TONGUE_NORMAL;
+                gTongueCounter = 0;
+            }
+            else
+            {
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+                }
+                gTongueCounter--;
+            }
+            break;
+        case TONGUE_NORMAL:
+        default:
+            if( (gController1 & BUTTON_B) != 0 && (gPrevController1 & BUTTON_B) == 0)
+            {
+                gTongueState = TONGUE_EXTENDING;
+                gTongueCounter = 2;
+
+                if( gSpeedDirection == 1 )
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[74] = 0x02;
+                    sprites[75] = gX + 16;
+                }
+                else
+                {
+                    sprites[72] = gY + 4;
+                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[74] = 0x42;
+                    sprites[75] = gX - 8;
+                }
+            }
+            break;
+    }
+}
+
 void update_sprites(void)
 {
     if(gController1 & BUTTON_UP)
@@ -1023,6 +1365,7 @@ void update_sprites(void)
     }
 
     update_frog_sprite();
+    update_tongue_sprite();
 
     sprites[0] = gY;
     sprites[3] = gX;
@@ -1623,6 +1966,8 @@ void init_game_state(void)
     gBounceCounter = 0;
     gHealth = 8;
     gFrogAnimationState = FROG_NORMAL;
+    gTongueState = TONGUE_NORMAL;
+    gTongueCounter = 0;
 }
 
 void game_running_sm(void)
