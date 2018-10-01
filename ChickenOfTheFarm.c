@@ -250,6 +250,8 @@ void __fastcall__ UnRLE(const unsigned char *data);
 #include "Background/Level1Bottom.h"
 #include "Background/Level2Top.h"
 #include "Background/Level2Bottom.h"
+#include "Background/Level3Top.h"
+#include "Background/Level3Bottom.h"
 
 #pragma bss-name (pop)
 
@@ -588,7 +590,7 @@ void fade_in(void)
     SET_COLOR(BACKGROUND0_3, WHITE);
 
     PPU_CTRL = 0x84 + gYNametable;
-    if( gStage == 0 || gStage > 2 )
+    if( gStage == 0 || gStage > 3 )
     {
         PPU_MASK = 0x0E;
     }
@@ -1421,7 +1423,14 @@ void load_stage(void)
             PPU_ADDRESS = 0x00;
             UnRLE(Level2Top);	// uncompresses our data
             break;
-
+        case 3:
+            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x00;
+            UnRLE(Level3Bottom);	// uncompresses our data
+            PPU_ADDRESS = 0x20; // address of nametable #2
+            PPU_ADDRESS = 0x00;
+            UnRLE(Level3Top);	// uncompresses our data
+            break;
         default:
             PPU_ADDRESS = 0x28; // address of nametable #2
             PPU_ADDRESS = 0x00;
@@ -1487,7 +1496,7 @@ void next_stage(void)
 {
     switch( gStage )
     {
-        case 2:
+        case 3:
             gGameState = ENDING_STATE;
 
         default:
