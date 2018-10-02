@@ -788,7 +788,7 @@ void small_jump(void)
 
 void big_jump(void)
 {
-    if(gJumping == 0) {
+    if(gJumping == 0 || (gJumping == 1 && gVelocityDirection == 1)) {
       gJumping = 2;
       gVelocity = 16;
       gVelocityDirection = 1;
@@ -1730,7 +1730,6 @@ void do_physics(void)
                 else
                 {
                     gVelocityDirection = 0;
-                    gJumping = 0;
                     break;
                 }
             }
@@ -1920,7 +1919,7 @@ void do_physics(void)
         sprites[39] = 0x00;
     }
 
-    if( gYNametable == 0 && gY == 0x0F && gX == 0xE0 )
+    if( gYNametable == 0 && gYScroll == 0 && gY == 0x0F && gX == 0xE0 )
     {
         next_stage();
         load_stage();
