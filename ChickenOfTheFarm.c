@@ -1,3 +1,5 @@
+#include "resources/resources.h"
+
 //
 // DEFINES
 //
@@ -12,72 +14,7 @@
 #define BUTTON_LEFT 0x02
 #define BUTTON_RIGHT 0x01
 
-// Colors
-#define            BLACK         0x0D
-#define            BLACK_2       0x0E
-#define            BLACK_3       0x0F
-#define            BLACK_4       0x1D
-#define            BLACK_5       0x1E
-#define            BLACK_6       0x1F
-#define            BLACK_7       0x2E
-#define            BLACK_8       0x2F
-#define            BLACK_9       0x3E
-#define            BLACK_10      0x3F
-#define       DARK_GRAY          0x00
-#define       DARK_GRAY_2        0x2D
-#define            GRAY          0x10
-#define            GRAY_2        0x3D
-#define      LIGHT_GRAY          0x20
-#define            WHITE         0x30
-#define       DARK_GRAY_BLUE     0x01
-#define            GRAY_BLUE     0x11
-#define      LIGHT_GRAY_BLUE     0x21
-#define VERY_LIGHT_GRAY_BLUE     0x31
-#define       DARK_BLUE          0x02
-#define            BLUE          0x12
-#define      LIGHT_BLUE          0x22
-#define VERY_LIGHT_BLUE          0x32
-#define       DARK_PURPLE        0x03
-#define            PURPLE        0x13
-#define      LIGHT_PURPLE        0x23
-#define VERY_LIGHT_PURPLE        0x33
-#define       DARK_PINK          0x04
-#define            PINK          0x14
-#define      LIGHT_PINK          0x24
-#define VERY_LIGHT_PINK          0x34
-#define       DARK_FUCHSIA       0x05
-#define            FUCHSIA       0x15
-#define      LIGHT_FUCHSIA       0x25
-#define VERY_LIGHT_FUCHSIA       0x35
-#define       DARK_RED           0x06
-#define            RED           0x16
-#define      LIGHT_RED           0x26
-#define VERY_LIGHT_RED           0x36
-#define       DARK_ORANGE        0x07
-#define            ORANGE        0x17
-#define      LIGHT_ORANGE        0x27
-#define VERY_LIGHT_ORANGE        0x37
-#define       DARK_TAN           0x08
-#define            TAN           0x18
-#define      LIGHT_TAN           0x28
-#define VERY_LIGHT_TAN           0x38
-#define       DARK_GREEN         0x09
-#define            GREEN         0x19
-#define      LIGHT_GREEN         0x29
-#define VERY_LIGHT_GREEN         0x39
-#define       DARK_LIME_GREEN    0x0A
-#define            LIME_GREEN    0x1A
-#define      LIGHT_LIME_GREEN    0x2A
-#define VERY_LIGHT_LIME_GREEN    0x3A
-#define       DARK_SEAFOAM_GREEN 0x0B
-#define            SEAFOAM_GREEN 0x1B
-#define      LIGHT_SEAFOAM_GREEN 0x2B
-#define VERY_LIGHT_SEAFOAM_GREEN 0x3B
-#define       DARK_CYAN          0x0C
-#define            CYAN          0x1C
-#define      LIGHT_CYAN          0x2C
-#define VERY_LIGHT_CYAN          0x3C
-
+// Palette addresses
 #define BACKGROUND0_0            0x00
 #define BACKGROUND0_1            0x01
 #define BACKGROUND0_2            0x02
@@ -110,50 +47,6 @@
 #define SPRITE3_1                0x1D
 #define SPRITE3_2                0x1E
 #define SPRITE3_3                0x1F
-
-#define PATTERN_FROG_NORMAL_0    0x00
-#define PATTERN_FROG_NORMAL_1    0x01
-#define PATTERN_FROG_NORMAL_2    0x02
-#define PATTERN_FROG_NORMAL_3    0x03
-#define PATTERN_FROG_HOP_0       0x04
-#define PATTERN_FROG_HOP_1       0x05
-#define PATTERN_FROG_HOP_2       0x06
-#define PATTERN_FROG_HOP_3       0x07
-#define PATTERN_FROG_JUMP_0      0x08
-#define PATTERN_FROG_JUMP_1      0x09
-#define PATTERN_FROG_JUMP_2      0x0A
-#define PATTERN_FROG_JUMP_3      0x0B
-#define PATTERN_FROG_SUSPENDED_0 0x0C
-#define PATTERN_FROG_SUSPENDED_1 0x0D
-#define PATTERN_FROG_SUSPENDED_2 0x0E
-#define PATTERN_FROG_SUSPENDED_3 0x0F
-#define PATTERN_FROG_FALLING_0   0x00
-#define PATTERN_FROG_FALLING_1   0x11
-#define PATTERN_FROG_FALLING_2   0x12
-#define PATTERN_FROG_FALLING_3   0x13
-#define PATTERN_FROG_LANDING_0   0x14
-#define PATTERN_FROG_LANDING_1   0x15
-#define PATTERN_FROG_LANDING_2   0x16
-#define PATTERN_FROG_LANDING_3   0x17
-#define PATTERN_BIRD_0           0x18
-#define PATTERN_BIRD_1           0x19
-#define PATTERN_PORTAL           0x1A
-#define PATTERN_HEALTH           0x1B
-#define PATTERN_BACKGROUND_0     0x1C
-#define PATTERN_BACKGROUND_1     0x1D
-#define PATTERN_BLANK_0          0x1E
-#define PATTERN_BLANK_1          0x1F
-#define PATTERN_S                0x20
-#define PATTERN_T                0x21
-#define PATTERN_A                0x22
-#define PATTERN_R                0x23
-#define PATTERN_BLANK_2          0x24
-#define PATTERN_E                0x25
-#define PATTERN_N                0x26
-#define PATTERN_D                0x27
-#define PATTERN_TONGUE_MIDDLE    0x28
-#define PATTERN_TONGUE_END       0x29
-
 
 // Registers
 #define PPU_CTRL    *((unsigned char*)0x2000)
@@ -244,69 +137,8 @@ extern void pMusicPlay(void);
 
 void __fastcall__ UnRLE(const unsigned char *data);
 
-#include "Background/TitleScreen.h"
-#include "Background/EndingScreen.h"
-#include "Background/Level1Top.h"
-#include "Background/Level1Bottom.h"
-#include "Background/Level2Top.h"
-#include "Background/Level2Bottom.h"
-#include "Background/Level3Top.h"
-#include "Background/Level3Bottom.h"
 
 #pragma bss-name (pop)
-
-#pragma data-name (push, "RODATA")
-
-unsigned char frog[4] = {0x00,0x01,0x02,0x03,};
-unsigned char bird[2] = {0x04,0x05,};
-
-#pragma data-name (pop)
-
-#pragma data-name ("CHARS")
-
-unsigned char pattern[0x2A0] = {0x00,0x00,0x00,0x00,0x00,0x00,0x06,0x08,0x00,0x00,0x00,0x01,0x01,0x07,0x09,0x17, // frog
-                                0x00,0x20,0x50,0x50,0x78,0xC0,0x0C,0x80,0x60,0xD0,0x88,0x88,0x86,0x3E,0xF3,0x7C, // frog
-                                0x10,0x20,0x00,0x00,0x00,0x01,0x00,0x00,0x2F,0x59,0x7E,0xF6,0xEC,0x9C,0x38,0x3F, // frog
-                                0x80,0x00,0x18,0x10,0x00,0x00,0x00,0x00,0x60,0xC0,0xC0,0xC0,0xE6,0x7C,0x1E,0x80, // frog
-                                0x00,0x00,0x00,0x00,0x00,0x02,0x0C,0x10,0x00,0x00,0x00,0x01,0x03,0x0D,0x13,0x2F, // frog hop
-                                0x00,0x00,0x10,0x28,0x28,0x3C,0x60,0x00,0x00,0x30,0xE8,0xC4,0xC4,0xC2,0x9F,0xFE, // frog hop
-                                0x20,0x07,0x02,0x00,0x00,0x04,0x0E,0x00,0x5F,0x78,0x3C,0x0C,0x1C,0x38,0x70,0x78, // frog hop
-                                0x40,0x0C,0x08,0x00,0x00,0x00,0x00,0x00,0xA0,0xE0,0x60,0x73,0x3E,0x0F,0x00,0x00, // frog hop
-                                0x00,0x03,0x02,0x03,0x01,0x00,0x04,0x0A,0x03,0x04,0x04,0x04,0x02,0x07,0x0B,0x15, // frog jump
-                                0x07,0x8E,0xD4,0x80,0x00,0x00,0x80,0x40,0x80,0x70,0x2B,0x72,0xE7,0xEE,0x7C,0xB8, // frog jump
-                                0x14,0x08,0x00,0x70,0x60,0xE0,0xA0,0x00,0x2B,0x37,0x3F,0x03,0x07,0x06,0x0E,0x0A, // frog jump
-                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xE0,0x80,0x00,0x80,0x00,0x00,0x00,0x00, // frog jump
-                                0x00,0x00,0x00,0x00,0x00,0x08,0x10,0x08,0x00,0x00,0x00,0x01,0x0F,0x17,0x2F,0x37, // frog suspended
-                                0x00,0x00,0x50,0x78,0x80,0x0C,0x80,0xC0,0x00,0x70,0x88,0x84,0x7E,0xF2,0x7C,0x30, // frog suspended
-                                0xD0,0x40,0xC0,0x00,0x00,0x00,0x00,0x00,0x2F,0x3F,0x3F,0xF8,0x70,0xE0,0x00,0x00, // frog suspended
-                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFB,0xBE,0x1F,0x00,0x00,0x00,0x00,0x00, // frog suspended
-                                0x60,0x38,0x78,0x09,0x02,0x01,0x00,0x00,0x00,0x00,0x07,0x06,0xC5,0x76,0xFF,0x1F, // frog falling
-                                0x00,0x00,0x00,0x00,0x80,0x40,0x8E,0x1A,0x00,0x00,0x00,0x80,0x40,0xAE,0x71,0xE1, // frog falling
-                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0B,0x01,0x01,0x00,0x00,0x00,0x00,0x00, // frog falling
-                                0x4E,0x84,0x00,0x04,0x02,0x07,0x03,0x01,0xB1,0x7A,0xFE,0xCA,0xE4,0x70,0x3C,0x14, // frog falling
-                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,0x1F, // frog landing
-                                0x00,0x00,0x00,0x00,0x10,0x28,0x28,0x7C,0x00,0x00,0x00,0x30,0x68,0xC4,0xC4,0x82, // frog landing
-                                0x0E,0x10,0xC0,0xE0,0xC0,0x00,0x00,0x00,0x31,0x6F,0x3F,0x1C,0x0E,0x7E,0x7C,0x30, // frog landing
-                                0x00,0x80,0x40,0x08,0x0C,0x00,0x00,0x00,0xFF,0x7E,0xA0,0x60,0x60,0x73,0x3E,0x0F, // frog landing
-                                0x18,0x2C,0xF9,0x03,0x03,0x01,0x01,0x00,0x00,0x00,0xE6,0x04,0x00,0x00,0x00,0x00, // bird
-                                0x00,0x00,0xF0,0xFE,0xFF,0xDF,0xC0,0xE0,0x00,0x00,0x00,0x00,0x00,0x00,0x1C,0x0E, // bird
-                                0x19,0x04,0x70,0x00,0x61,0x86,0x22,0x47,0x19,0x07,0x79,0x1D,0x66,0xB1,0x29,0x40, // portal
-                                0x00,0x00,0x30,0x21,0x03,0x06,0x1E,0x18,0x18,0x7E,0x7E,0xFE,0xFC,0x78,0x60,0x00, // health
-                                0xFF,0x00,0x78,0x40,0x5F,0x1F,0x3F,0x00,0x00,0xFF,0xFF,0xFF,0xE0,0xE0,0xC0,0xFF,
-                                0xFF,0x03,0xFF,0x0F,0xEF,0xE3,0x8F,0x3F,0x00,0xFC,0x00,0xF0,0x10,0x1C,0x70,0xC0,
-                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                                0x3C,0x7E,0x61,0x3C,0x1E,0x43,0x3F,0x1E,0x3C,0x42,0x40,0x3C,0x02,0x42,0x3C,0x00, // S
-                                0xFE,0x3F,0x18,0x18,0x18,0x18,0x18,0x08,0xFE,0x10,0x10,0x10,0x10,0x10,0x10,0x00, // T
-                                0x18,0x2C,0x52,0x63,0x7F,0x7F,0x63,0x21,0x18,0x24,0x42,0x42,0x7E,0x42,0x42,0x00, // A
-                                0x7C,0x7E,0x63,0x7D,0x6E,0x64,0x62,0x21,0x7C,0x42,0x42,0x7C,0x48,0x44,0x42,0x00, // R
-                                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                                0x7E,0x7F,0x60,0x78,0x7C,0x60,0x7E,0x7F,0x7E,0x40,0x40,0x78,0x40,0x40,0x7E,0x00, // E
-                                0x42,0x63,0x73,0x6B,0x67,0x63,0x63,0x21,0x42,0x62,0x52,0x4A,0x46,0x42,0x42,0x00, // N
-                                0x78,0x7C,0x62,0x63,0x67,0x65,0x7A,0x3C,0x78,0x44,0x42,0x42,0x42,0x44,0x78,0x00, // D
-                                0x00,0x83,0x44,0x38,0x83,0x44,0x38,0x00,0x00,0x00,0x83,0xC7,0x7C,0x38,0x00,0x00, // tongue middle
-                                0x0E,0x93,0x51,0x31,0x81,0x46,0x38,0x00,0x00,0x0C,0x8E,0xCE,0x7E,0x38,0x00,0x00, // tongue end
-                                };
 
 void vblank(void)
 {
@@ -448,7 +280,7 @@ void loadCollisionFromNametables(void)
   i = *((unsigned char*)0x2007);
 
   for(i = 0 ; i < 240 ;) {
-    collision[i] = (*((unsigned char*)0x2007) == PATTERN_BACKGROUND_0) ? 0x01 : 0x00;
+    collision[i] = (*((unsigned char*)0x2007) != PATTERN_BLANK_0) ? 0x01 : 0x00;
     j = *((unsigned char*)0x2007);
 
     i++;
@@ -466,7 +298,7 @@ void loadCollisionFromNametables(void)
   i = *((unsigned char*)0x2007);
 
   for(i = 0 ; i < 240 ;) {
-    collision[i + 240] = (*((unsigned char*)0x2007) == PATTERN_BACKGROUND_0) ? 0x01 : 0x00;
+    collision[i + 240] = (*((unsigned char*)0x2007) != PATTERN_BLANK_0) ? 0x01 : 0x00;
     j = *((unsigned char*)0x2007);
 
     i++;
@@ -487,11 +319,11 @@ void palattes(void)
     SET_COLOR(BACKGROUND0_2, GRAY);
     SET_COLOR(BACKGROUND0_3, WHITE);
 
-    // Background 1
-    SET_COLOR(BACKGROUND1_0, BLACK);
-    SET_COLOR(BACKGROUND1_1, DARK_GRAY);
-    SET_COLOR(BACKGROUND1_2, GRAY);
-    SET_COLOR(BACKGROUND1_3, WHITE);
+    // Background 2
+    SET_COLOR(BACKGROUND2_0, BLUE);
+    SET_COLOR(BACKGROUND2_1, DARK_GRAY);
+    SET_COLOR(BACKGROUND2_2, GRAY);
+    SET_COLOR(BACKGROUND2_3, RED);
 
     // Sprite 0
     SET_COLOR(SPRITE0_1, DARK_GREEN);
@@ -631,7 +463,7 @@ void draw_health(void)
     for( i = 0; i < 8; i++)
     {
         sprites[40 + (i<<2)] = 0x0F + (i<<3) + i;
-        sprites[41 + (i<<2)] = PATTERN_HEALTH;
+        sprites[41 + (i<<2)] = PATTERN_HEALTH_0;
         if( gHealth > i )
         {
             sprites[42 + (i<<2)] = 0x02;
@@ -920,17 +752,17 @@ void update_frog_sprite(void)
         default:
             if( gSpeedDirection == 1 )
             {
-                sprites[1]  = PATTERN_FROG_NORMAL_0;
-                sprites[5]  = PATTERN_FROG_NORMAL_1;
-                sprites[9]  = PATTERN_FROG_NORMAL_2;
-                sprites[13] = PATTERN_FROG_NORMAL_3;
+                sprites[1]  = PATTERN_FROG_0;
+                sprites[5]  = PATTERN_FROG_1;
+                sprites[9]  = PATTERN_FROG_2;
+                sprites[13] = PATTERN_FROG_3;
             }
             else
             {
-                sprites[1]  = PATTERN_FROG_NORMAL_1;
-                sprites[5]  = PATTERN_FROG_NORMAL_0;
-                sprites[9]  = PATTERN_FROG_NORMAL_3;
-                sprites[13] = PATTERN_FROG_NORMAL_2;
+                sprites[1]  = PATTERN_FROG_1;
+                sprites[5]  = PATTERN_FROG_0;
+                sprites[9]  = PATTERN_FROG_3;
+                sprites[13] = PATTERN_FROG_2;
             }
             break;
     }
@@ -961,24 +793,24 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x02;
                     sprites[79] = gX + 24;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x42;
                     sprites[79] = gX - 16;
                 }
@@ -990,14 +822,14 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
                 }
@@ -1010,34 +842,34 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_MIDDLE;
+                    sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x02;
                     sprites[79] = gX + 24;
 
                     sprites[80] = gY + 4;
-                    sprites[81] = PATTERN_TONGUE_END;
+                    sprites[81] = PATTERN_TONGUE_1;
                     sprites[82] = 0x02;
                     sprites[83] = gX + 32;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_MIDDLE;
+                    sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
                     sprites[79] = gX - 16;
 
                     sprites[80] = gY + 4;
-                    sprites[81] = PATTERN_TONGUE_END;
+                    sprites[81] = PATTERN_TONGUE_1;
                     sprites[82] = 0x42;
                     sprites[83] = gX - 24;
                 }
@@ -1049,24 +881,24 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x02;
                     sprites[79] = gX + 24;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x42;
                     sprites[79] = gX - 16;
                 }
@@ -1079,12 +911,12 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x02;
                     sprites[79] = gX + 24;
 
@@ -1096,12 +928,12 @@ void update_tongue_sprite(void)
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x42;
                     sprites[79] = gX - 16;
 
@@ -1118,34 +950,34 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_MIDDLE;
+                    sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x02;
                     sprites[79] = gX + 24;
 
                     sprites[80] = gY + 4;
-                    sprites[81] = PATTERN_TONGUE_END;
+                    sprites[81] = PATTERN_TONGUE_1;
                     sprites[82] = 0x02;
                     sprites[83] = gX + 32;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_MIDDLE;
+                    sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
                     sprites[79] = gX - 16;
 
                     sprites[80] = gY + 4;
-                    sprites[81] = PATTERN_TONGUE_END;
+                    sprites[81] = PATTERN_TONGUE_1;
                     sprites[82] = 0x42;
                     sprites[83] = gX - 24;
                 }
@@ -1158,7 +990,7 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
 
@@ -1170,7 +1002,7 @@ void update_tongue_sprite(void)
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
 
@@ -1187,24 +1019,24 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x02;
                     sprites[79] = gX + 24;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_MIDDLE;
+                    sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_END;
+                    sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x42;
                     sprites[79] = gX - 16;
                 }
@@ -1236,14 +1068,14 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
                 }
@@ -1260,14 +1092,14 @@ void update_tongue_sprite(void)
                 if( gSpeedDirection == 1 )
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x02;
                     sprites[75] = gX + 16;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_END;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
                     sprites[75] = gX - 8;
                 }
@@ -1403,38 +1235,38 @@ void load_stage(void)
         case 0:
             PPU_ADDRESS = 0x28; // address of nametable #2
             PPU_ADDRESS = 0x00;
-            UnRLE(TitleScreen);	// uncompresses our data
+            UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
             break;
 
         case 1:
             PPU_ADDRESS = 0x28; // address of nametable #2
             PPU_ADDRESS = 0x00;
-            UnRLE(Level1Bottom);	// uncompresses our data
+            UnRLE(Nametable_Level1_bottom_rle);	// uncompresses our data
             PPU_ADDRESS = 0x20; // address of nametable #2
             PPU_ADDRESS = 0x00;
-            UnRLE(Level1Top);	// uncompresses our data
+            UnRLE(Nametable_Level1_top_rle);	// uncompresses our data
             break;
 
         case 2:
             PPU_ADDRESS = 0x28; // address of nametable #2
             PPU_ADDRESS = 0x00;
-            UnRLE(Level2Bottom);	// uncompresses our data
+            UnRLE(Nametable_Level2_bottom_rle);	// uncompresses our data
             PPU_ADDRESS = 0x20; // address of nametable #2
             PPU_ADDRESS = 0x00;
-            UnRLE(Level2Top);	// uncompresses our data
+            UnRLE(Nametable_Level2_top_rle);	// uncompresses our data
             break;
         case 3:
             PPU_ADDRESS = 0x28; // address of nametable #2
             PPU_ADDRESS = 0x00;
-            UnRLE(Level3Bottom);	// uncompresses our data
+            UnRLE(Nametable_Level3_bottom_rle);	// uncompresses our data
             PPU_ADDRESS = 0x20; // address of nametable #2
             PPU_ADDRESS = 0x00;
-            UnRLE(Level3Top);	// uncompresses our data
+            UnRLE(Nametable_Level3_top_rle);	// uncompresses our data
             break;
         default:
             PPU_ADDRESS = 0x28; // address of nametable #2
             PPU_ADDRESS = 0x00;
-            UnRLE(EndingScreen);	// uncompresses our data
+            UnRLE(Nametable_EndingScreen_bottom_rle);	// uncompresses our data
             break;
     }
 
@@ -1864,12 +1696,12 @@ void do_physics(void)
         if( gYScroll < 0x20 )
         {
             sprites[24] = 0x0F - gYScroll;
-            sprites[25] = PATTERN_PORTAL;
+            sprites[25] = PATTERN_PORTAL_0;
             sprites[26] = 0x00;
             sprites[27] = 0xE0;
 
             sprites[28] = 0x0F - gYScroll;
-            sprites[29] = PATTERN_PORTAL;
+            sprites[29] = PATTERN_PORTAL_0;
             sprites[30] = 0x40;
             sprites[31] = 0xE8;
         }
@@ -1887,12 +1719,12 @@ void do_physics(void)
         }
 
         sprites[32] = 0x17 - gYScroll;
-        sprites[33] = PATTERN_PORTAL;
+        sprites[33] = PATTERN_PORTAL_0;
         sprites[34] = 0x80;
         sprites[35] = 0xE0;
 
         sprites[36] = 0x17 - gYScroll;
-        sprites[37] = PATTERN_PORTAL;
+        sprites[37] = PATTERN_PORTAL_0;
         sprites[38] = 0xC0;
         sprites[39] = 0xE8;
     }
@@ -2056,7 +1888,7 @@ void main(void)
 
   	PPU_ADDRESS = 0x28; // address of nametable #2
   	PPU_ADDRESS = 0x00;
-  	UnRLE(TitleScreen);	// uncompresses our data
+  	UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
 
     loadCollisionFromNametables();
 

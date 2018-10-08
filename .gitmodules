@@ -1,0 +1,3 @@
+[submodule "resources/sprite_mapper"]
+	path = resources/sprite_mapper
+	url = https://github.com/pgrimsrud/sprite_mapper.git
