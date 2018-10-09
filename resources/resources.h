@@ -17,6 +17,7 @@
 #include "Background\Level1\Level1.h"
 #include "Background\Level2\Level2.h"
 #include "Background\Level3\Level3.h"
+#include "Background\Level4\Level4.h"
 #include "Background\TitleScreen\TitleScreen.h"
 
 #define PATTERN_BLANK_0 30

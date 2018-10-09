@@ -108,6 +108,7 @@ unsigned char collision[480] = {};
 static unsigned char        gController1;
 static unsigned char        gPrevController1;
 static unsigned char        gPrevController1Change;
+static unsigned char        gTmpX;
 static unsigned char        gX;
 static unsigned char        gY;
 static unsigned long        gXScroll;
@@ -131,7 +132,7 @@ static GameState_t          gGameState;
 static FrogAnimationState_t gFrogAnimationState;
 static TongueState_t        gTongueState;
 static unsigned int         gTongueCounter;
-
+    
 extern void pMusicInit(unsigned char);
 extern void pMusicPlay(void);
 
@@ -422,7 +423,7 @@ void fade_in(void)
     SET_COLOR(BACKGROUND0_3, WHITE);
 
     PPU_CTRL = 0x84 + gYNametable;
-    if( gStage == 0 || gStage > 3 )
+    if( gStage == 0 || gStage > 4 )
     {
         PPU_MASK = 0x0E;
     }
@@ -1233,38 +1234,46 @@ void load_stage(void)
     switch( gStage )
     {
         case 0:
-            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
             break;
 
         case 1:
-            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level1_bottom_rle);	// uncompresses our data
-            PPU_ADDRESS = 0x20; // address of nametable #2
+            PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level1_top_rle);	// uncompresses our data
             break;
 
         case 2:
-            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level2_bottom_rle);	// uncompresses our data
-            PPU_ADDRESS = 0x20; // address of nametable #2
+            PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level2_top_rle);	// uncompresses our data
             break;
         case 3:
-            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level3_bottom_rle);	// uncompresses our data
-            PPU_ADDRESS = 0x20; // address of nametable #2
+            PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level3_top_rle);	// uncompresses our data
             break;
+        case 4:
+            PPU_ADDRESS = 0x28;
+            PPU_ADDRESS = 0x00;
+            UnRLE(Nametable_Level4_bottom_rle);	// uncompresses our data
+            PPU_ADDRESS = 0x20;
+            PPU_ADDRESS = 0x00;
+            UnRLE(Nametable_Level4_top_rle);	// uncompresses our data
+            break;
         default:
-            PPU_ADDRESS = 0x28; // address of nametable #2
+            PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_EndingScreen_bottom_rle);	// uncompresses our data
             break;
@@ -1328,7 +1337,7 @@ void next_stage(void)
 {
     switch( gStage )
     {
-        case 3:
+        case 4:
             gGameState = ENDING_STATE;
 
         default:
@@ -1397,19 +1406,33 @@ void do_physics(void)
         //  sprites[13] = 0x02;
         //  sprites[14] = 0x40;
         //}
-
+        
         for( i = 0; (i<<2) < gSpeed; i++ )
         {
-            if(gX > 0x08)
-            {
+            gTmpX = gX - 1;
 
-                if( gYNametable == 2 )
+            if( gYNametable == 2 )
+            {
+              //x = gX >> 4;
+              //y = gY >> 4
+              //index[y*16 + x]
+                if( collision[240 + (((gY+1)&0xF0)) + (gTmpX >> 4)] == 0 &&
+                    collision[240 + (((gY+0x10)&0xF0)) + (gTmpX >> 4)] == 0 )
                 {
-                  //x = gX >> 4;
-                  //y = gY >> 4
-                  //index[y*16 + x]
-                    if( collision[240 + (((gY+1)&0xF0)) + ((gX-1) >> 4)] == 0 &&
-                        collision[240 + (((gY+0x10)&0xF0)) + ((gX-1) >> 4)] == 0 )
+                    gX -= 1;
+                    small_jump();
+                }
+                else
+                {
+                    gSpeed = 0;
+                }
+            }
+            else
+            {
+                if((gYScroll + gY + 1) >= 0xF0)
+                {
+                    if( collision[240 + (((gYScroll + gY + 1 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                        collision[240 + (((gYScroll + gY + 0x10 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX -= 1;
                         small_jump();
@@ -1421,31 +1444,15 @@ void do_physics(void)
                 }
                 else
                 {
-                    if((gYScroll + gY + 1) >= 0xF0)
+                    if( collision[(((gYScroll + gY + 1) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                        collision[(((gYScroll + gY + 0x10) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
-                        if( collision[240 + (((gYScroll + gY + 1 - 0xF0) & 0xF0) ) + ((gX-1) >> 4)] == 0 &&
-                            collision[240 + (((gYScroll + gY + 0x10 - 0xF0) & 0xF0) ) + ((gX-1) >> 4)] == 0 )
-                        {
-                            gX -= 1;
-                            small_jump();
-                        }
-                        else
-                        {
-                            gSpeed = 0;
-                        }
+                        gX -= 1;
+                        small_jump();
                     }
                     else
                     {
-                        if( collision[(((gYScroll + gY + 1) & 0xF0) ) + ((gX-1) >> 4)] == 0 &&
-                            collision[(((gYScroll + gY + 0x10) & 0xF0) ) + ((gX-1) >> 4)] == 0 )
-                        {
-                            gX -= 1;
-                            small_jump();
-                        }
-                        else
-                        {
-                            gSpeed = 0;
-                        }
+                        gSpeed = 0;
                     }
                 }
             }
@@ -1464,15 +1471,31 @@ void do_physics(void)
         //  sprites[13] = 0x03;
         //  sprites[14] = 0x00;
         //}
+        
 
         for( i = 0; (i<<2) < gSpeed; i++ )
         {
-            if(gX < 0xE8)
+            gTmpX = gX + 0x10;
+
+            if( gYNametable == 2 )
             {
-                if( gYNametable == 2 )
+                if( collision[240 + (((gY+1)&0xF0) ) + (gTmpX >> 4)] == 0 &&
+                    collision[240 + (((gY+0x10)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if( collision[240 + (((gY+1)&0xF0) ) + ((gX+0x10) >> 4)] == 0 &&
-                        collision[240 + (((gY+0x10)&0xF0) ) + ((gX+0x10) >> 4)] == 0 )
+                    gX += 1;
+                    small_jump();
+                }
+                else
+                {
+                    gSpeed = 0;
+                }
+            }
+            else
+            {
+                if((gYScroll + gY + 1) >= 0xF0)
+                {
+                    if( collision[240 + (((gYScroll + gY + 1 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                        collision[240 + (((gYScroll + gY + 0x10 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX += 1;
                         small_jump();
@@ -1484,31 +1507,15 @@ void do_physics(void)
                 }
                 else
                 {
-                    if((gYScroll + gY + 1) >= 0xF0)
+                    if( collision[(((gYScroll + gY + 1) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                        collision[(((gYScroll + gY + 0x10) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
-                        if( collision[240 + (((gYScroll + gY + 1 - 0xF0) & 0xF0) ) + ((gX+0x10) >> 4)] == 0 &&
-                            collision[240 + (((gYScroll + gY + 0x10 - 0xF0) & 0xF0) ) + ((gX+0x10) >> 4)] == 0 )
-                        {
-                            gX += 1;
-                            small_jump();
-                        }
-                        else
-                        {
-                            gSpeed = 0;
-                        }
+                        gX += 1;
+                        small_jump();
                     }
                     else
                     {
-                        if( collision[(((gYScroll + gY + 1) & 0xF0) ) + ((gX+0x10) >> 4)] == 0 &&
-                            collision[(((gYScroll + gY + 0x10) & 0xF0) ) + ((gX+0x10) >> 4)] == 0 )
-                        {
-                            gX += 1;
-                            small_jump();
-                        }
-                        else
-                        {
-                            gSpeed = 0;
-                        }
+                        gSpeed = 0;
                     }
                 }
             }
@@ -1519,14 +1526,17 @@ void do_physics(void)
     // Vertical Movement
     //
 
+        
     if( gVelocityDirection == 1 ) // moving up
     {
         for( i = 0; (i<<2) < gVelocity; i++ )
         {
+            gTmpX = gX + 0xF;
+            
             if( gYNametable == 2 )
             {
                 if( collision[240 + (((gY)&0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[240 + (((gY)&0xF0) ) + ((gX+0xF) >> 4)] == 0 )
+                    collision[240 + (((gY)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY > 0x0F)
                     {
@@ -1548,7 +1558,7 @@ void do_physics(void)
             else if((gYScroll + gY) >= 0xF0 )
             {
                 if( collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + ((gX+0xF) >> 4)] == 0 )
+                    collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY > 0x0F)
                     {
@@ -1568,7 +1578,7 @@ void do_physics(void)
             else
             {
                 if( collision[(((gYScroll + gY - 0x100) & 0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[(((gYScroll + gY - 0x100) & 0xF0) ) + ((gX+0xF) >> 4)] == 0 )
+                    collision[(((gYScroll + gY - 0x100) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY > 0x0F)
                     {
@@ -1606,10 +1616,12 @@ void do_physics(void)
     {
         for( i = 0; (i<<2) < gVelocity; i++ )
         {
+            gTmpX = gX + 0xF;
+            
             if(gYNametable == 2 )
             {
                 if( collision[240 + (((gY+0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[240 + (((gY+0x11)&0xF0) ) + ((gX+0xF) >> 4)] == 0 )
+                    collision[240 + (((gY+0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY < 0xCF)
                     {
@@ -1632,7 +1644,7 @@ void do_physics(void)
             else if((gYScroll + gY + 0x11) >= 0xF0)
             {
                 if( collision[240 + (((gYScroll + gY+0x11 - 0xF0)&0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[240 + (((gYScroll + gY+0x11 - 0xF0)&0xF0) ) + ((gX+0xF) >> 4)] == 0 )
+                    collision[240 + (((gYScroll + gY+0x11 - 0xF0)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY < 0xCF)
                     {
@@ -1664,7 +1676,7 @@ void do_physics(void)
             else
             {
                 if( collision[(((gYScroll + gY+0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[(((gYScroll + gY+0x11)&0xF0) ) + ((gX+0xF) >> 4)] == 0 )
+                    collision[(((gYScroll + gY+0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY < 0xCF)
                     {
