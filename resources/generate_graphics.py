@@ -114,6 +114,15 @@ background_list = []
 sprite_list = []
 background_id = 0
 
+# This path can be run from resources folder or from above, but needs it in the path either way
+def getPathWithResources() :
+    currentPath = os.getcwd()
+
+    if not currentPath.endswith("resources"):
+        currentPath = os.path.join(currentPath, "resources")
+
+    return currentPath
+
 def create_patterns(folder, pattern_type):
     global palettes
     global new_headers
@@ -121,11 +130,12 @@ def create_patterns(folder, pattern_type):
     global raw_nametables
     global reduced_nametables
 
-    base_name = os.getcwd() + "\\" + pattern_type + "\\" + folder + "\\" + folder
+    base_name = os.path.join(getPathWithResources(), pattern_type, folder, folder)
+
     image = base_name + ".png"
     header = base_name + ".h"
     color_map = ""
-        
+
     print(folder)
     if not os.path.isfile(image):
         print("missing " + image)
@@ -133,22 +143,22 @@ def create_patterns(folder, pattern_type):
     if not os.path.isfile(header):
         print("missing " + header)
         exit()
-    
+
     palettes[folder] = []
     new_headers[folder] = []
     raw_patterns[folder] = []
     raw_nametables[folder] = []
     reduced_nametables[folder] = []
-    
+
     if pattern_type == "Sprite":
         sprite_list.append(folder)
     if pattern_type == "Background":
         background_list.append(folder)
-    
+
     header_handle = open(header, 'r')
     palette_found = 0
     palette_end_found = 0
-    
+
     count = 0
     for header_line in header_handle.readlines():
         new_headers[folder].append(header_line)
@@ -169,7 +179,7 @@ def create_patterns(folder, pattern_type):
         if match:
             break
     header_handle.close()
-    
+
     if pattern_type == "Sprite" and count > 4:
         print(folder + " specifies too many colors.")
         exit()
@@ -179,20 +189,20 @@ def create_patterns(folder, pattern_type):
     if palette_found == 0:
         print("No palette found in " + folder)
         exit()
-    
+
     #print(palettes)
     #print(new_headers)
-    
+
     #print(color_map)
     long_options = ["help", "in=", "out=", "map=", "c=", "offset=", "RLE"]
-    call(["python","sprite_mapper\sprite_pattern_mapper.py",
+    call(["python",os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
           "--in=" + image,
           "--out=" + base_name + "-reduced.png",
           "--map=" + color_map,
           "--c=" + base_name + "-tmp.h"])
 
     header_handle = open(base_name + "-tmp.h", 'r')
-    
+
     for header_line in header_handle.readlines():
         match = re.search("pattern.*\{(.*)\}", header_line)
         if match:
@@ -207,17 +217,17 @@ def create_patterns(folder, pattern_type):
                 if num != '':
                     raw_nametables[folder].append(int(num))
                     reduced_nametables[folder].append(int(num))
-                    
+
     #print(raw_patterns)
     #print(raw_nametables)
-    
+
 print("Creating patterns:")
-for folder in os.listdir(os.getcwd() + "\Sprite"):
+for folder in os.listdir(os.path.join(getPathWithResources(), "Sprite")):
     create_patterns(folder, "Sprite")
-    
-for folder in os.listdir(os.getcwd() + "\Background"):
+
+for folder in os.listdir(os.path.join(getPathWithResources(), "Background")):
     create_patterns(folder, "Background")
-    
+
 #print(background_list)
 #print(sprite_list)
 #print(raw_nametables)
@@ -230,7 +240,7 @@ def reduce_patterns( resource ):
     global reduced_patterns
     global reduced_nametables
     global background_id
-    
+
     for i in range(0, int(len(raw_patterns[resource])/16)):
         exists = False
         for j in range(0, int(len(reduced_patterns)/16)):
@@ -238,13 +248,13 @@ def reduce_patterns( resource ):
             for k in range(0, 16):
                 if reduced_patterns[j*16 + k] != raw_patterns[resource][i*16 + k]:
                     match = False
-                    
+
             if match == True:
                 exists = True
                 for k in range(0, len(raw_nametables[resource])):
                     if raw_nametables[resource][k] == i:
                         reduced_nametables[resource][k] = j
-        
+
         if exists == False:
             #print(resource + ": %d map to %d" % (i, int(len(reduced_patterns)/16)))
             #print(raw_nametables[resource])
@@ -259,13 +269,13 @@ def reduce_patterns( resource ):
             if zero_pattern == True:
                 background_id = int(len(reduced_patterns)/16) - 1
             #print(reduced_nametables[resource])
-           
+
 print("Reducing patterns:")
 for resource in sprite_list:
     reduce_patterns( resource )
 for resource in background_list:
     reduce_patterns( resource )
-    
+
 #print(raw_patterns)
 #for i in range(0, int(len(reduced_patterns)/16)):
 #    print("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d" % (
@@ -295,13 +305,13 @@ for resource in background_list:
     #print(resource)
     nametable_tmp = []
     start = 0;
-    
+
     if len(reduced_nametables[resource]) > 960:
         for i in range(0,960):
             nametable_tmp.append(reduced_nametables[resource][i])
         nametable_top_rle[resource] = create_rle(nametable_tmp)
         start = 960
-    
+
     nametable_tmp = []
     for i in range(start,start+960):
         nametable_tmp.append(reduced_nametables[resource][i])
@@ -313,38 +323,38 @@ for resource in background_list:
 print("Updating headers:")
 #write out the name tables and defines to a header for each resource
 for resource in sprite_list:
-    resource_handle = open(os.getcwd() + "\\Sprite\\" + resource + "\\" + resource + ".h", 'w+')
-    
+    resource_handle = open(getPathWithResources() + "/Sprite/" + resource + "/" + resource + ".h", 'w+')
+
     for line in new_headers[resource]:
         resource_handle.write(line)
     resource_handle.write("\n")
-    
+
     for i in range(0,len(reduced_nametables[resource])):
         resource_handle.write("#define PATTERN_" + resource.upper() + "_%d" % (i) + " %d" % (reduced_nametables[resource][i]) + "\n")
-        
+
 for resource in background_list:
-    resource_handle = open(os.getcwd() + "\\Background\\" + resource + "\\" + resource + ".h", 'w+')
-    
+    resource_handle = open(getPathWithResources() + "/Background/" + resource + "/" + resource + ".h", 'w+')
+
     for line in new_headers[resource]:
         resource_handle.write(line)
     resource_handle.write("\n")
 
     if resource in nametable_top_rle:
         resource_handle.write("const unsigned char Nametable_" + resource + "_top_rle[%d] = " % (len(nametable_top_rle[resource])) + "{")
-        
+
         for i in range(0,len(nametable_top_rle[resource])):
             resource_handle.write("%d," % (nametable_top_rle[resource][i]))
         resource_handle.write("};\n\n")
-        
+
     resource_handle.write("const unsigned char Nametable_" + resource + "_bottom_rle[%d] = " % (len(nametable_bottom_rle[resource])) + "{")
-    
+
     for i in range(0,len(nametable_bottom_rle[resource])):
         resource_handle.write("%d," % (nametable_bottom_rle[resource][i]))
     resource_handle.write("};\n")
-        
-    
+
+
 #write out the include tree and pattern tables remaking resources.h
-resource_handle = open(os.getcwd() + "\\resources.h", 'w+')
+resource_handle = open(getPathWithResources() + "/resources.h", 'w+')
 
 resource_handle.write("// DO NOT MAKE CHANGES TO THIS FILE!\n")
 resource_handle.write("// THIS FILE IS GENERATED BY generate_graphics.py AND WILL BE OVERWRITTEN!\n\n")
@@ -352,9 +362,9 @@ resource_handle.write("// THIS FILE IS GENERATED BY generate_graphics.py AND WIL
 resource_handle.write("#include \"Colors.h\"\n\n")
 
 for resource in sprite_list:
-    resource_handle.write("#include \"Sprite\\" + resource + "\\" + resource + ".h\"\n")
+    resource_handle.write("#include \"resources/Sprite/" + resource + "/" + resource + ".h\"\n")
 for resource in background_list:
-    resource_handle.write("#include \"Background\\" + resource + "\\" + resource + ".h\"\n")
+    resource_handle.write("#include \"resources/Background/" + resource + "/" + resource + ".h\"\n")
 
 resource_handle.write("\n")
 resource_handle.write("#define PATTERN_BLANK_0 %d\n\n" % (background_id))
