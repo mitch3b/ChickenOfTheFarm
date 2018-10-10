@@ -2,3 +2,8 @@
 *.o
 *.nes.deb
 vars.txt
+resources/__pycache__
+resources/Background/*/*-reduced.png
+resources/Background/*/*-tmp.h
+resources/Sprite/*/*-reduced.png
+resources/Sprite/*/*-tmp.h
