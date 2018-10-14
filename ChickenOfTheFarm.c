@@ -132,7 +132,9 @@ static GameState_t          gGameState;
 static FrogAnimationState_t gFrogAnimationState;
 static TongueState_t        gTongueState;
 static unsigned int         gTongueCounter;
-    
+static unsigned int         gFade;
+static const unsigned int*  gScratchPointer;
+
 extern void pMusicInit(unsigned char);
 extern void pMusicPlay(void);
 
@@ -312,20 +314,8 @@ void loadCollisionFromNametables(void)
 }
 
 
-void palattes(void)
+void palettes(void)
 {
-    // Background 0
-    SET_COLOR(BACKGROUND0_0, BLACK);
-    SET_COLOR(BACKGROUND0_1, DARK_GRAY);
-    SET_COLOR(BACKGROUND0_2, GRAY);
-    SET_COLOR(BACKGROUND0_3, WHITE);
-
-    // Background 2
-    SET_COLOR(BACKGROUND2_0, BLUE);
-    SET_COLOR(BACKGROUND2_1, DARK_GRAY);
-    SET_COLOR(BACKGROUND2_2, GRAY);
-    SET_COLOR(BACKGROUND2_3, RED);
-
     // Sprite 0
     SET_COLOR(SPRITE0_1, DARK_GREEN);
     SET_COLOR(SPRITE0_2, GREEN);
@@ -357,6 +347,60 @@ void palattes(void)
 //    }
 //}
 
+void load_palette(void)
+{
+    SET_COLOR(BACKGROUND0_0, Level1Palette[0]);
+    SET_COLOR(BACKGROUND1_0, Level1Palette[0]);
+    SET_COLOR(BACKGROUND2_0, Level1Palette[0]);
+    SET_COLOR(BACKGROUND3_0, Level1Palette[0]);
+
+    if( gFade > 0 )
+    {
+        SET_COLOR(BACKGROUND0_1, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND1_1, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND2_1, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND3_1, gScratchPointer[0]);
+    }
+    else
+    {
+        SET_COLOR(BACKGROUND0_1, gScratchPointer[1 ]);
+        SET_COLOR(BACKGROUND1_1, gScratchPointer[4 ]);
+        SET_COLOR(BACKGROUND2_1, gScratchPointer[7 ]);
+        SET_COLOR(BACKGROUND3_1, gScratchPointer[10]);
+    }
+
+    if( gFade > 1 )
+    {
+        SET_COLOR(BACKGROUND0_2, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND1_2, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND2_2, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND3_2, gScratchPointer[0]);
+    }
+    else
+    {
+        SET_COLOR(BACKGROUND0_2, gScratchPointer[2  - gFade]);
+        SET_COLOR(BACKGROUND1_2, gScratchPointer[5  - gFade]);
+        SET_COLOR(BACKGROUND2_2, gScratchPointer[8  - gFade]);
+        SET_COLOR(BACKGROUND3_2, gScratchPointer[11 - gFade]);
+    }
+
+    if( gFade > 2 )
+    {
+        SET_COLOR(BACKGROUND0_3, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND1_3, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND2_3, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND3_3, gScratchPointer[0]);
+    }
+    else
+    {
+        SET_COLOR(BACKGROUND0_3, gScratchPointer[3  - gFade]);
+        SET_COLOR(BACKGROUND1_3, gScratchPointer[6  - gFade]);
+        SET_COLOR(BACKGROUND2_3, gScratchPointer[9  - gFade]);
+        SET_COLOR(BACKGROUND3_3, gScratchPointer[12 - gFade]);
+    }
+
+}
+
 void fade_out(void)
 {
     PPU_MASK = 0x0E;
@@ -365,10 +409,8 @@ void fade_out(void)
     gCounter = 20;
     vblank_counter();
 
-    SET_COLOR(BACKGROUND0_0, BLACK);
-    SET_COLOR(BACKGROUND0_1, BLACK);
-    SET_COLOR(BACKGROUND0_2, DARK_GRAY);
-    SET_COLOR(BACKGROUND0_3, GRAY);
+    gFade = 1;
+    load_palette();
 
     PPU_CTRL = 0x84 + gYNametable;
     set_scroll();
@@ -376,8 +418,8 @@ void fade_out(void)
     gCounter = 20;
     vblank_counter();
 
-    SET_COLOR(BACKGROUND0_2, BLACK);
-    SET_COLOR(BACKGROUND0_3, DARK_GRAY);
+    gFade = 2;
+    load_palette();
 
     PPU_CTRL = 0x84 + gYNametable;
     set_scroll();
@@ -385,7 +427,8 @@ void fade_out(void)
     gCounter = 20;
     vblank_counter();
 
-    SET_COLOR(BACKGROUND0_3, BLACK);
+    gFade = 3;
+    load_palette();
 
     PPU_CTRL = 0x84 + gYNametable;
     set_scroll();
@@ -400,7 +443,8 @@ void fade_out(void)
 
 void fade_in(void)
 {
-    SET_COLOR(BACKGROUND0_3, DARK_GRAY);
+    gFade = 2;
+    load_palette();
 
     PPU_CTRL = 0x84 + gYNametable;
     PPU_MASK = 0x0E;
@@ -409,8 +453,8 @@ void fade_in(void)
     gCounter = 20;
     vblank_counter();
 
-    SET_COLOR(BACKGROUND0_2, DARK_GRAY);
-    SET_COLOR(BACKGROUND0_3, GRAY);
+    gFade = 1;
+    load_palette();
 
     PPU_CTRL = 0x84 + gYNametable;
     set_scroll();
@@ -418,9 +462,8 @@ void fade_in(void)
     gCounter = 20;
     vblank_counter();
 
-    SET_COLOR(BACKGROUND0_1, DARK_GRAY);
-    SET_COLOR(BACKGROUND0_2, GRAY);
-    SET_COLOR(BACKGROUND0_3, WHITE);
+    gFade = 0;
+    load_palette();
 
     PPU_CTRL = 0x84 + gYNametable;
     if( gStage == 0 || gStage > 4 )
@@ -435,28 +478,6 @@ void fade_in(void)
 
     gCounter = 20;
     vblank_counter();
-}
-
-void patterntables(void)
-{
-    //for( i = 0; i < 768; i++ )
-    //{
-    //    PPU_ADDRESS = 0x00;
-    //    PPU_ADDRESS = 0;
-    //    //PPU_DATA = j;//((unsigned char*) addr)[i];
-    //    PPU_DATA = ((unsigned char*) pattern)[i];
-    //    PPU_ADDRESS = 0x10;
-    //    PPU_ADDRESS = 0;
-    //    //PPU_DATA = j;//((unsigned char*) addr)[i];
-    //    PPU_DATA = ((unsigned char*) pattern)[i];
-    //}
-    //PPU_ADDRESS = 0x00;
-    //PPU_ADDRESS = 0;
-    //for( i = 0; i < 1024; i++ )
-    //{
-    //    //PPU_DATA = pattern[i];
-    //    PPU_DATA = i;//pattern[i];
-    //}
 }
 
 void draw_health(void)
@@ -1237,6 +1258,8 @@ void load_stage(void)
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
+            gScratchPointer = TitleScreenPalette;
+            load_palette();
             break;
 
         case 1:
@@ -1246,6 +1269,8 @@ void load_stage(void)
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level1_top_rle);	// uncompresses our data
+            gScratchPointer = Level1Palette;
+            load_palette();
             break;
 
         case 2:
@@ -1255,6 +1280,8 @@ void load_stage(void)
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level2_top_rle);	// uncompresses our data
+            gScratchPointer = Level2Palette;
+            load_palette();
             break;
         case 3:
             PPU_ADDRESS = 0x28;
@@ -1263,6 +1290,8 @@ void load_stage(void)
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level3_top_rle);	// uncompresses our data
+            gScratchPointer = Level3Palette;
+            load_palette();
             break;
         case 4:
             PPU_ADDRESS = 0x28;
@@ -1271,11 +1300,15 @@ void load_stage(void)
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level4_top_rle);	// uncompresses our data
+            gScratchPointer = Level4Palette;
+            load_palette();
             break;
         default:
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_EndingScreen_bottom_rle);	// uncompresses our data
+            gScratchPointer = EndingScreenPalette;
+            load_palette();
             break;
     }
 
@@ -1406,7 +1439,7 @@ void do_physics(void)
         //  sprites[13] = 0x02;
         //  sprites[14] = 0x40;
         //}
-        
+
         for( i = 0; (i<<2) < gSpeed; i++ )
         {
             gTmpX = gX - 1;
@@ -1471,7 +1504,7 @@ void do_physics(void)
         //  sprites[13] = 0x03;
         //  sprites[14] = 0x00;
         //}
-        
+
 
         for( i = 0; (i<<2) < gSpeed; i++ )
         {
@@ -1526,13 +1559,13 @@ void do_physics(void)
     // Vertical Movement
     //
 
-        
+
     if( gVelocityDirection == 1 ) // moving up
     {
         for( i = 0; (i<<2) < gVelocity; i++ )
         {
             gTmpX = gX + 0xF;
-            
+
             if( gYNametable == 2 )
             {
                 if( collision[240 + (((gY)&0xF0) ) + ((gX) >> 4)] == 0 &&
@@ -1617,7 +1650,7 @@ void do_physics(void)
         for( i = 0; (i<<2) < gVelocity; i++ )
         {
             gTmpX = gX + 0xF;
-            
+
             if(gYNametable == 2 )
             {
                 if( collision[240 + (((gY+0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
@@ -1820,6 +1853,7 @@ void init_game_state(void)
     gFrogAnimationState = FROG_NORMAL;
     gTongueState = TONGUE_NORMAL;
     gTongueCounter = 0;
+    gFade = 3;
 }
 
 void game_running_sm(void)
@@ -1894,13 +1928,14 @@ void main(void)
 
     ppudisable();
 
-    palattes();
+    palettes();
     vblank();
-    patterntables();
 
   	PPU_ADDRESS = 0x28; // address of nametable #2
   	PPU_ADDRESS = 0x00;
   	UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
+    gScratchPointer = TitleScreenPalette;
+    load_palette();
 
     loadCollisionFromNametables();
 

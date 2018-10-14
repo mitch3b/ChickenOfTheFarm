@@ -110,6 +110,7 @@ raw_patterns = {}
 reduced_patterns = []
 raw_nametables = {}
 reduced_nametables = {}
+raw_attributes = {}
 background_list = []
 sprite_list = []
 background_id = 0
@@ -149,6 +150,7 @@ def create_patterns(folder, pattern_type):
     raw_patterns[folder] = []
     raw_nametables[folder] = []
     reduced_nametables[folder] = []
+    raw_attributes[folder] = []
 
     if pattern_type == "Sprite":
         sprite_list.append(folder)
@@ -194,12 +196,24 @@ def create_patterns(folder, pattern_type):
     #print(new_headers)
 
     #print(color_map)
-    long_options = ["help", "in=", "out=", "map=", "c=", "offset=", "RLE"]
-    call(["python",os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
-          "--in=" + image,
-          "--out=" + base_name + "-reduced.png",
-          "--map=" + color_map,
-          "--c=" + base_name + "-tmp.h"])
+    #long_options = ["help", "in=", "out=", "map=", "c=", "offset=", "RLE"]
+    result = 0
+    if pattern_type == "Background":
+        result = call(["python",os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
+                       "--in=" + image,
+                       "--out=" + base_name + "-reduced.png",
+                       "--map=" + color_map,
+                       "--c=" + base_name + "-tmp.h",
+                       "--attribute"])
+    else:
+        result = call(["python",os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
+                       "--in=" + image,
+                       "--out=" + base_name + "-reduced.png",
+                       "--map=" + color_map,
+                       "--c=" + base_name + "-tmp.h"])
+    if result != 0:
+        print("Failed to generate %s" % folder)
+        sys.exit(result)
 
     header_handle = open(base_name + "-tmp.h", 'r')
 
@@ -217,6 +231,13 @@ def create_patterns(folder, pattern_type):
                 if num != '':
                     raw_nametables[folder].append(int(num))
                     reduced_nametables[folder].append(int(num))
+        if pattern_type == "Background":
+            match = re.search("attributes.*\{(.*)\}", header_line)
+            if match:
+                tmp = match.group(1).split(",")
+                for num in tmp:
+                    if num != '':
+                        raw_attributes[folder].append(int(num))
 
     #print(raw_patterns)
     #print(raw_nametables)
@@ -305,16 +326,22 @@ for resource in background_list:
     #print(resource)
     nametable_tmp = []
     start = 0;
+    attribute_start = 0
 
     if len(reduced_nametables[resource]) > 960:
         for i in range(0,960):
             nametable_tmp.append(reduced_nametables[resource][i])
+        for i in range(0,64):
+            nametable_tmp.append(raw_attributes[resource][i])
         nametable_top_rle[resource] = create_rle(nametable_tmp)
         start = 960
+        attribute_start = 64
 
     nametable_tmp = []
     for i in range(start,start+960):
         nametable_tmp.append(reduced_nametables[resource][i])
+    for i in range(attribute_start,attribute_start+64):
+        nametable_tmp.append(raw_attributes[resource][i])
     nametable_bottom_rle[resource] = create_rle(nametable_tmp)
 
 #print(nametable_top_rle)
