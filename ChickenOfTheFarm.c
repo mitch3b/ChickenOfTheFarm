@@ -54,6 +54,10 @@
 #define PPU_ADDRESS *((unsigned char*)0x2006)
 #define PPU_DATA    *((unsigned char*)0x2007)
 
+// These are used to determine how much screen to show above and below frog while scrolling
+#define MAX_BOTTOM_BUFFER 0xAF
+#define MAX_TOP_BUFFER    0x3F
+
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
 
 //
@@ -1591,21 +1595,24 @@ void do_physics(void)
 
             if( gYNametable == 2 )
             {
+                //Bottom half of level
                 if( collision[240 + (((gY)&0xF0) ) + ((gX) >> 4)] == 0 &&
                     collision[240 + (((gY)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if(gY > 0x0F)
+                    if(gY > MAX_TOP_BUFFER )
                     {
                         gY -= 1;
                     }
                     else
                     {
+                        // Jumping out of the bottom half of screen so scroll instead of moving frog up
                         gYScroll = 0xEF;
                         gYNametable = 0;
                     }
                 }
                 else
                 {
+                    //Ran into a block so stop
                     gVelocity = 0;
                     gVelocityDirection = 0;
                     break;
@@ -1616,37 +1623,35 @@ void do_physics(void)
                 if( collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + ((gX) >> 4)] == 0 &&
                     collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if(gY > 0x0F)
+                    if(gY > MAX_TOP_BUFFER)
                     {
                         gY -= 1;
                     }
                     else
                     {
+                        //??
                         gYScroll -= 1;
                     }
                 }
                 else
                 {
+                    //Ran into block so stop
                     gVelocityDirection = 0;
                     break;
                 }
             }
             else
             {
-                if( collision[(((gYScroll + gY - 0x100) & 0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[(((gYScroll + gY - 0x100) & 0xF0) ) + (gTmpX >> 4)] == 0 )
+                if( collision[(((gYScroll + gY) & 0xF0) ) + ((gX) >> 4)] == 0 &&
+                    collision[(((gYScroll + gY) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if(gY > 0x0F)
-                    {
-                        gY -= 1;
-                    }
-                    else
-                    {
-                        if( gYScroll > 0 )
-                        {
-                            gYScroll -= 1;
-                        }
-                    }
+                  //Approaching the top. Scroll until we can't anymore
+                  if(gYScroll > 0) {
+                    gYScroll -= 1;
+                  }
+                  else if(gY > 0x00) {
+                    gY -= 1;
+                  }
                 }
                 else
                 {
@@ -1676,10 +1681,11 @@ void do_physics(void)
 
             if(gYNametable == 2 )
             {
-                if( collision[240 + (((gY+0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[240 + (((gY+0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
+                //Bottom half of level
+                if( collision[240 + (((gYScroll + gY + 0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
+                    collision[240 + (((gYScroll + gY + 0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if(gY < 0xCF)
+                    if(gY < 0xFF )
                     {
                         gY += 1;
                     }
@@ -1692,6 +1698,7 @@ void do_physics(void)
                 }
                 else
                 {
+                    //Ran into block
                     gVelocity = 0;
                     gJumping = 0;
                     break;
@@ -1702,7 +1709,7 @@ void do_physics(void)
                 if( collision[240 + (((gYScroll + gY+0x11 - 0xF0)&0xF0) ) + ((gX) >> 4)] == 0 &&
                     collision[240 + (((gYScroll + gY+0x11 - 0xF0)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if(gY < 0xCF)
+                    if(gY < MAX_BOTTOM_BUFFER)
                     {
                         gY += 1;
                     }
@@ -1712,8 +1719,6 @@ void do_physics(void)
                         {
                             gYNametable = 2;
                             gYScroll = 0;
-                            gVelocity = 0;
-                            gJumping = 0;
                             break;
                         }
                         else
@@ -1734,7 +1739,7 @@ void do_physics(void)
                 if( collision[(((gYScroll + gY+0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
                     collision[(((gYScroll + gY+0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if(gY < 0xCF)
+                    if(gY < MAX_BOTTOM_BUFFER)
                     {
                         gY += 1;
                     }
