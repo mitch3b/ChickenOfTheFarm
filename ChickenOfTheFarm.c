@@ -118,6 +118,15 @@ static unsigned char        devnull;
 static unsigned int         i;
 static unsigned int         j;
 static unsigned int         garbage;
+// These are probably overkill, but it makes collision detection a lot cleaner
+static unsigned int         x1;
+static unsigned int         y1;
+static unsigned int         width1;
+static unsigned int         height1;
+static unsigned int         x2;
+static unsigned int         y2;
+static unsigned int         width2;
+static unsigned int         height2;
 static unsigned int         gJumping; // 0 if not currently in the air from a jump, 1 if yes
 static unsigned int         gBounceCounter;
 static unsigned int         gVelocity;
@@ -827,14 +836,14 @@ void update_tongue_sprite(void)
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_0;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_1;
+                    sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 16;
+                    sprites[79] = gX - 8;
                 }
                 gTongueState = TONGUE_EXTENDING2;
                 gTongueCounter = 2;
@@ -881,9 +890,9 @@ void update_tongue_sprite(void)
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_0;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 24;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
@@ -891,9 +900,9 @@ void update_tongue_sprite(void)
                     sprites[79] = gX - 16;
 
                     sprites[80] = gY + 4;
-                    sprites[81] = PATTERN_TONGUE_1;
+                    sprites[81] = PATTERN_TONGUE_0;
                     sprites[82] = 0x42;
-                    sprites[83] = gX - 24;
+                    sprites[83] = gX - 8;
                 }
                 gTongueState = TONGUE_OUT;
                 gTongueCounter = 5;
@@ -915,14 +924,14 @@ void update_tongue_sprite(void)
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_0;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_1;
+                    sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 16;
+                    sprites[79] = gX - 8;
                 }
                 gTongueCounter--;
             }
@@ -950,14 +959,14 @@ void update_tongue_sprite(void)
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_0;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_1;
+                    sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 16;
+                    sprites[79] = gX - 8;
 
                     sprites[80] = 0x00;
                     sprites[81] = 0x00;
@@ -989,9 +998,9 @@ void update_tongue_sprite(void)
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_0;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 24;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
@@ -999,9 +1008,9 @@ void update_tongue_sprite(void)
                     sprites[79] = gX - 16;
 
                     sprites[80] = gY + 4;
-                    sprites[81] = PATTERN_TONGUE_1;
+                    sprites[81] = PATTERN_TONGUE_0;
                     sprites[82] = 0x42;
-                    sprites[83] = gX - 24;
+                    sprites[83] = gX - 8;
                 }
                 gTongueCounter--;
             }
@@ -1053,14 +1062,14 @@ void update_tongue_sprite(void)
                 else
                 {
                     sprites[72] = gY + 4;
-                    sprites[73] = PATTERN_TONGUE_0;
+                    sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 16;
 
                     sprites[76] = gY + 4;
-                    sprites[77] = PATTERN_TONGUE_1;
+                    sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 16;
+                    sprites[79] = gX - 8;
                 }
                 gTongueCounter--;
             }
@@ -1376,6 +1385,20 @@ void next_stage(void)
         default:
             gStage++;
     }
+}
+
+/**
+ * Compares two rectangles for collision
+ * Requires x1, y1, width1, height1, x2, y2, width2, height2 to be set bc params are apparently dangerous
+ * TODO doesn't account for screen wrapping
+ * TODO return values are also supposedly bad, but reads so much better in code like this
+ */
+int is_collision(void)
+{
+    return x1 + width1 > x2
+        && x2 + width2 > x1
+        && y1 + height1 > y2
+        && y2 + height2 > y1;
 }
 
 void do_physics(void)
@@ -1800,6 +1823,37 @@ void do_physics(void)
     {
         next_stage();
         load_stage();
+    }
+
+    //Tongue collision box
+    x1 = sprites[75];
+    y1 = sprites[72] + 1;
+    width1 = (sprites[79] == 0) ? 8 : (sprites[83] == 0) ? 16 : 24;
+    height1 = 6;
+
+    //bird collision box
+    x2 = sprites[19];
+    y2 =  sprites[16] + 1;
+    width2 = 4;
+    height2 = 6;
+
+    if(is_collision())
+    {
+      //Reset tongue
+      sprites[72] = 0;
+      sprites[75] = 0;
+      sprites[76] = 0;
+      sprites[79] = 0;
+      sprites[80] = 0;
+      sprites[83] = 0;
+      gTongueState = TONGUE_NORMAL;
+      gTongueCounter = 0;
+
+      //Reset bird TODO don't just reset to top left corner
+      sprites[16] = 0;
+      sprites[19] = 8;
+      sprites[20] = 0;
+      sprites[23] = 16;
     }
 
     if( sprites[16] == gY && sprites[19] == gX && gIframes == 0)
