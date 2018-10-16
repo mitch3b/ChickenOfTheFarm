@@ -1844,7 +1844,7 @@ void do_physics(void)
 
     if(is_collision())
     {
-      //Reset tongue
+      //Reset tongue 
       sprites[72] = 0;
       sprites[75] = 0;
       sprites[76] = 0;
