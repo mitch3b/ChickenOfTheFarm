@@ -1642,15 +1642,15 @@ void do_physics(void)
             }
             else
             {
-                if( collision[(((gYScroll + gY) & 0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[(((gYScroll + gY) & 0xF0) ) + (gTmpX >> 4)] == 0 )
+                if( collision[(((gYScroll + gY - 0x100) & 0xF0) ) + ((gX) >> 4)] == 0 &&
+                    collision[(((gYScroll + gY - 0x100) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                   //Approaching the top. Scroll until we can't anymore
-                  if(gYScroll > 0) {
-                    gYScroll -= 1;
-                  }
-                  else if(gY > 0x00) {
+                  if(gY > MAX_TOP_BUFFER || gYScroll == 0) {
                     gY -= 1;
+                  }
+                  else {// if(gYScroll > 0) {
+                    gYScroll -= 1;
                   }
                 }
                 else
@@ -1682,19 +1682,19 @@ void do_physics(void)
             if(gYNametable == 2 )
             {
                 //Bottom half of level
-                if( collision[240 + (((gYScroll + gY + 0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
-                    collision[240 + (((gYScroll + gY + 0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
+                if( collision[240 + (((gY + 0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
+                    collision[240 + (((gY + 0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if(gY < 0xFF )
-                    {
+                    //if(gY < MAX_BOTTOM_BUFFER )
+                    //{
                         gY += 1;
-                    }
-                    else
-                    {
-                        gVelocity = 0;
-                        gJumping = 0;
-                        break;
-                    }
+                    //}
+                    //else
+                    //{
+                    //    gVelocity = 0;
+                    //    gJumping = 0;
+                    //    break;
+                    //}
                 }
                 else
                 {
@@ -1844,7 +1844,7 @@ void do_physics(void)
 
     if(is_collision())
     {
-      //Reset tongue 
+      //Reset tongue
       sprites[72] = 0;
       sprites[75] = 0;
       sprites[76] = 0;
