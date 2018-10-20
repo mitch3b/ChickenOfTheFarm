@@ -607,15 +607,15 @@ void setup_sprites(void)
     sprites[22] = 0x02;
     sprites[23] = 0x58;
 
-    sprites[84] = 0xB0;
-    sprites[85] = PATTERN_ARROW_0;
-    sprites[86] = 0x00;
-    sprites[87] = 0x10;
-
     arrowMoving = 0;
     arrowStartX = 0x10;
     arrowStartY = 0xB0;
     arrowNametable = 2;
+
+    sprites[84] = (arrowNametable == 2) ? arrowStartY : 0x00;
+    sprites[85] = PATTERN_ARROW_0;
+    sprites[86] = 0x00;
+    sprites[87] = 0x10;
 
     draw_health();
 }
@@ -1438,7 +1438,7 @@ void death(void)
 /**
  * Compares two rectangles for collision
  * Requires x1, y1, width1, height1, x2, y2, width2, height2 to be set bc params are apparently dangerous
- * TODO doesn't account for screen wrapping
+ * TODO doesn't account for screen wrapping left to right
  * TODO return values are also supposedly bad, but reads so much better in code like this
  */
 int is_collision(void)
@@ -1447,6 +1447,60 @@ int is_collision(void)
         && x2 + width2 > x1
         && y1 + height1 > y2
         && y2 + height2 > y1;
+}
+
+/**
+ * Compares rectangle sprite to background
+ * Requires x1, y1, width1, height1
+ * TODO doesn't account for screen wrapping left to right
+ * TODO return values are also supposedly bad, but reads so much better in code like this
+ */
+int is_background_collision(void) {
+  if( gYNametable == 2 )
+  {
+      if( collision[240 + (((y1)&0xF0)) + (x1 >> 4)] == 0 &&
+          collision[240 + (((y1 + height1)&0xF0)) + (x1 >> 4)] == 0 &&
+          collision[240 + (((y1)&0xF0)) + ((x1 + width1) >> 4)] == 0 &&
+              collision[240 + (((y1 + height1)&0xF0)) + ((x1 + width1) >> 4)] == 0)
+      {
+          return 0;
+      }
+      else
+      {
+          return 1;
+      }
+  }
+  else
+  {
+      if((gYScroll + gY + 1) >= 0xF0)
+      {
+          if( collision[240 + (((gYScroll + y1 - 0xF0) & 0xF0) ) + (x1 >> 4)] == 0 &&
+              collision[240 + (((gYScroll + y1 + height1 - 0xF0) & 0xF0) ) + (x1 >> 4)] == 0 &&
+              collision[240 + (((gYScroll + y1 - 0xF0) & 0xF0) ) + ((x1 + width1) >> 4)] == 0 &&
+              collision[240 + (((gYScroll + y1 + height1 - 0xF0) & 0xF0) ) + ((x1 + width1) >> 4)] == 0 )
+          {
+              return 0;
+          }
+          else
+          {
+              return 1;
+          }
+      }
+      else
+      {
+          if( collision[(((gYScroll + y1) & 0xF0) ) + (x1 >> 4)] == 0 &&
+              collision[(((gYScroll + y1 + height1) & 0xF0) ) + (x1 >> 4)] == 0 &&
+              collision[(((gYScroll + y1) & 0xF0) ) + ((x1 + width1) >> 4)] == 0 &&
+              collision[(((gYScroll + y1 + height1) & 0xF0) ) + ((x1 + width1) >> 4)] == 0 )
+          {
+              return 0;
+          }
+          else
+          {
+              return 1;
+          }
+      }
+  }
 }
 
 void take_hit(void)
@@ -1923,7 +1977,25 @@ void do_physics(void)
             }
           }
           else {
-            //TODO for arrows in top half
+            //Arrow in top half
+            if(gYNametable == 0) {
+              if(gYScroll <= arrowStartY) {
+                  //Arrow should now be displayed
+                  sprites[84] = arrowStartY - gYScroll;
+                  if(sprites[87] == 0) {
+                    sprites[87] = arrowStartX;
+                  }
+              }
+              else {
+                //Arrow moved offscreen so kill it
+                sprites[84] = 0;
+                sprites[87] = 0;
+              }
+            }
+            else {
+              //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
+              sprites[84] = 0;
+            }
           }
       }
 
@@ -1932,7 +2004,11 @@ void do_physics(void)
       {
           //Arrow is in flight
           //if arrow is just long enough to stick into a wall
-          if(collision[240 + (((sprites[84])&0xF0)) + ((sprites[87] + 7) >> 4)] != 0)
+          x1 = sprites[87];
+          y1 = sprites[84];
+          height1 = 2;
+          width1 = 8;
+          if(is_background_collision())
           {
             arrowMoving = 2;
           }
