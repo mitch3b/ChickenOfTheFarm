@@ -199,14 +199,14 @@ def create_patterns(folder, pattern_type):
     #long_options = ["help", "in=", "out=", "map=", "c=", "offset=", "RLE"]
     result = 0
     if pattern_type == "Background":
-        result = call(["python3",os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
+        result = call([sys.executable,os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
                        "--in=" + image,
                        "--out=" + base_name + "-reduced.png",
                        "--map=" + color_map,
                        "--c=" + base_name + "-tmp.h",
                        "--attribute"])
     else:
-        result = call(["python3",os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
+        result = call([sys.executable,os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
                        "--in=" + image,
                        "--out=" + base_name + "-reduced.png",
                        "--map=" + color_map,

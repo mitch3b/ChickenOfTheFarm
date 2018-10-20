@@ -60,6 +60,9 @@
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
 
+#define TONGUE_EXTEND_DELAY  0
+#define TONGUE_RETRACT_DELAY 4
+
 //
 // TYPEDEFS
 //
@@ -90,6 +93,7 @@ typedef enum _TongueState_t
     TONGUE_OUT,
     TONGUE_RETRACTING,
     TONGUE_RETRACTING2,
+    TONGUE_CLEANUP,
 }
 TongueState_t;
 
@@ -103,7 +107,7 @@ unsigned char sprites[256];
 
 // 16 x (15 + 15)
 // TODO should use a bit per block instead of byte, but this is a lot easier at the moment
-unsigned char collision[480] = {};
+unsigned char collision[496] = {};
 
 #pragma bss-name (pop)
 
@@ -323,6 +327,11 @@ void loadCollisionFromNametables(void)
         garbage = *((unsigned char*)0x2007);
       }
     }
+  }
+
+  for(i = 0; i < 16; i++)
+  {
+      collision[480 + i] = 0;
   }
 }
 
@@ -850,7 +859,7 @@ void update_tongue_sprite(void)
                     sprites[79] = gX - 8;
                 }
                 gTongueState = TONGUE_EXTENDING2;
-                gTongueCounter = 2;
+                gTongueCounter = TONGUE_EXTEND_DELAY;
             }
             else
             {
@@ -909,7 +918,7 @@ void update_tongue_sprite(void)
                     sprites[83] = gX - 8;
                 }
                 gTongueState = TONGUE_OUT;
-                gTongueCounter = 5;
+                gTongueCounter = TONGUE_RETRACT_DELAY;
             }
             else
             {
@@ -978,7 +987,7 @@ void update_tongue_sprite(void)
                     sprites[83] = 0x00;
                 }
                 gTongueState = TONGUE_RETRACTING;
-                gTongueCounter = 5;
+                gTongueCounter = TONGUE_RETRACT_DELAY;
             }
             else
             {
@@ -1047,7 +1056,7 @@ void update_tongue_sprite(void)
                     sprites[79] = 0x00;
                 }
                 gTongueState = TONGUE_RETRACTING2;
-                gTongueCounter = 5;
+                gTongueCounter = TONGUE_RETRACT_DELAY;
             }
             else
             {
@@ -1081,20 +1090,10 @@ void update_tongue_sprite(void)
         case TONGUE_RETRACTING2:
             if( gTongueCounter == 0 )
             {
-                if( gSpeedDirection == 1 )
-                {
-                    sprites[72] = 0x00;
-                    sprites[73] = 0x00;
-                    sprites[74] = 0x00;
-                    sprites[75] = 0x00;
-                }
-                else
-                {
-                    sprites[72] = 0x00;
-                    sprites[73] = 0x00;
-                    sprites[74] = 0x00;
-                    sprites[75] = 0x00;
-                }
+                sprites[72] = 0x00;
+                sprites[73] = 0x00;
+                sprites[74] = 0x00;
+                sprites[75] = 0x00;
                 gTongueState = TONGUE_NORMAL;
                 gTongueCounter = 0;
             }
@@ -1117,12 +1116,19 @@ void update_tongue_sprite(void)
                 gTongueCounter--;
             }
             break;
+        case TONGUE_CLEANUP:
+            for( i = 72; i < 84; i++)
+            {
+                sprites[i] = 0x00;
+            }
+            gTongueState = TONGUE_NORMAL;
+            break;
         case TONGUE_NORMAL:
         default:
             if( (gController1 & BUTTON_B) != 0 && (gPrevController1 & BUTTON_B) == 0)
             {
                 gTongueState = TONGUE_EXTENDING;
-                gTongueCounter = 2;
+                gTongueCounter = TONGUE_EXTEND_DELAY;
 
                 if( gSpeedDirection == 1 )
                 {
@@ -1245,7 +1251,7 @@ void update_sprites(void)
     sprites[12] = gY+8;
     sprites[15] = gX+8;
 
-    if( gIframes > 0 )
+    if(gIframes > 0 && (gIframes & 0x4) == 0)
     {
         sprites[2]  ^= 2;
         sprites[6]  ^= 2;
@@ -1387,8 +1393,21 @@ void next_stage(void)
             gGameState = ENDING_STATE;
 
         default:
+            gTongueState = TONGUE_CLEANUP;
+            gTongueCounter = 0;
+            update_tongue_sprite();
+
             gStage++;
     }
+}
+
+void death(void)
+{
+    gHealth = 8;
+    gStage = 0;
+    gGameState = TITLE_SCREEN_STATE;
+    load_stage();
+    draw_health();
 }
 
 /**
@@ -1685,16 +1704,14 @@ void do_physics(void)
                 if( collision[240 + (((gY + 0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
                     collision[240 + (((gY + 0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    //if(gY < MAX_BOTTOM_BUFFER )
-                    //{
+                    if(gY == 0xF0)
+                    {
+                        death();
+                    }
+                    else
+                    {
                         gY += 1;
-                    //}
-                    //else
-                    //{
-                    //    gVelocity = 0;
-                    //    gJumping = 0;
-                    //    break;
-                    //}
+                    }
                 }
                 else
                 {
@@ -1872,11 +1889,7 @@ void do_physics(void)
             draw_health();
             if( gHealth == 0 )
             {
-                gHealth = 8;
-                gStage = 0;
-                gGameState = TITLE_SCREEN_STATE;
-                load_stage();
-                draw_health();
+                death();
             }
             else
             {
@@ -1909,9 +1922,11 @@ void init_game_state(void)
     gJumping = 0;
     gBounceCounter = 0;
     gHealth = 8;
+    draw_health();
     gFrogAnimationState = FROG_NORMAL;
-    gTongueState = TONGUE_NORMAL;
+    gTongueState = TONGUE_CLEANUP;
     gTongueCounter = 0;
+    update_tongue_sprite();
     gFade = 3;
 }
 
