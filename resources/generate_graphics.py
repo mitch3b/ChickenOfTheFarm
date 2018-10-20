@@ -177,9 +177,6 @@ def create_patterns(folder, pattern_type):
                 palettes[folder].append(match.group(1))
                 color_map = color_map + colors[match.group(1)] + ":"
                 count = count + 1
-        match = re.search("\/\/ DO NOT MAKE CHANGES BELOW THIS LINE!", header_line)
-        if match:
-            break
     header_handle.close()
 
     if pattern_type == "Sprite" and count > 4:
@@ -348,37 +345,6 @@ for resource in background_list:
 #print(nametable_bottom_rle)
 
 print("Updating headers:")
-#write out the name tables and defines to a header for each resource
-for resource in sprite_list:
-    resource_handle = open(getPathWithResources() + "/Sprite/" + resource + "/" + resource + ".h", 'w+')
-
-    for line in new_headers[resource]:
-        resource_handle.write(line)
-    resource_handle.write("\n")
-
-    for i in range(0,len(reduced_nametables[resource])):
-        resource_handle.write("#define PATTERN_" + resource.upper() + "_%d" % (i) + " %d" % (reduced_nametables[resource][i]) + "\n")
-
-for resource in background_list:
-    resource_handle = open(getPathWithResources() + "/Background/" + resource + "/" + resource + ".h", 'w+')
-
-    for line in new_headers[resource]:
-        resource_handle.write(line)
-    resource_handle.write("\n")
-
-    if resource in nametable_top_rle:
-        resource_handle.write("const unsigned char Nametable_" + resource + "_top_rle[%d] = " % (len(nametable_top_rle[resource])) + "{")
-
-        for i in range(0,len(nametable_top_rle[resource])):
-            resource_handle.write("%d," % (nametable_top_rle[resource][i]))
-        resource_handle.write("};\n\n")
-
-    resource_handle.write("const unsigned char Nametable_" + resource + "_bottom_rle[%d] = " % (len(nametable_bottom_rle[resource])) + "{")
-
-    for i in range(0,len(nametable_bottom_rle[resource])):
-        resource_handle.write("%d," % (nametable_bottom_rle[resource][i]))
-    resource_handle.write("};\n")
-
 
 #write out the include tree and pattern tables remaking resources.h
 resource_handle = open(getPathWithResources() + "/resources.h", 'w+')
@@ -399,6 +365,27 @@ resource_handle.write("#pragma data-name (\"CHARS\")\n")
 resource_handle.write("unsigned char pattern[%d] = {" % (len(reduced_patterns)))
 for i in range(0,len(reduced_patterns)):
     resource_handle.write("%d," % (reduced_patterns[i]))
-resource_handle.write("};\n")
+resource_handle.write("};\n\n")
+
+#write out the name tables and defines to a header for each resource
+for resource in sprite_list:
+    for i in range(0,len(reduced_nametables[resource])):
+        resource_handle.write("#define PATTERN_" + resource.upper() + "_%d" % (i) + " %d" % (reduced_nametables[resource][i]) + "\n")
+
+    resource_handle.write("\n")
+
+for resource in background_list:
+    if resource in nametable_top_rle:
+        resource_handle.write("const unsigned char Nametable_" + resource + "_top_rle[%d] = " % (len(nametable_top_rle[resource])) + "{")
+
+        for i in range(0,len(nametable_top_rle[resource])):
+            resource_handle.write("%d," % (nametable_top_rle[resource][i]))
+        resource_handle.write("};\n\n")
+
+    resource_handle.write("const unsigned char Nametable_" + resource + "_bottom_rle[%d] = " % (len(nametable_bottom_rle[resource])) + "{")
+
+    for i in range(0,len(nametable_bottom_rle[resource])):
+        resource_handle.write("%d," % (nametable_bottom_rle[resource][i]))
+    resource_handle.write("};\n")
 
 resource_handle.close()
