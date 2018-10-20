@@ -118,6 +118,7 @@ unsigned char collision[496] = {};
 static unsigned char        gController1;
 static unsigned char        gPrevController1;
 static unsigned char        gPrevController1Change;
+static unsigned char        gFrameCounter;
 static unsigned char        gTmpX;
 static unsigned char        gX;
 static unsigned char        gY;
@@ -687,7 +688,7 @@ void big_jump(void)
 {
     if(gJumping == 0 || (gJumping == 1 && gVelocityDirection == 1)) {
       gJumping = 2;
-      gVelocity = 16;
+      gVelocity = 13;
       gVelocityDirection = 1;
       gPrevController1Change |= BUTTON_A;
     }
@@ -1465,6 +1466,11 @@ void take_hit(void)
       {
           gIframes = 120;
       }
+      //if(gSpeed != 0)
+      {
+          gSpeed = 16;
+          gSpeedDirection ^= 1;
+      }
   }
 }
 
@@ -1724,17 +1730,21 @@ void do_physics(void)
                 }
             }
         }
-        if( i == ((gVelocity+3)>>2) )
-        {
+        //if(((gController1 & BUTTON_A) != BUTTON_A && i == ((gVelocity+3)>>2)) ||
+        //   i == ((gVelocity+7)>>3))
+        //{
             if( gVelocity == 0 )
             {
                 gVelocityDirection = 0;
             }
             else
             {
-                gVelocity -= 1;
+                if((gController1 & BUTTON_A) != BUTTON_A || (gFrameCounter & 1))
+                {
+                    gVelocity -= 1;
+                }
             }
-        }
+        //}
     }
     else // moving down
     {
@@ -2049,6 +2059,7 @@ void init_game_state(void)
     gTongueCounter = 0;
     update_tongue_sprite();
     gFade = 3;
+    gFrameCounter = 0;
 }
 
 void game_running_sm(void)
@@ -2056,6 +2067,8 @@ void game_running_sm(void)
     while( gGameState == GAME_RUNNING_STATE )
     {
         vblank();
+
+        gFrameCounter++;
 
         input_poll();
 
