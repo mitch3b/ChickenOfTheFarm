@@ -107,13 +107,14 @@ TongueState_t;
 unsigned char sprites[256];
 
 
-// 16 x (15 + 15)
-// TODO should use a bit per block instead of byte, but this is a lot easier at the moment
-unsigned char collision[496] = {};
-
 #pragma bss-name (pop)
 
 #pragma bss-name (push, "BSS")
+
+// 16 x (15 + 15)
+// TODO should use a bit per block instead of byte, but this is a lot easier at the moment
+unsigned char collision[496];
+
 
 static unsigned char        gController1;
 static unsigned char        gPrevController1;
@@ -159,6 +160,8 @@ static FrogAnimationState_t gFrogAnimationState;
 static TongueState_t        gTongueState;
 static unsigned int         gTongueCounter;
 static unsigned int         gFade;
+static unsigned int         gLives;
+static unsigned int         gDisplayLives;
 static const unsigned int*  gScratchPointer;
 
 extern void pMusicInit(unsigned char);
@@ -498,7 +501,7 @@ void fade_in(void)
     load_palette();
 
     PPU_CTRL = 0x84 + gYNametable;
-    if( gStage == 0 || gStage > 4 )
+    if( gStage == 0 || gStage > 4 || gDisplayLives == 1)
     {
         PPU_MASK = 0x0E;
     }
@@ -1293,6 +1296,31 @@ void load_stage(void)
 {
     fade_out();
 
+    if( gDisplayLives == 1)
+    {
+        PPU_ADDRESS = 0x28;
+        PPU_ADDRESS = 0x00;
+        UnRLE(Nametable_Lives_bottom_rle);	// uncompresses our data
+
+        PPU_ADDRESS = 0x29;
+        PPU_ADDRESS = 0xED;
+        PPU_DATA = PATTERN_NUMBERS_0 + gLives;
+
+        gScratchPointer = LivesPalette;
+        load_palette();
+
+        vblank();
+
+        fade_in();
+
+        gCounter = 30;
+        vblank_counter();
+
+        fade_out();
+
+        gDisplayLives = 0;
+    }
+
     switch( gStage )
     {
         case 0:
@@ -1429,10 +1457,20 @@ void next_stage(void)
 void death(void)
 {
     gHealth = 8;
-    gStage = 0;
-    gGameState = TITLE_SCREEN_STATE;
-    load_stage();
+
+    if( gLives == 0 )
+    {
+        gStage = 0;
+        gGameState = TITLE_SCREEN_STATE;
+    }
+    else
+    {
+        gLives--;
+        gDisplayLives = 1;
+    }
+
     draw_health();
+    load_stage();
 }
 
 /**
@@ -2112,6 +2150,7 @@ void do_physics(void)
 void init_globals(void)
 {
     gGameState = TITLE_SCREEN_STATE;
+    gDisplayLives = 0;
 }
 
 void init_game_state(void)
@@ -2136,6 +2175,8 @@ void init_game_state(void)
     update_tongue_sprite();
     gFade = 3;
     gFrameCounter = 0;
+    gLives = 2;
+    gDisplayLives = 1;
 }
 
 void game_running_sm(void)
@@ -2147,6 +2188,30 @@ void game_running_sm(void)
         gFrameCounter++;
 
         input_poll();
+
+         if((gController1 & BUTTON_START) == BUTTON_START)
+         {
+             do
+             {
+                 vblank();
+                 input_poll();
+             }
+             while((gController1 & BUTTON_START) == BUTTON_START);
+
+             do
+             {
+                 vblank();
+                 input_poll();
+             }
+             while((gController1 & BUTTON_START) != BUTTON_START);
+
+             do
+             {
+                 vblank();
+                 input_poll();
+             }
+             while((gController1 & BUTTON_START) == BUTTON_START);
+         }
 
         update_sprites();
 

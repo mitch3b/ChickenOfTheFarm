@@ -367,6 +367,9 @@ for i in range(0,len(reduced_patterns)):
     resource_handle.write("%d," % (reduced_patterns[i]))
 resource_handle.write("};\n\n")
 
+resource_handle.write("#pragma data-name (\"RODATA\")\n")
+
+
 #write out the name tables and defines to a header for each resource
 for resource in sprite_list:
     for i in range(0,len(reduced_nametables[resource])):
@@ -386,6 +389,6 @@ for resource in background_list:
 
     for i in range(0,len(nametable_bottom_rle[resource])):
         resource_handle.write("%d," % (nametable_bottom_rle[resource][i]))
-    resource_handle.write("};\n")
+    resource_handle.write("};\n\n")
 
 resource_handle.close()
