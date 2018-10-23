@@ -59,6 +59,7 @@
 #define MAX_TOP_BUFFER    0x3F
 
 #define ARROW_SPEED 3
+#define MAX_ENEMIES 5 //Make sure that sprites 84 - X are avaiable before extending this
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
 
@@ -99,6 +100,16 @@ typedef enum _TongueState_t
 }
 TongueState_t;
 
+//According to nesdev, better to have arrays of attributes than arrays of objects: https://forums.nesdev.com/viewtopic.php?f=2&t=17465&start=0
+typedef struct {
+  //TODO id when we have more than just arrows
+  unsigned int startX[MAX_ENEMIES];
+  unsigned int startY[MAX_ENEMIES];
+  unsigned int startNametable[MAX_ENEMIES];
+  unsigned int state[MAX_ENEMIES];
+  unsigned int direction[MAX_ENEMIES];
+} arrows_t;
+
 //
 // GLOBALS
 //
@@ -125,12 +136,14 @@ static unsigned char        gX;
 static unsigned char        gY;
 static unsigned long        gXScroll;
 static unsigned char        gYScroll;
-static unsigned char        gYScrollPrev;
 static unsigned char        gYNametable;
 static unsigned char        devnull;
 static unsigned int         i;
 static unsigned int         j;
 static unsigned int         garbage;
+static unsigned char        garbage2;
+static unsigned char        garbage3;
+
 // These are probably overkill, but it makes collision detection a lot cleaner
 static unsigned int         x1;
 static unsigned int         y1;
@@ -150,11 +163,8 @@ static unsigned int         gStage;
 static unsigned int         gCounter;
 static unsigned int         gHealth;
 static unsigned int         gIframes;
-static unsigned int         arrowMoving;
-static unsigned int         arrowStartX;
-static unsigned int         arrowStartY; //TODO could probably get away with rounding to nearest 8th then wouldn't need nametable
-static unsigned int         arrowNametable;
-static unsigned int         numEnemies; // Will need something like this for knowing how many enemies to iterate on
+static arrows_t             arrows; //For now lets reserve max 5 spots
+static unsigned int         numEnemies;
 static GameState_t          gGameState;
 static FrogAnimationState_t gFrogAnimationState;
 static TongueState_t        gTongueState;
@@ -348,6 +358,67 @@ void loadCollisionFromNametables(void)
   }
 }
 
+//TODO get this set via background generator file
+#define PATTERN_ARROW_SPAWN_0 47
+
+// TODO not the most efficient but pulling directly from nametables and might want to join with above
+// This method goes through the top nametable then the bottom and looks for enemy spawns
+void loadEnemiesFromNametables(void)
+{
+  numEnemies = 0;
+
+  PPU_ADDRESS = 0x20; // address of nametable #0
+  PPU_ADDRESS = 0x00;
+
+  //First read is always invalid
+  i = *((unsigned char*)0x2007);
+
+  for(j = 0 ; j < 30 ; j++) {
+    for(i = 0; i < 32 ; i++) {
+      garbage2 = *((unsigned char*)0x2007);
+
+      if( i == 33 || j == 31 || garbage2 == PATTERN_ARROW_SPAWN_0) {
+        arrows.state[numEnemies] = 0;
+        arrows.startX[numEnemies] = i*8;
+        arrows.startY[numEnemies] = j*8 - 1;
+        arrows.startNametable[numEnemies] = 0;
+        arrows.direction[numEnemies] = (i == 1) ? 1 : 0; //0 moves left, 1 moves right
+
+        numEnemies = numEnemies + 1;
+
+        if(numEnemies > MAX_ENEMIES) {
+          return;
+        }
+      }
+    }
+  }
+
+  PPU_ADDRESS = 0x28; // address of nametable #2
+  PPU_ADDRESS = 0x00;
+
+  //First read is always invalid
+  i = *((unsigned char*)0x2007);
+
+  for(j = 0 ; j < 30 ; j++) {
+    for(i = 0; i < 32 ; i++) {
+      garbage2 = *((unsigned char*)0x2007);
+
+      if(garbage2 == PATTERN_ARROW_SPAWN_0) {
+        arrows.state[numEnemies] = 0;
+        arrows.startX[numEnemies] = i*8;
+        arrows.startY[numEnemies] = j*8 - 1;
+        arrows.startNametable[numEnemies] = 2;
+        arrows.direction[numEnemies] = (i == 1) ? 1 : 0; //0 moves left, 1 moves right
+
+        numEnemies = numEnemies + 1;
+
+        if(numEnemies > MAX_ENEMIES) {
+          return;
+        }
+      }
+    }
+  }
+}
 
 void palettes(void)
 {
@@ -591,7 +662,6 @@ void setup_sprites(void)
     gSpeedDirection = 1;
     gXScroll = 0;
     gYScroll = 0;
-    gYScrollPrev = 0;
     gYNametable = 2;
     gJumping = 0;
     gBounceCounter = 0;
@@ -610,15 +680,29 @@ void setup_sprites(void)
     sprites[22] = 0x02;
     sprites[23] = 0x58;
 
-    arrowMoving = 0;
-    arrowStartX = 0x10;
-    arrowStartY = 0xB0;
-    arrowNametable = 2;
+    j = 84;
+    for(i = 0 ; i < numEnemies ; i++) {
+      sprites[j] = (arrows.startNametable[i] == 2) ? arrows.startY[i] : 0x00;
+      j++;
+      sprites[j] = PATTERN_ARROW_0;
+      j++;
+      sprites[j] = 0x00; //TODO for direction, we want to flip the arrow
+      j++;
+      sprites[j] = (arrows.startNametable[i] == 2) ? arrows.startX[i] : 0x00;
+      j++;
+    }
 
-    sprites[84] = (arrowNametable == 2) ? arrowStartY : 0x00;
-    sprites[85] = PATTERN_ARROW_0;
-    sprites[86] = 0x00;
-    sprites[87] = 0x10;
+    //Clear out the rest
+    for( ; i < MAX_ENEMIES ; i++) {
+      sprites[j] =  0x00;
+      j++;
+      sprites[j] = PATTERN_ARROW_0;
+      j++;
+      sprites[j] = 0x00;
+      j++;
+      sprites[j] = 0x00;
+      j++;
+    }
 
     draw_health();
 }
@@ -1339,7 +1423,6 @@ void load_stage(void)
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level1_top_rle);	// uncompresses our data
             gScratchPointer = Level1Palette;
-            numEnemies = 1; // TODO will load this from stage at some point
             load_palette();
             break;
 
@@ -1351,7 +1434,6 @@ void load_stage(void)
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level2_top_rle);	// uncompresses our data
             gScratchPointer = Level2Palette;
-            numEnemies = 0; // TODO will load this from stage at some point, but for now it'll stay 0
             load_palette();
             break;
         case 3:
@@ -1383,6 +1465,7 @@ void load_stage(void)
             break;
     }
 
+    loadEnemiesFromNametables();
     loadCollisionFromNametables();
 
     vblank();
@@ -1394,7 +1477,6 @@ void load_stage(void)
     gVelocityDirection = 0;
     gXScroll = 0;
     gYScroll = 0;
-    gYScrollPrev = 0;
     gSpeed = 0;
     gSpeedDirection = 1;
     gJumping = 0;
@@ -1430,6 +1512,30 @@ void load_stage(void)
     sprites[37] = 0x00;
     sprites[38] = 0x00;
     sprites[39] = 0x00;
+
+    j = 84;
+    for(i = 0 ; i < numEnemies ; i++) {
+      sprites[j] = (arrows.startNametable[i] == 2) ? arrows.startY[i] : 0x00;
+      j++;
+      sprites[j] = PATTERN_ARROW_0;
+      j++;
+      sprites[j] = 0x00; //TODO for direction, we want to flip the arrow
+      j++;
+      sprites[j] = (arrows.startNametable[i] == 2) ? arrows.startX[i] : 0x00;
+      j++;
+    }
+
+    //Clear out the rest
+    for( ; i < MAX_ENEMIES ; i++) {
+      sprites[j] =  0x00;
+      j++;
+      sprites[j] = PATTERN_ARROW_0;
+      j++;
+      sprites[j] = 0x00;
+      j++;
+      sprites[j] = 0x00;
+      j++;
+    }
 
     update_sprites();
     dma_sprites();
@@ -1745,7 +1851,6 @@ void do_physics(void)
     //
     // Vertical Movement
     //
-    gYScrollPrev = gYScroll;
 
     if( gVelocityDirection == 1 ) // moving up
     {
@@ -1766,7 +1871,6 @@ void do_physics(void)
                     else
                     {
                         // Jumping out of the bottom half of screen so scroll instead of moving frog up
-                        gYScrollPrev = 0xF0 - gYScroll;
                         gYScroll = 0xEF;
                         gYNametable = 0;
                     }
@@ -1881,7 +1985,6 @@ void do_physics(void)
                         if( gYScroll == 0xEF )
                         {
                             gYNametable = 2;
-                            gYScrollPrev = gYScroll - 0xF0;
                             gYScroll = 0;
                             break;
                         }
@@ -1988,91 +2091,124 @@ void do_physics(void)
         sprites[39] = 0x00;
     }
 
+    //TODO the values in arrows array seem right so something is off here, probably with indexing into an array same line as doing something else
     if(numEnemies > 0) {
 
       // Arrow
       //Account for any scrolling
-      if(gYScrollPrev != gYScroll) {
-          if(arrowNametable == 2) {
-            //Arrow in bottom half
-            if(gYNametable == 0) {
-              if(gYScroll > arrowStartY) {
-                  //Arrow should now be displayed
-                  sprites[84] = arrowStartY - gYScroll - 0x10;
-                  if(sprites[87] == 0) {
-                    sprites[87] = arrowStartX;
-                  }
-              }
-              else {
-                //Arrow moved offscreen so kill it
-                sprites[84] = 0;
-                sprites[87] = 0;
-              }
+      j = 80;
+      for(i = 0; i < numEnemies; i++) {
+        j += 4;
+
+        if(arrows.startNametable[i] == 2) {
+          //Arrow in bottom half
+          if(gYNametable == 0) {
+            garbage = arrows.startY[i];
+            if(gYScroll > garbage) {
+                //Arrow should now be displayed
+                garbage = arrows.startY[i];
+                sprites[j] =  garbage - gYScroll - 0x10;
+                if(sprites[j + 3] == 0) {
+                  sprites[j + 3] = arrows.startX[i];
+                }
             }
             else {
-              //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
-              sprites[84] = arrowStartY;
+              //Arrow moved offscreen so kill it
+              sprites[j] = 0x00;
+              sprites[j + 3] = 0x00;
             }
           }
           else {
-            //Arrow in top half
-            if(gYNametable == 0) {
-              if(gYScroll <= arrowStartY) {
-                  //Arrow should now be displayed
-                  sprites[84] = arrowStartY - gYScroll;
-                  if(sprites[87] == 0) {
-                    sprites[87] = arrowStartX;
-                  }
-              }
-              else {
-                //Arrow moved offscreen so kill it
-                sprites[84] = 0;
-                sprites[87] = 0;
-              }
+            //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
+            sprites[j] = arrows.startY[i];
+            garbage3++; //TODO for whatever reason, without something here, the line above doesn't work correctly
+          }
+        }
+        else {
+          //Arrow in top half
+          if(gYNametable == 0) {
+            garbage = arrows.startY[i];
+            if(gYScroll < garbage) {
+                //Arrow should now be displayed
+                garbage = arrows.startY[i];
+                sprites[j] = garbage - gYScroll;
+                if(sprites[j + 3] == 0) {
+                  sprites[j + 3] = arrows.startX[i];
+                }
             }
             else {
-              //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
-              sprites[84] = 0;
+              //Arrow moved offscreen so kill it
+              sprites[j] = 0;
+              sprites[j + 3] = 0;
+              arrows.state[i] = 0;
             }
           }
-      }
-
-      //Update X
-      if(arrowMoving == 1)
-      {
-          //Arrow is in flight
-          //if arrow is just long enough to stick into a wall
-          x1 = sprites[87];
-          y1 = sprites[84];
-          height1 = 2;
-          width1 = 8;
-          if(is_background_collision())
-          {
-            arrowMoving = 2;
+          else {
+            //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
+            sprites[j] = 0;
           }
-          else
-          {
-            sprites[87] += ARROW_SPEED;
-          }
-      }
-      else if(arrowMoving == 0)
-      {
-        //Arrow isn't moving
-        if(sprites[84] > sprites[0] && sprites[84] < sprites[8])
-        {
-          //Start moving if frog becomes in path
-          arrowMoving = 1;
         }
-      }
-      else
-      {
-          //Arrow is stuck in wall
-          arrowMoving++;
-          //Check if its been stuck long enough to respawn
-          if(arrowMoving > 120) {
-            arrowMoving = 0;
-            sprites[87] = arrowStartX;
+
+        //Update X
+        if(arrows.state[i] == 2 || arrows.state[i] == 1)
+        {
+            //Arrow is in flight
+            //if arrow is just long enough to stick into a wall
+            x1 = sprites[j + 3];
+            y1 = sprites[j] + 4;
+            height1 = 2;
+            width1 = 8; //Don't count the tip
+            if(arrows.state[i] == 2 && is_background_collision())
+            {
+              arrows.state[i] = 3;
+            }
+            else
+            {
+              if(arrows.direction[i] == 1)
+              {
+                //moving right
+                sprites[j + 3] += ARROW_SPEED;
+                //Doing this in line didn't work
+                garbage = sprites[j + 3];
+                garbage -= arrows.startX[i];
+
+                if(garbage > 8) {
+                  arrows.state[i] = 2;
+                }
+              }
+              else {
+                //moving left
+                sprites[j + 3] -= ARROW_SPEED;
+                //Doing this in line didn't work
+                garbage = arrows.startX[i];
+                garbage -= sprites[j + 3];
+
+                if(garbage > 8) {
+                  arrows.state[i] = 2;
+                }
+              }
+            }
+        }
+        else if(arrows.state[i] == 0)
+        {
+          //Arrow isn't moving/waiting for trigger
+          if(sprites[j] >= sprites[0] && sprites[j] <= sprites[8])
+          {
+            //Start moving if frog becomes in path
+            arrows.state[i] = 1;
           }
+        }
+        else
+        {
+            //Arrow is stuck in wall
+            garbage = arrows.state[i];
+            arrows.state[i] = garbage + 1;
+            //Check if its been stuck long enough to respawn
+            if(arrows.state[i] > 120) {
+              arrows.state[i] = 0;
+              sprites[j + 3] = arrows.startX[i];
+            }
+        }
       }
     }
 
@@ -2116,27 +2252,34 @@ void do_physics(void)
     //Frog to enemies collision
     if(gIframes == 0)
     {
-      //Frog collision box
-      x1 = sprites[3] + 1;
-      y1 = sprites[0] + 1;
-      width1 = 14;
-      height1 = 15;
 
-      //arrow collision box
-      x2 = sprites[87];
-      y2 =  sprites[84] + 4;
-      width2 = 8;
-      height2 = 1;
 
-      //Check arrow collison
-      if(is_collision())
-      {
+      if( sprites[16] == gY && sprites[19] == gX) {
         take_hit();
       }
-      //Check bird collision
-      else if( sprites[16] == gY && sprites[19] == gX)
-      {
-        take_hit();
+      else {
+        //Frog collision box
+        x1 = sprites[3] + 1;
+        y1 = sprites[0] + 1;
+        width1 = 14;
+        height1 = 15;
+
+        j = 84;
+        for(i = 0 ; i < numEnemies ; i++) {
+          //Check arrow collison
+          //arrow collision box
+          x2 = sprites[j+3];
+          y2 =  sprites[j] + 4;
+          width2 = 8;
+          height2 = 1;
+          if(is_collision())
+          {
+            take_hit();
+            break;
+          }
+
+          j += 4;
+        }
       }
     }
 
@@ -2162,7 +2305,6 @@ void init_game_state(void)
     gVelocityDirection = 0;
     gXScroll = 0;
     gYScroll = 0;
-    gYScrollPrev = 0;
     gSpeed = 0;
     gSpeedDirection = 1;
     gJumping = 0;
@@ -2286,7 +2428,9 @@ void main(void)
     gScratchPointer = TitleScreenPalette;
     load_palette();
 
+    loadEnemiesFromNametables();
     loadCollisionFromNametables();
+
 
     vblank();
     setup_sprites();
