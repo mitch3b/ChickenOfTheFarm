@@ -1380,6 +1380,9 @@ void load_stage(void)
 {
     fade_out();
 
+    gYNametable = 2;
+    gYScroll = 0;
+
     if( gDisplayLives == 1)
     {
         PPU_ADDRESS = 0x28;
@@ -1468,8 +1471,6 @@ void load_stage(void)
     loadEnemiesFromNametables();
     loadCollisionFromNametables();
 
-    vblank();
-
     gX = 0x10;
     gY = 0xCF;
     gYNametable = 2;
@@ -1540,6 +1541,8 @@ void load_stage(void)
     update_sprites();
     dma_sprites();
     set_scroll();
+
+    vblank();
 
     fade_in();
 }
