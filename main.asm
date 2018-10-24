@@ -19,7 +19,7 @@
 .byte $02                ; PRG ROM size (16 KiB units)
 .byte $01                ; CHR ROM size (8 KiB units)
 .byte $00                ; horizontal mirroring
-.byte $00                ; mapper 0000 (NROM)
+.byte $08                ; mapper 0000 (NROM)
 .byte $00                ; PRG RAM size (8 KiB units)
 .byte $00                ; NTSC
 .byte $00                ; unused
@@ -52,19 +52,21 @@ irq:
 _music:
     ;.incbin "starwars.nsf", $80 ;just need the data not the header
     ;.incbin "Z2.nsf", $80 ;just need the data not the header
-    .incbin "test.nsf"
+    .incbin "test.nsf" ;, $80
 .popseg
 
 .export _pMusicInit
 _pMusicInit:
-    jmp _music + $80 ;$8080
+    ; address of the init function (see nsf header for the offset, adjust based on where we included it in the ROM
+    jmp _music + $80 ;$8000; $87F9 ;_music + $0F9 ;$80 ;$8080
     rts
 
 .export _pMusicPlay
 _pMusicPlay:
     lda #0
     ldx #0
-    jmp _music + $84 ;$8084
+    ; address of the play function (see nsf header for the offset, adjust based on where we included it in the ROM
+    jmp _music + $84 ;$8084; $8803 ;_music + $703 ;$84 ;$8084
     rts
 
 .pushseg

@@ -2300,7 +2300,7 @@ void do_physics(void)
         load_stage();
     }
 
-    //Tongue collision box 
+    //Tongue collision box
     if(gTongueState != TONGUE_NORMAL) {
       x1 = sprites[75];
       y1 = sprites[72] + 1;
@@ -2410,29 +2410,31 @@ void game_running_sm(void)
 
         input_poll();
 
-         if((gController1 & BUTTON_START) == BUTTON_START)
-         {
-             do
-             {
-                 vblank();
-                 input_poll();
-             }
-             while((gController1 & BUTTON_START) == BUTTON_START);
+        //pMusicPlay();
 
-             do
-             {
-                 vblank();
-                 input_poll();
-             }
-             while((gController1 & BUTTON_START) != BUTTON_START);
+        if((gController1 & BUTTON_START) == BUTTON_START)
+        {
+            do
+            {
+             vblank();
+             input_poll();
+            }
+            while((gController1 & BUTTON_START) == BUTTON_START);
 
-             do
-             {
-                 vblank();
-                 input_poll();
-             }
-             while((gController1 & BUTTON_START) == BUTTON_START);
-         }
+            do
+            {
+             vblank();
+             input_poll();
+            }
+            while((gController1 & BUTTON_START) != BUTTON_START);
+
+            do
+            {
+             vblank();
+             input_poll();
+            }
+            while((gController1 & BUTTON_START) == BUTTON_START);
+        }
 
         update_sprites();
 
@@ -2516,7 +2518,7 @@ void main(void)
 
     apuinit();
 
-    pMusicInit(0x1);
+    pMusicInit(0x0);
 
     gCounter = 5;
     vblank_counter();
