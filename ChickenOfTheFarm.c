@@ -59,7 +59,12 @@
 #define MAX_TOP_BUFFER    0x3F
 
 #define ARROW_SPEED 3
-#define MAX_ENEMIES 5 //Make sure that sprites 84 - X are avaiable before extending this
+#define MAX_NUM_ENEMIES 10        // need to reserve enough space for max enemies
+#define FIRST_ENEMY_SPRITE 84
+#define LAST_ENEMY_SPRITE 124 //Reserve 10 sprites for now
+
+#define ARROW_ID 1
+#define BIRD_ID 2
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
 
@@ -102,13 +107,16 @@ TongueState_t;
 
 //According to nesdev, better to have arrays of attributes than arrays of objects: https://forums.nesdev.com/viewtopic.php?f=2&t=17465&start=0
 typedef struct {
-  //TODO id when we have more than just arrows
-  unsigned int startX[MAX_ENEMIES];
-  unsigned int startY[MAX_ENEMIES];
-  unsigned int startNametable[MAX_ENEMIES];
-  unsigned int state[MAX_ENEMIES];
-  unsigned int direction[MAX_ENEMIES];
-} arrows_t;
+  unsigned int id[MAX_NUM_ENEMIES];
+  unsigned int startX[MAX_NUM_ENEMIES];
+  unsigned int startY[MAX_NUM_ENEMIES];
+  unsigned int startNametable[MAX_NUM_ENEMIES];
+  unsigned int state[MAX_NUM_ENEMIES];
+  unsigned int direction[MAX_NUM_ENEMIES];
+  unsigned int numSprites[MAX_NUM_ENEMIES]; //Not using this yet... not sure if we need it
+  unsigned int doesTongueKill[MAX_NUM_ENEMIES];
+  unsigned int spriteStart[MAX_NUM_ENEMIES];
+} enemies_t;
 
 //
 // GLOBALS
@@ -163,7 +171,7 @@ static unsigned int         gStage;
 static unsigned int         gCounter;
 static unsigned int         gHealth;
 static unsigned int         gIframes;
-static arrows_t             arrows; //For now lets reserve max 5 spots
+static enemies_t            enemies; //For now lets reserve max 5 spots
 static unsigned int         numEnemies;
 static GameState_t          gGameState;
 static FrogAnimationState_t gFrogAnimationState;
@@ -360,41 +368,19 @@ void loadCollisionFromNametables(void)
 
 //TODO get this set via background generator file
 #define PATTERN_ARROW_SPAWN_0 47
+#define PATTERN_BIRD_SPAWN_0 49
 
-// TODO not the most efficient but pulling directly from nametables and might want to join with above
-// This method goes through the top nametable then the bottom and looks for enemy spawns
-void loadEnemiesFromNametables(void)
-{
-  numEnemies = 0;
-
-  PPU_ADDRESS = 0x20; // address of nametable #0
-  PPU_ADDRESS = 0x00;
-
-  //First read is always invalid
-  i = *((unsigned char*)0x2007);
-
-  for(j = 0 ; j < 30 ; j++) {
-    for(i = 0; i < 32 ; i++) {
-      garbage2 = *((unsigned char*)0x2007);
-
-      if( i == 33 || j == 31 || garbage2 == PATTERN_ARROW_SPAWN_0) {
-        arrows.state[numEnemies] = 0;
-        arrows.startX[numEnemies] = i*8;
-        arrows.startY[numEnemies] = j*8 - 1;
-        arrows.startNametable[numEnemies] = 0;
-        arrows.direction[numEnemies] = (i == 1) ? 1 : 0; //0 moves left, 1 moves right
-
-        numEnemies = numEnemies + 1;
-
-        if(numEnemies > MAX_ENEMIES) {
-          return;
-        }
-      }
-    }
-  }
-
-  PPU_ADDRESS = 0x28; // address of nametable #2
-  PPU_ADDRESS = 0x00;
+/**
+  * Will have similar logic for parsing each nametable
+  * params:
+  *  garbage - current nametable
+  *  i       - first ppu nametable address
+  *  j       - second ppu nametable address
+  *  ppu x2007 should be ready to read (0, 0) on next call
+  */
+void loadEnemiesFromNametable(void) {
+  PPU_ADDRESS = i; // address of nametable #0
+  PPU_ADDRESS = j;
 
   //First read is always invalid
   i = *((unsigned char*)0x2007);
@@ -404,20 +390,55 @@ void loadEnemiesFromNametables(void)
       garbage2 = *((unsigned char*)0x2007);
 
       if(garbage2 == PATTERN_ARROW_SPAWN_0) {
-        arrows.state[numEnemies] = 0;
-        arrows.startX[numEnemies] = i*8;
-        arrows.startY[numEnemies] = j*8 - 1;
-        arrows.startNametable[numEnemies] = 2;
-        arrows.direction[numEnemies] = (i == 1) ? 1 : 0; //0 moves left, 1 moves right
+        enemies.id[numEnemies] = ARROW_ID;
+        enemies.state[numEnemies] = 0;
+        enemies.startX[numEnemies] = i*8;
+        enemies.startY[numEnemies] = j*8 - 1;
+        enemies.startNametable[numEnemies] = garbage;
+        enemies.direction[numEnemies] = (i == 1) ? 1 : 0; //0 moves left, 1 moves right
+        enemies.numSprites[numEnemies] = 1;
+        enemies.doesTongueKill[numEnemies] = 0;
 
         numEnemies = numEnemies + 1;
 
-        if(numEnemies > MAX_ENEMIES) {
+        if(numEnemies > MAX_NUM_ENEMIES) {
+          return;
+        }
+      }
+      else if(garbage2 == PATTERN_BIRD_SPAWN_0) {
+        enemies.id[numEnemies] = BIRD_ID;
+        enemies.state[numEnemies] = 0;
+        enemies.startX[numEnemies] = i*8;
+        enemies.startY[numEnemies] = j*8 - 7; //Spawn on top of nest
+        enemies.startNametable[numEnemies] = garbage;
+        enemies.direction[numEnemies] = 0;
+        enemies.numSprites[numEnemies] = 2;
+        enemies.doesTongueKill[numEnemies] = 1;
+
+        numEnemies = numEnemies + 1;
+
+        if(numEnemies > MAX_NUM_ENEMIES) {
           return;
         }
       }
     }
   }
+}
+// TODO not the most efficient but pulling directly from nametables and might want to join with above
+// This method goes through the top nametable then the bottom and looks for enemy spawns
+void loadEnemies(void)
+{
+  numEnemies = 0;
+
+  i = 0x20;
+  j = 0x00;
+  garbage = 0;
+  loadEnemiesFromNametable();
+
+  i = 0x28;
+  j = 0x00;
+  garbage = 2;
+  loadEnemiesFromNametable();
 }
 
 void palettes(void)
@@ -605,6 +626,54 @@ void draw_health(void)
     }
 }
 
+void init_enemies(void) {
+  j = FIRST_ENEMY_SPRITE;
+  for(i = 0 ; i < numEnemies && j <= LAST_ENEMY_SPRITE ; i++) {
+    if(enemies.id[i] == ARROW_ID) {
+      sprites[j] = (enemies.startNametable[i] == 2) ? enemies.startY[i] : 0x00;
+      enemies.spriteStart[i] = j;
+      j++;
+      sprites[j] = PATTERN_ARROW_0; //TODO take into account the rest
+      j++;
+      sprites[j] = 0x00; //TODO for direction, we want to flip the arrow
+      j++;
+      sprites[j] = (enemies.startNametable[i] == 2) ? enemies.startX[i] : 0x00;
+      j++;
+    }
+    else if(enemies.id[i] == BIRD_ID) {
+      sprites[j] = (enemies.startNametable[i] == 2) ? enemies.startY[i] : 0x00;
+      enemies.spriteStart[i] = j;
+      j++;
+      sprites[j] = PATTERN_BIRD_1; //TODO take into account the rest
+      j++;
+      sprites[j] = 0x41; //TODO for direction, we want to flip the arrow
+      j++;
+      sprites[j] = (enemies.startNametable[i] == 2) ? enemies.startX[i] : 0x00;
+      j++;
+      sprites[j] = (enemies.startNametable[i] == 2) ? enemies.startY[i] : 0x00;
+      j++;
+      sprites[j] = PATTERN_BIRD_0; //TODO take into account the rest
+      j++;
+      sprites[j] = 0x41; //TODO for direction, we want to flip the arrow
+      j++;
+      sprites[j] = (enemies.startNametable[i] == 2) ? enemies.startX[i] + 8 : 0x08;
+      j++;
+    }
+  }
+
+  //Clear out the rest
+  for( ; i < MAX_NUM_ENEMIES && j <= LAST_ENEMY_SPRITE; i++) {
+    sprites[j] =  0x00;
+    j++;
+    sprites[j] = PATTERN_ARROW_0;
+    j++;
+    sprites[j] = 0x00;
+    j++;
+    sprites[j] = 0x00;
+    j++;
+  }
+}
+
 void setup_sprites(void)
 {
     unsigned int i;
@@ -669,40 +738,7 @@ void setup_sprites(void)
     gHealth = 8;
     gIframes = 0;
 
-    // bird
-    sprites[16] = 0x30;
-    sprites[17] = PATTERN_BIRD_0;
-    sprites[18] = 0x02;
-    sprites[19] = 0x50;
-
-    sprites[20] = 0x30;
-    sprites[21] = PATTERN_BIRD_1;
-    sprites[22] = 0x02;
-    sprites[23] = 0x58;
-
-    j = 84;
-    for(i = 0 ; i < numEnemies ; i++) {
-      sprites[j] = (arrows.startNametable[i] == 2) ? arrows.startY[i] : 0x00;
-      j++;
-      sprites[j] = PATTERN_ARROW_0;
-      j++;
-      sprites[j] = 0x00; //TODO for direction, we want to flip the arrow
-      j++;
-      sprites[j] = (arrows.startNametable[i] == 2) ? arrows.startX[i] : 0x00;
-      j++;
-    }
-
-    //Clear out the rest
-    for( ; i < MAX_ENEMIES ; i++) {
-      sprites[j] =  0x00;
-      j++;
-      sprites[j] = PATTERN_ARROW_0;
-      j++;
-      sprites[j] = 0x00;
-      j++;
-      sprites[j] = 0x00;
-      j++;
-    }
+    init_enemies();
 
     draw_health();
 }
@@ -1468,7 +1504,8 @@ void load_stage(void)
             break;
     }
 
-    loadEnemiesFromNametables();
+    loadEnemies();
+
     loadCollisionFromNametables();
 
     gX = 0x10;
@@ -1514,29 +1551,7 @@ void load_stage(void)
     sprites[38] = 0x00;
     sprites[39] = 0x00;
 
-    j = 84;
-    for(i = 0 ; i < numEnemies ; i++) {
-      sprites[j] = (arrows.startNametable[i] == 2) ? arrows.startY[i] : 0x00;
-      j++;
-      sprites[j] = PATTERN_ARROW_0;
-      j++;
-      sprites[j] = 0x00; //TODO for direction, we want to flip the arrow
-      j++;
-      sprites[j] = (arrows.startNametable[i] == 2) ? arrows.startX[i] : 0x00;
-      j++;
-    }
-
-    //Clear out the rest
-    for( ; i < MAX_ENEMIES ; i++) {
-      sprites[j] =  0x00;
-      j++;
-      sprites[j] = PATTERN_ARROW_0;
-      j++;
-      sprites[j] = 0x00;
-      j++;
-      sprites[j] = 0x00;
-      j++;
-    }
+    init_enemies();
 
     update_sprites();
     dma_sprites();
@@ -1650,6 +1665,49 @@ int is_background_collision(void) {
   }
 }
 
+// CHecks if enemy i spawn is on screen
+int is_i_spawn_onscreen(void) {
+  if(enemies.startNametable[i] == 2) {
+    //spawns in bottom half
+    if(gYNametable == 0) {
+      //are on top half
+      garbage = enemies.startY[i];
+      if(gYScroll > garbage) {
+        return 1;
+      }
+    }
+    else {
+      //spawns on bottom and are on bottom
+      return 1;
+    }
+  }
+  else {
+    //Bird starts in top half
+    garbage = enemies.startY[i];
+    if(gYNametable == 0 && gYScroll < garbage) {
+      //Spawn bird
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+void put_i_in_collision2_vars(void) {
+  if(enemies.id[i] == ARROW_ID) {
+    x2 = sprites[j+3];
+    y2 =  sprites[j] + 4;
+    width2 = 8;
+    height2 = 1;
+  }
+  else if(enemies.id[i] == BIRD_ID) {
+    x2 = sprites[j+3];
+    y2 =  sprites[j];
+    width2 = 16;
+    height2 = 8;
+  }
+}
+
 void take_hit(void)
 {
   if( gHealth > 0 )
@@ -1677,47 +1735,6 @@ void take_hit(void)
 
 void do_physics(void)
 {
-    // 0-15 Frog 4 sprites
-    // 16-23 Bird
-    if( sprites[16] != gY )
-    {
-        if( sprites[16] < gY )
-        {
-            sprites[16] += 1;
-            sprites[20] += 1;
-        }
-        else
-        {
-            sprites[16] -= 1;
-            sprites[20] -= 1;
-        }
-    }
-    if( sprites[19] != gX )
-    {
-        if( sprites[19] < gX )
-        {
-            // X
-            sprites[19] += 1;
-            sprites[23] += 1;
-            // Tiles
-            sprites[21] = PATTERN_BIRD_0;
-            sprites[22] = 0x41;
-            sprites[17] = PATTERN_BIRD_1;
-            sprites[18] = 0x41;
-        }
-        else
-        {
-            // X
-            sprites[19] -= 1;
-            sprites[23] -= 1;
-            // Tiles
-            sprites[21] = PATTERN_BIRD_1;
-            sprites[22] = 0x01;
-            sprites[17] = PATTERN_BIRD_0;
-            sprites[18] = 0x01;
-        }
-    }
-
     //
     // Horizontal Movement
     //
@@ -2094,25 +2111,20 @@ void do_physics(void)
         sprites[39] = 0x00;
     }
 
-    //TODO the values in arrows array seem right so something is off here, probably with indexing into an array same line as doing something else
-    if(numEnemies > 0) {
-
-      // Arrow
-      //Account for any scrolling
-      j = 80;
-      for(i = 0; i < numEnemies; i++) {
-        j += 4;
-
-        if(arrows.startNametable[i] == 2) {
+    //Update enemies with movements
+    j = FIRST_ENEMY_SPRITE;
+    for(i = 0; i < numEnemies; i++) {
+      if(enemies.id[i] == ARROW_ID) {
+        if(enemies.startNametable[i] == 2) {
           //Arrow in bottom half
           if(gYNametable == 0) {
-            garbage = arrows.startY[i];
+            garbage = enemies.startY[i];
             if(gYScroll > garbage) {
                 //Arrow should now be displayed
-                garbage = arrows.startY[i];
+                garbage = enemies.startY[i];
                 sprites[j] =  garbage - gYScroll - 0x10;
                 if(sprites[j + 3] == 0) {
-                  sprites[j + 3] = arrows.startX[i];
+                  sprites[j + 3] = enemies.startX[i];
                 }
             }
             else {
@@ -2123,27 +2135,27 @@ void do_physics(void)
           }
           else {
             //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
-            sprites[j] = arrows.startY[i];
+            sprites[j] = enemies.startY[i];
             garbage3++; //TODO for whatever reason, without something here, the line above doesn't work correctly
           }
         }
         else {
           //Arrow in top half
           if(gYNametable == 0) {
-            garbage = arrows.startY[i];
+            garbage = enemies.startY[i];
             if(gYScroll < garbage) {
                 //Arrow should now be displayed
-                garbage = arrows.startY[i];
+                garbage = enemies.startY[i];
                 sprites[j] = garbage - gYScroll;
                 if(sprites[j + 3] == 0) {
-                  sprites[j + 3] = arrows.startX[i];
+                  sprites[j + 3] = enemies.startX[i];
                 }
             }
             else {
               //Arrow moved offscreen so kill it
               sprites[j] = 0;
               sprites[j + 3] = 0;
-              arrows.state[i] = 0;
+              enemies.state[i] = 0;
             }
           }
           else {
@@ -2153,7 +2165,7 @@ void do_physics(void)
         }
 
         //Update X
-        if(arrows.state[i] == 2 || arrows.state[i] == 1)
+        if(enemies.state[i] == 2 || enemies.state[i] == 1)
         {
             //Arrow is in flight
             //if arrow is just long enough to stick into a wall
@@ -2161,57 +2173,124 @@ void do_physics(void)
             y1 = sprites[j] + 4;
             height1 = 2;
             width1 = 8; //Don't count the tip
-            if(arrows.state[i] == 2 && is_background_collision())
+            if(enemies.state[i] == 2 && is_background_collision())
             {
-              arrows.state[i] = 3;
+              enemies.state[i] = 3;
             }
             else
             {
-              if(arrows.direction[i] == 1)
+              if(enemies.direction[i] == 1)
               {
                 //moving right
                 sprites[j + 3] += ARROW_SPEED;
                 //Doing this in line didn't work
                 garbage = sprites[j + 3];
-                garbage -= arrows.startX[i];
+                garbage -= enemies.startX[i];
 
                 if(garbage > 8) {
-                  arrows.state[i] = 2;
+                  enemies.state[i] = 2;
                 }
               }
               else {
                 //moving left
                 sprites[j + 3] -= ARROW_SPEED;
                 //Doing this in line didn't work
-                garbage = arrows.startX[i];
+                garbage = enemies.startX[i];
                 garbage -= sprites[j + 3];
 
                 if(garbage > 8) {
-                  arrows.state[i] = 2;
+                  enemies.state[i] = 2;
                 }
               }
             }
         }
-        else if(arrows.state[i] == 0)
+        else if(enemies.state[i] == 0)
         {
           //Arrow isn't moving/waiting for trigger
           if(sprites[j] >= sprites[0] && sprites[j] <= sprites[8])
           {
             //Start moving if frog becomes in path
-            arrows.state[i] = 1;
+            enemies.state[i] = 1;
           }
         }
         else
         {
             //Arrow is stuck in wall
-            garbage = arrows.state[i];
-            arrows.state[i] = garbage + 1;
+            garbage = enemies.state[i];
+            enemies.state[i] = garbage + 1;
             //Check if its been stuck long enough to respawn
-            if(arrows.state[i] > 120) {
-              arrows.state[i] = 0;
-              sprites[j + 3] = arrows.startX[i];
+            if(enemies.state[i] > 120) {
+              enemies.state[i] = 0;
+              sprites[j + 3] = enemies.startX[i];
             }
         }
+
+        j += 4;
+      }
+      else if(enemies.id[i] == BIRD_ID) {
+        if(sprites[j] == 0 && sprites[j+3] == 0) {
+          if(is_i_spawn_onscreen()) {
+            //Spawn bird
+            garbage = enemies.startY[i];
+            if(gYNametable == 0) {
+              garbage = garbage - gYScroll;
+              if(enemies.startNametable[i] == 2) {
+                garbage = garbage  - 0x10; //Scroll only goes to F0
+              }
+            }
+            sprites[j] = garbage;
+            sprites[j + 3] = enemies.startX[i];
+            sprites[j + 4] = garbage;
+            sprites[j + 7] = enemies.startX[i] + 8;
+          }
+        }
+        else {
+          if(sprites[j+3] != 0) {
+            //Bird in general moves towards the frog
+            //Update Y
+            if( sprites[j] != gY)
+            {
+                if( sprites[j] < gY)
+                {
+                    sprites[j] += 1;
+                    sprites[j+4] += 1;
+                }
+                else
+                {
+                    sprites[j] -= 1;
+                    sprites[j+4] -= 1;
+                }
+            }
+            //Update X
+            if( sprites[j+3] != gX)
+            {
+                if( sprites[j+3] < gX)
+                {
+                    // X
+                    sprites[j+3] += 1;
+                    sprites[j+7] += 1;
+                    // Tiles
+                    sprites[j+1] = PATTERN_BIRD_1;
+                    sprites[j+2] = 0x41;
+                    sprites[j+5] = PATTERN_BIRD_0;
+                    sprites[j+6] = 0x41;
+                }
+                else
+                {
+                    // X
+                    sprites[j+3] -= 1;
+                    sprites[j+7] -= 1;
+                    // Tiles
+                    sprites[j+1] = PATTERN_BIRD_0;
+                    sprites[j+2] = 0x01;
+                    sprites[j+5] = PATTERN_BIRD_1;
+                    sprites[j+6] = 0x01;
+                }
+            }
+          }
+        }
+
+        j += 8;
       }
     }
 
@@ -2221,68 +2300,65 @@ void do_physics(void)
         load_stage();
     }
 
-    //Tongue collision box
-    x1 = sprites[75];
-    y1 = sprites[72] + 1;
-    width1 = (sprites[79] == 0) ? 8 : (sprites[83] == 0) ? 16 : 24;
-    height1 = 6;
+    //Tongue collision box 
+    if(gTongueState != TONGUE_NORMAL) {
+      x1 = sprites[75];
+      y1 = sprites[72] + 1;
+      width1 = (sprites[79] == 0) ? 8 : (sprites[83] == 0) ? 16 : 24;
+      height1 = 6;
 
-    //bird collision box
-    x2 = sprites[19];
-    y2 =  sprites[16] + 1;
-    width2 = 4;
-    height2 = 6;
+      for(i = 0 ; i < numEnemies ; i++) {
+        if(enemies.doesTongueKill[i] == 1){
+          j = enemies.spriteStart[i];
+          put_i_in_collision2_vars();
 
-    if(is_collision())
-    {
-      //Reset tongue
-      sprites[72] = 0;
-      sprites[75] = 0;
-      sprites[76] = 0;
-      sprites[79] = 0;
-      sprites[80] = 0;
-      sprites[83] = 0;
-      gTongueState = TONGUE_NORMAL;
-      gTongueCounter = 0;
+          if(is_collision()) {
+            //Reset tongue
+            sprites[72] = 0;
+            sprites[75] = 0;
+            sprites[76] = 0;
+            sprites[79] = 0;
+            sprites[80] = 0;
+            sprites[83] = 0;
+            gTongueState = TONGUE_NORMAL;
+            gTongueCounter = 0;
 
-      //Reset bird TODO don't just reset to top left corner
-      sprites[16] = 0;
-      sprites[19] = 8;
-      sprites[20] = 0;
-      sprites[23] = 16;
+            //Reset enemy
+            j = enemies.spriteStart[i];
+
+            garbage2 = 2;
+            for(garbage = 0 ; garbage < garbage2 ; garbage++) {
+              sprites[j] = 0;
+              sprites[j + 3] = 0;
+
+              j += 4;
+            }
+          }
+        }
+      }
     }
 
     //Frog to enemies collision
     if(gIframes == 0)
     {
+      //Frog collision box
+      x1 = sprites[3] + 1;
+      y1 = sprites[0] + 1;
+      width1 = 14;
+      height1 = 15;
 
+      for(i = 0 ; i < numEnemies ; i++) {
+        j = enemies.spriteStart[i];
 
-      if( sprites[16] == gY && sprites[19] == gX) {
-        take_hit();
-      }
-      else {
-        //Frog collision box
-        x1 = sprites[3] + 1;
-        y1 = sprites[0] + 1;
-        width1 = 14;
-        height1 = 15;
+        put_i_in_collision2_vars();
 
-        j = 84;
-        for(i = 0 ; i < numEnemies ; i++) {
-          //Check arrow collison
-          //arrow collision box
-          x2 = sprites[j+3];
-          y2 =  sprites[j] + 4;
-          width2 = 8;
-          height2 = 1;
-          if(is_collision())
-          {
-            take_hit();
-            break;
-          }
-
-          j += 4;
+        if(is_collision())
+        {
+          take_hit();
+          break;
         }
+
+        j += 4;
       }
     }
 
@@ -2431,7 +2507,7 @@ void main(void)
     gScratchPointer = TitleScreenPalette;
     load_palette();
 
-    loadEnemiesFromNametables();
+    loadEnemies();
     loadCollisionFromNametables();
 
 

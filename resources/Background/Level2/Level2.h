@@ -1,6 +1,15 @@
-const unsigned int Level2Palette[4]={
+const unsigned int Level2Palette[13]={
 BLACK,
 DARK_GRAY,
 GRAY,
 WHITE,
+DARK_BLUE,
+BLUE,
+LIGHT_BLUE,
+DARK_PURPLE,
+PURPLE,
+LIGHT_PURPLE,
+DARK_GREEN,
+GREEN,
+LIGHT_GREEN,
 };
