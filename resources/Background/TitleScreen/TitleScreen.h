@@ -1,4 +1,4 @@
-const unsigned int TitleScreenPalette[4]={
+const unsigned char TitleScreenPalette[4]={
 BLACK,
 DARK_GRAY,
 GRAY,
