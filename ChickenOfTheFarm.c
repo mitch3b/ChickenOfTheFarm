@@ -2573,6 +2573,7 @@ void end_screen_sm(void)
 void main(void)
 {
     init_globals();
+    init_game_state();
 
     gCounter = 5;
     vblank_counter();
