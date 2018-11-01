@@ -190,7 +190,9 @@ static unsigned char        gX;
 static unsigned char        gY;
 static unsigned long        gXScroll;
 static unsigned char        gYScroll;
+static unsigned char        gYPrevScroll;
 static unsigned char        gYNametable;
+static unsigned char        gYPrevNametable;
 static unsigned char        devnull;
 static unsigned int         i;
 static unsigned int         j;
@@ -199,6 +201,9 @@ static unsigned char        gTmp;
 static unsigned char        gTmp2;
 static unsigned char        gTmp3;
 static unsigned char        gTmp4;
+static unsigned char        gTmp5;
+static unsigned char        gTmp6;
+static unsigned char        gTmp7;
 
 // These are probably overkill, but it makes collision detection a lot cleaner
 static unsigned char        x1;
@@ -363,6 +368,9 @@ void set_scroll(void)
     *((unsigned char*)0x2005) = gXScroll;
     // scroll a number of pixels in the Y direction
     *((unsigned char*)0x2005) = gYScroll;
+    //Could put this only when its set, but this is the safest place
+    gYPrevScroll = gYScroll;
+    gYPrevNametable = gYNametable;
 }
 
 // TODO not the most efficient but pulling directly from nametables
@@ -1549,7 +1557,7 @@ int is_background_collision(void) {
   }
   else
   {
-      if((gYScroll + gY + 1) >= 0xF0)
+      if((gYScroll + y1 + 1) >= 0xF0)
       {
           if( collision[240 + (((gYScroll + y1 - 0xF0) & 0xF0) ) + (x1 >> 4)] == 0 &&
               collision[240 + (((gYScroll + y1 + height1 - 0xF0) & 0xF0) ) + (x1 >> 4)] == 0 &&
@@ -1580,55 +1588,27 @@ int is_background_collision(void) {
   }
 }
 
-// CHecks if enemy i spawn is on screen
-int is_i_spawn_onscreen(void) {
-  if(gSpriteTable.startNametable[i] == 2) {
-    //spawns in bottom half
-    if(gYNametable == 0) {
-      //are on top half
-      gTmp4 = gSpriteTable.startY[i];
-      if(gYScroll > gTmp4) {
-        return 1;
-      }
-    }
-    else {
-      //spawns on bottom and are on bottom
-      return 1;
-    }
-  }
-  else {
-    //Bird starts in top half
-    gTmp4 = gSpriteTable.startY[i];
-    if(gYNametable == 0 && gYScroll < gTmp4) {
-      //Spawn bird
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
 void put_i_in_collision2_vars(void) {
   switch(gSpriteTable.id[i])
   {
     case ARROW_ID:
-      x2 = sprites[gTmp3+3];
-      y2 =  sprites[gTmp3] + 4;
+      x2 = sprites[j + 3];
+      y2 =  sprites[j] + 4;
       width2 = 8;
       height2 = 1;
       break;
 
     case BIRD_ID:
-      x2 = sprites[gTmp3+3];
-      y2 =  sprites[gTmp3];
+      x2 = sprites[j+3];
+      y2 =  sprites[j];
       width2 = 16;
       height2 = 8;
       break;
 
     case MINI_FROG_ID:
     default:
-      x2 = sprites[gTmp3 + 3];
-      y2 = sprites[gTmp3];
+      x2 = sprites[j + 3];
+      y2 = sprites[j];
       width2 = 8;
       height2 = 8;
       break;
@@ -1660,6 +1640,13 @@ void take_hit(void)
   }
 }
 
+/**
+ * Overwrites:
+ * gTmp4
+ * gTmp
+ * gTmp2
+ * k
+ */
 void spawn_check(void)
 {
   // check to see if the sprite has already spawned first
@@ -1675,7 +1662,7 @@ void spawn_check(void)
             gTmp = gSpriteTable.numSprites[i];
             for(k = 0; k < gTmp; k++)
             {
-                sprites[j + (k << 2)] =  gTmp4 - gYScroll - 0x10 + ((k >> 1) << 3);
+                sprites[j + (k << 2)] =  gTmp4 - gYScroll - 0x10;
                 gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern + k;
                 sprites[j + (k << 2) + 1] = gTmp2;
                 sprites[j + (k << 2) + 2] = gSpriteTable.direction[i];
@@ -1701,7 +1688,7 @@ void spawn_check(void)
         for(k = 0; k < gTmp; k++)
         {
           //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
-          sprites[j + (k << 2)] = gSpriteTable.startY[i] + ((k >> 1) << 3);
+          sprites[j + (k << 2)] = gSpriteTable.startY[i];
           gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern + k;
           sprites[j + (k << 2) + 1] = gTmp2;
           sprites[j + (k << 2) + 2] = gSpriteTable.direction[i];
@@ -1759,57 +1746,48 @@ void spawn_check(void)
       }
     }
   }
-
-  j += (gSpriteTable.numSprites[i] << 2);
 }
 
-void sprite_maintain_y_position(void)
-{
-  if(gSpriteTable.startNametable[i] == 2) {
-    //bottom half
-    if(gYNametable == 0) {
-      gTmp4 = gSpriteTable.startY[i];
-      if(gYScroll > gTmp4) {
-          //should now be displayed
-          gTmp4 = gSpriteTable.startY[i];
-          gTmp = gSpriteTable.numSprites[i];
-          for(k = 0; k < gTmp; k++)
-          {
-              sprites[gTmp3 + (k << 2)] =  gTmp4 - gYScroll - 0x10 + ((k >> 1) << 3);
-          }
-      }
+/**
+ * Expects:
+ * j to be set to first sprite id
+ * i to be set to bird index in gSpriteTable
+ * Resets:
+ * gTmp
+ * gTmp4
+ * gTmp5
+ * k
+ */
+void sprite_maintain_y_position(void) {
+  //Put scroll shift in gTmp (TODO could do this just once)
+  if(gYPrevNametable == gYNametable) {
+    gTmp = gYScroll - gYPrevScroll;
+  }
+  else{
+    if(gYNametable == 2) {
+      //basically hit the bottom
+      gTmp = 0xF0 - gYPrevScroll;
     }
     else {
-      gTmp = gSpriteTable.numSprites[i];
-      for(k = 0; k < gTmp; k++)
-      {
-        //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
-        sprites[gTmp3 + (k << 2)] = gSpriteTable.startY[i] + ((k >> 1) << 3);
-        //gTmp++; //TODO for whatever reason, without something here, the line above doesn't work correctly
-      }
+      //Moved from very bottom to scrolled top screen
+      gTmp = gYScroll - 0xF0;
     }
   }
-  else {
-    //top half
-    if(gYNametable == 0) {
-      gTmp4 = gSpriteTable.startY[i];
-      if(gYScroll < gTmp4) {
-        gTmp = gSpriteTable.numSprites[i];
-        for(k = 0; k < gTmp; k++)
-        {
-          //should now be displayed
-          gTmp4 = gSpriteTable.startY[i];
-          sprites[gTmp3 + (k << 2)] = gTmp4 - gYScroll + ((k >> 1) << 3);
-        }
-      }
-    }
+
+  k = j;
+
+  gTmp5 = gSpriteTable.numSprites[i];
+  for(gTmp4 = 0 ; gTmp4 < gTmp5 ; gTmp4++) {
+    gTmp6 = sprites[k];
+    sprites[k] = gTmp6 - gTmp;
+    k += 4;
   }
 }
 
 void arrow_ai_handler(void)
 {
   // check to see if the sprite has spawned first
-  if(sprites[gTmp3+1] != 0)
+  if(sprites[j+1] != 0)
   {
     //Update Y
     sprite_maintain_y_position();
@@ -1819,8 +1797,8 @@ void arrow_ai_handler(void)
     {
         //Arrow is in flight
         //if arrow is just long enough to stick into a wall
-        x1 = sprites[gTmp3 + 3];
-        y1 = sprites[gTmp3] + 4;
+        x1 = sprites[j + 3];
+        y1 = sprites[j] + 4;
         height1 = 2;
         width1 = 8; //Don't count the tip
         if(gSpriteTable.state[i] == 2 && is_background_collision())
@@ -1832,9 +1810,9 @@ void arrow_ai_handler(void)
           if((gSpriteTable.direction[i] & 0x40) == 0x00)
           {
             //moving right
-            sprites[gTmp3 + 3] += ARROW_SPEED;
+            sprites[j + 3] += ARROW_SPEED;
             //Doing this in line didn't work
-            gTmp4 = sprites[gTmp3 + 3];
+            gTmp4 = sprites[j + 3];
             gTmp4 -= gSpriteTable.startX[i];
 
             if(gTmp4 > 8) {
@@ -1843,10 +1821,10 @@ void arrow_ai_handler(void)
           }
           else {
             //moving left
-            sprites[gTmp3 + 3] -= ARROW_SPEED;
+            sprites[j + 3] -= ARROW_SPEED;
             //Doing this in line didn't work
             gTmp4 = gSpriteTable.startX[i];
-            gTmp4 -= sprites[gTmp3 + 3];
+            gTmp4 -= sprites[j + 3];
 
             if(gTmp4 > 8) {
               gSpriteTable.state[i] = 2;
@@ -1857,7 +1835,7 @@ void arrow_ai_handler(void)
     else if(gSpriteTable.state[i] == 0)
     {
       //Arrow isn't moving/waiting for trigger
-      if(sprites[gTmp3] >= sprites[0] && sprites[gTmp3] <= sprites[8])
+      if(sprites[j] >= sprites[0] && sprites[j] <= sprites[8])
       {
         //Start moving if frog becomes in path
         gSpriteTable.state[i] = 1;
@@ -1872,81 +1850,105 @@ void arrow_ai_handler(void)
         if(gSpriteTable.state[i] > 120) {
           gSpriteTable.state[i] = 0;
           gTmp4 = gSpriteTable.startX[i];
-          sprites[gTmp3 + 3] = gTmp4;
+          sprites[j + 3] = gTmp4;
         }
     }
   }
 }
 
+/**
+ * Expects:
+ * j to be set to first sprite id
+ * i to be set to bird index in gSpriteTable
+ * Resets:
+ * gTmp4
+ * Increments:
+ * gTmp
+ */
 void bird_ai_handler(void)
 {
-  if(sprites[gTmp3] == 0 && sprites[gTmp3+3] == 0) {
-    if(is_i_spawn_onscreen()) {
-      //Spawn bird
-      gTmp4 = gSpriteTable.startY[i];
-      if(gYNametable == 0) {
-        gTmp4 = gTmp4 - gYScroll;
-        if(gSpriteTable.startNametable[i] == 2) {
-          gTmp4 = gTmp4  - 0x10; //Scroll only goes to F0
+  if(sprites[j+3] != 0) {
+    sprite_maintain_y_position();
+
+    //Bird in general moves towards the frog
+    //Update Y
+    if( sprites[j] != sprites[0])
+    {
+        if( sprites[j] < sprites[0])
+        {
+            sprites[j] += 1;
+            sprites[j+4] += 1;
+
+            x1 = sprites[j + 3];
+            y1 = sprites[j] + 1;
+            height1 = 8;
+            width1 = 16; //Don't count the tip
+            if(is_background_collision()) {
+              sprites[j] -= 1;
+              sprites[j+4] -= 1;
+            }
         }
-      }
-      sprites[gTmp3] = gTmp4;
-      sprites[gTmp3 + 1] = PATTERN_BIRD_1;
-      sprites[gTmp3 + 2] = 0x41;
-      sprites[gTmp3 + 3] = gSpriteTable.startX[i];
-      sprites[gTmp3 + 4] = gTmp4;
-      sprites[gTmp3 + 5] = PATTERN_BIRD_0;
-      sprites[gTmp3 + 6] = 0x41;
-      sprites[gTmp3 + 7] = gSpriteTable.startX[i] + 8;
+        else
+        {
+            sprites[j] -= 1;
+            sprites[j+4] -= 1;
+
+            x1 = sprites[j + 3];
+            y1 = sprites[j] + 1;
+            height1 = 8;
+            width1 = 16; //Don't count the tip
+            if(is_background_collision()) {
+              sprites[j] += 1;
+              sprites[j+4] += 1;
+            }
+        }
     }
-  }
-  else {
-    if(sprites[gTmp3+3] != 0) {
-      //Bird in general moves towards the frog
-      //Update Y
-      sprites[0x80] = sprites[gTmp3];
-      sprites[0x90] = gY;
-      if( sprites[gTmp3] != gY)
-      {
-          if( sprites[gTmp3] < gY)
-          {
-              sprites[gTmp3] += 1;
-              sprites[gTmp3+4] += 1;
-          gTmp++;
-          }
-          else
-          {
-              sprites[gTmp3] -= 1;
-              sprites[gTmp3+4] -= 1;
-          gTmp++;
-          }
-      }
-      //Update X
-      if( sprites[gTmp3+3] != gX)
-      {
-          if( sprites[gTmp3+3] < gX)
-          {
-              // X
-              sprites[gTmp3+3] += 1;
-              sprites[gTmp3+7] += 1;
-              // Tiles
-              sprites[gTmp3+1] = PATTERN_BIRD_1;
-              sprites[gTmp3+2] = 0x41;
-              sprites[gTmp3+5] = PATTERN_BIRD_0;
-              sprites[gTmp3+6] = 0x41;
-          }
-          else
-          {
-              // X
-              sprites[gTmp3+3] -= 1;
-              sprites[gTmp3+7] -= 1;
-              // Tiles
-              sprites[gTmp3+1] = PATTERN_BIRD_0;
-              sprites[gTmp3+2] = 0x01;
-              sprites[gTmp3+5] = PATTERN_BIRD_1;
-              sprites[gTmp3+6] = 0x01;
-          }
-      }
+
+    //Update X
+    if( sprites[j+3] != sprites[3])
+    {
+        if( sprites[j+3] < sprites[3])
+        {
+            // X
+            sprites[j+3] += 1;
+            sprites[j+7] += 1;
+
+            x1 = sprites[j + 3];
+            y1 = sprites[j] + 1;
+            height1 = 8;
+            width1 = 16; //Don't count the tip
+            if(is_background_collision()) {
+              sprites[j+3] -= 1;
+              sprites[j+7] -= 1;
+            }
+
+            // Tiles
+            sprites[j+1] = PATTERN_BIRD_1;
+            sprites[j+2] = 0x41;
+            sprites[j+5] = PATTERN_BIRD_0;
+            sprites[j+6] = 0x41;
+        }
+        else
+        {
+            // X
+            sprites[j+3] -= 1;
+            sprites[j+7] -= 1;
+
+            x1 = sprites[j + 3];
+            y1 = sprites[j] + 1;
+            height1 = 8;
+            width1 = 16; //Don't count the tip
+            if(is_background_collision()) {
+              sprites[j+3] += 1;
+              sprites[j+7] += 1;
+            }
+
+            // Tiles
+            sprites[j+1] = PATTERN_BIRD_0;
+            sprites[j+2] = 0x01;
+            sprites[j+5] = PATTERN_BIRD_1;
+            sprites[j+6] = 0x01;
+        }
     }
   }
 }
@@ -1954,7 +1956,7 @@ void bird_ai_handler(void)
 void item_ai_handler(void)
 {
   // check to see if the sprite has spawned first
-  if(sprites[gTmp3+1] != 0)
+  if(sprites[j+1] != 0)
   {
     //Update Y
     sprite_maintain_y_position();
@@ -1976,10 +1978,10 @@ void mini_frog_collision_handler(void)
   gTmp = gSpriteTable.numSprites[i];
   for(k = 0; k < gTmp; k++)
   {
-    sprites[gTmp3 + (k << 2)] = 0;
-    sprites[gTmp3 + (k << 2) + 1] = 0;
-    sprites[gTmp3 + (k << 2) + 2] = 0;
-    sprites[gTmp3 + (k << 2) + 3] = 0;
+    sprites[j + (k << 2)] = 0;
+    sprites[j + (k << 2) + 1] = 0;
+    sprites[j + (k << 2) + 2] = 0;
+    sprites[j + (k << 2) + 3] = 0;
     gTmp2++;
   }
 
@@ -2006,18 +2008,6 @@ void do_physics(void)
 
     if( gSpeedDirection == 0 )
     {
-        ////TODO better checks to verify direction changed
-        //if((gPrevController1 & BUTTON_LEFT) == 0) {
-        //  sprites[1] = 0x01;
-        //  sprites[2] = 0x40;
-        //  sprites[5] = 0x00;
-        //  sprites[6] = 0x40;
-        //  sprites[9] = 0x03;
-        //  sprites[10] = 0x40;
-        //  sprites[13] = 0x02;
-        //  sprites[14] = 0x40;
-        //}
-
         for( i = 0; (i<<2) < gSpeed; i++ )
         {
             gTmpX = gX - 1;
@@ -2071,19 +2061,6 @@ void do_physics(void)
     }
     else
     {
-        ////TODO better checks to verify direction changed
-        //if((gPrevController1 & BUTTON_RIGHT) == 0) {
-        //  sprites[1] = 0x00;
-        //  sprites[2] = 0x00;
-        //  sprites[5] = 0x01;
-        //  sprites[6] = 0x00;
-        //  sprites[9] = 0x02;
-        //  sprites[10] = 0x00;
-        //  sprites[13] = 0x03;
-        //  sprites[14] = 0x00;
-        //}
-
-
         for( i = 0; (i<<2) < gSpeed; i++ )
         {
             gTmpX = gX + 0x10;
@@ -2211,21 +2188,18 @@ void do_physics(void)
                 }
             }
         }
-        //if(((gController1 & BUTTON_A) != BUTTON_A && i == ((gVelocity+3)>>2)) ||
-        //   i == ((gVelocity+7)>>3))
-        //{
-            if( gVelocity == 0 )
+
+        if( gVelocity == 0 )
+        {
+            gVelocityDirection = 0;
+        }
+        else
+        {
+            if((gController1 & BUTTON_A) != BUTTON_A || (gFrameCounter & 1))
             {
-                gVelocityDirection = 0;
+                gVelocity -= 1;
             }
-            else
-            {
-                if((gController1 & BUTTON_A) != BUTTON_A || (gFrameCounter & 1))
-                {
-                    gVelocity -= 1;
-                }
-            }
-        //}
+        }
     }
     else // moving down
     {
@@ -2377,14 +2351,33 @@ void do_physics(void)
     }
 
     //Update enemies with movements
-    j = FIRST_ENEMY_SPRITE;
-    gTmp3 = FIRST_ENEMY_SPRITE;
     for(i = 0; i < numSprites; i++) {
-      spawn_check();
+      j = gSpriteTable.spriteStart[i];
+      gTmp3 = sprites[j];
 
       gTmp2 = gSpriteTable.id[i];
 
       spriteProperties[gTmp2].ai_handler();
+      // In case item/enemy needs to be respawned
+      spawn_check();
+
+      // Check if we scrolled this offscreen
+      gTmp7 = sprites[j];
+      if((gTmp3 > gTmp7 && (gTmp3 - gTmp7) > 200)
+       || (gTmp7 > gTmp3 && (gTmp7 - gTmp3) > 200)) {
+        sprites[j] = 0;
+        sprites[j+1] = 0;
+        sprites[j+2] = 0;
+        sprites[j+3] = 0;
+
+        //TODO use numSprites
+        if(gTmp2 == BIRD_ID) {
+          sprites[j+4] = 0;
+          sprites[j+5] = 0;
+          sprites[j+6] = 0;
+          sprites[j+7] = 0;
+        }
+      }
 
       //Tongue collision box
       if(gTongueState != TONGUE_NORMAL) {
@@ -2410,10 +2403,10 @@ void do_physics(void)
           for(k = 0; k < gTmp; k++)
           {
             //moved offscreen so kill it
-            sprites[gTmp3 + (k << 2)] = 0;
-            sprites[gTmp3 + (k << 2) + 1] = 0;
-            sprites[gTmp3 + (k << 2) + 2] = 0;
-            sprites[gTmp3 + (k << 2) + 3] = 0;
+            sprites[j + (k << 2)] = 0;
+            sprites[j + (k << 2) + 1] = 0;
+            sprites[j + (k << 2) + 2] = 0;
+            sprites[j + (k << 2) + 3] = 0;
           }
 
         }
@@ -2431,7 +2424,7 @@ void do_physics(void)
       {
           spriteProperties[gSpriteTable.id[i]].collision_handler();
       }
-      gTmp3 = j;
+
     }
 
     if( gYNametable == 0 && gYScroll == 0 && gY == 0x0F && gX == 0xE0 )
