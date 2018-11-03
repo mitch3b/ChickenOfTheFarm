@@ -193,6 +193,7 @@ static unsigned char        gYScroll;
 static unsigned char        gYPrevScroll;
 static unsigned char        gYNametable;
 static unsigned char        gYPrevNametable;
+static unsigned char        numMiniFrogs;
 static unsigned char        devnull;
 static unsigned int         i;
 static unsigned int         j;
@@ -440,6 +441,7 @@ void ClearSprites(void)
 
 void LoadSprites(void)
 {
+    numMiniFrogs = 0;
     for(gTmp2 = 0; gTmp2 < numSprites; gTmp2++)
     {
         gTmp = *gScratchPointer2++;
@@ -460,6 +462,10 @@ void LoadSprites(void)
         gSpriteTable.doesTongueKill[gTmp2] = gTmp;
         gTmp = *gScratchPointer2++;
         gSpriteTable.spriteStart[gTmp2] =    gTmp;
+
+        if(gSpriteTable.id[gTmp2] == MINI_FROG_ID) {
+          numMiniFrogs++;
+        }
     }
 }
 
@@ -1990,6 +1996,8 @@ void mini_frog_collision_handler(void)
     gHealth++;
     draw_health();
   }
+
+  numMiniFrogs--;
 }
 
 void invalid_ai_handler(void)
@@ -2294,10 +2302,12 @@ void do_physics(void)
     {
         if( gYScroll < 0x20 )
         {
-            sprites[24] = 0x0F - gYScroll;
-            sprites[25] = PATTERN_PORTAL_0;
-            sprites[26] = 0x00;
-            sprites[27] = 0xE0;
+          //Had to put the lock in front of portal so move one of portal tiles back to 128.
+          //Need to do an overhaul of reserved sprites at some point
+            sprites[128] = 0x0F - gYScroll;
+            sprites[129] = PATTERN_PORTAL_0;
+            sprites[130] = 0x00;
+            sprites[131] = 0xE0;
 
             sprites[28] = 0x0F - gYScroll;
             sprites[29] = PATTERN_PORTAL_0;
@@ -2306,15 +2316,21 @@ void do_physics(void)
         }
         else
         {
-            sprites[24] = 0x00;
-            sprites[25] = 0x00;
-            sprites[26] = 0x00;
-            sprites[27] = 0x00;
+            sprites[128] = 0x00;
+            sprites[129] = 0x00;
+            sprites[130] = 0x00;
+            sprites[131] = 0x00;
 
             sprites[28] = 0x00;
             sprites[29] = 0x00;
             sprites[30] = 0x00;
             sprites[31] = 0x00;
+
+            //lock
+            sprites[24] = 0x00;
+            sprites[25] = 0x00;
+            sprites[26] = 0x00;
+            sprites[27] = 0x00;
         }
 
         sprites[32] = 0x17 - gYScroll;
@@ -2326,13 +2342,27 @@ void do_physics(void)
         sprites[37] = PATTERN_PORTAL_0;
         sprites[38] = 0xC0;
         sprites[39] = 0xE8;
+
+        //lock
+        if(numMiniFrogs > 0) {
+          sprites[24] = 0x14 - gYScroll;
+          sprites[25] = PATTERN_LOCK_0;
+          sprites[26] = 0x00;
+          sprites[27] = 0xE4;
+        }
+        else {
+          sprites[24] = 0x00;
+          sprites[25] = 0x00;
+          sprites[26] = 0x00;
+          sprites[27] = 0x00;
+        }
     }
     else
     {
-        sprites[24] = 0x00;
-        sprites[25] = 0x00;
-        sprites[26] = 0x00;
-        sprites[27] = 0x00;
+        sprites[128] = 0x00;
+        sprites[129] = 0x00;
+        sprites[130] = 0x00;
+        sprites[131] = 0x00;
 
         sprites[28] = 0x00;
         sprites[29] = 0x00;
@@ -2348,6 +2378,11 @@ void do_physics(void)
         sprites[37] = 0x00;
         sprites[38] = 0x00;
         sprites[39] = 0x00;
+
+        sprites[24] = 0x00;
+        sprites[25] = 0x00;
+        sprites[26] = 0x00;
+        sprites[27] = 0x00;
     }
 
     //Update enemies with movements
@@ -2427,7 +2462,7 @@ void do_physics(void)
 
     }
 
-    if( gYNametable == 0 && gYScroll == 0 && gY == 0x0F && gX == 0xE0 )
+    if( gYNametable == 0 && gYScroll == 0 && gY == 0x0F && gX == 0xE0 && numMiniFrogs == 0)
     {
         next_stage();
         load_stage();
