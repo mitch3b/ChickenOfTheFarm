@@ -13,7 +13,7 @@
 #include "resources/Sprite/frog_landing/frog_landing.h"
 #include "resources/Sprite/frog_suspended/frog_suspended.h"
 #include "resources/Sprite/health/health.h"
-#include "resources/Sprite/lock/lock.h"
+#include "resources/Sprite/key/key.h"
 #include "resources/Sprite/mini_frog/mini_frog.h"
 #include "resources/Sprite/numbers/numbers.h"
 #include "resources/Sprite/portal/portal.h"
@@ -71,7 +71,7 @@ unsigned char pattern[960] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,249,249,0,0,
 
 #define PATTERN_HEALTH_0 28
 
-#define PATTERN_LOCK_0 29
+#define PATTERN_KEY_0 29
 
 #define PATTERN_MINI_FROG_0 30
 

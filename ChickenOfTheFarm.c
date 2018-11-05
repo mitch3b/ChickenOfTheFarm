@@ -59,15 +59,17 @@
 #define MAX_TOP_BUFFER    0x3F
 
 #define ARROW_SPEED 3
-#define MAX_NUM_SPRITES 10        // need to reserve enough space for max sprites
+#define MAX_NUM_SPRITES 16        // need to reserve enough space for max sprites
 #define FIRST_ENEMY_SPRITE 84
-#define LAST_ENEMY_SPRITE 124 //Reserve 10 sprites for now
+//#define LAST_ENEMY_SPRITE 124 //Reserve 10 sprites for now
 
 #define INVALID_ID   0
 #define MINI_FROG_ID 1
 #define ARROW_ID     2
 #define BIRD_ID      3
-#define ID_COUNT     4
+#define PORTAL_ID    4
+#define KEY_ID       5
+#define ID_COUNT     6
 
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
@@ -120,9 +122,17 @@ typedef struct {
   unsigned char direction[MAX_NUM_SPRITES]; //Also palette color, bit 7 is direction
   unsigned char numSprites[MAX_NUM_SPRITES]; //Not using this yet... not sure if we need it
   unsigned char doesTongueKill[MAX_NUM_SPRITES];
-  unsigned char spriteStart[MAX_NUM_SPRITES];
+  unsigned char spriteOffset[MAX_NUM_SPRITES];
 } sprites_t;
 #define SPRITES_T_MEMBER_COUNT 9
+
+void spawn_1_by_1_sprite(void);
+void spawn_2_by_1_sprite(void);
+void spawn_portal_sprite(void);
+
+void despawn_1_sprite(void);
+void despawn_2_sprite(void);
+void despawn_portal_sprite(void);
 
 void invalid_ai_handler(void);
 void arrow_ai_handler(void);
@@ -132,18 +142,24 @@ void item_ai_handler(void);
 void invalid_collision_handler(void);
 void enemy_collision_handler(void);
 void mini_frog_collision_handler(void);
+void portal_collision_handler(void);
+void key_collision_handler(void);
 
 typedef struct {
   unsigned char pattern;
+  void          (*spawn)(void);
+  void          (*despawn)(void);
   void          (*ai_handler)(void);
   void          (*collision_handler)(void);
 } sprite_properties_t;
 
 sprite_properties_t spriteProperties[ID_COUNT] = {
-    {PATTERN_AAA_INVALID_0,  &invalid_ai_handler, &invalid_collision_handler  }, //INVALID_ID
-    {  PATTERN_MINI_FROG_0,     &item_ai_handler, &mini_frog_collision_handler}, //MINI_FROG_ID
-    {      PATTERN_ARROW_0,    &arrow_ai_handler, &enemy_collision_handler    }, //ARROW_ID
-    {       PATTERN_BIRD_0,     &bird_ai_handler, &enemy_collision_handler    }, //BIRD_ID
+    {PATTERN_AAA_INVALID_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite, &invalid_ai_handler, &invalid_collision_handler  }, //INVALID_ID
+    {  PATTERN_MINI_FROG_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &mini_frog_collision_handler}, //MINI_FROG_ID
+    {      PATTERN_ARROW_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,   &arrow_ai_handler, &enemy_collision_handler    }, //ARROW_ID
+    {       PATTERN_BIRD_0,  &spawn_2_by_1_sprite,      &despawn_2_sprite,    &bird_ai_handler, &enemy_collision_handler    }, //BIRD_ID
+    {     PATTERN_PORTAL_0,  &spawn_portal_sprite, &despawn_portal_sprite,    &item_ai_handler, &portal_collision_handler   }, //PORTAL_ID
+    {        PATTERN_KEY_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &key_collision_handler      }, //KEY_ID
 };
 
 //
@@ -193,7 +209,7 @@ static unsigned char        gYScroll;
 static unsigned char        gYPrevScroll;
 static unsigned char        gYNametable;
 static unsigned char        gYPrevNametable;
-static unsigned char        numMiniFrogs;
+static unsigned char        numKeys;
 static unsigned char        devnull;
 static unsigned int         i;
 static unsigned int         j;
@@ -205,6 +221,7 @@ static unsigned char        gTmp4;
 static unsigned char        gTmp5;
 static unsigned char        gTmp6;
 static unsigned char        gTmp7;
+static unsigned char        gTmp8;
 
 // These are probably overkill, but it makes collision detection a lot cleaner
 static unsigned char        x1;
@@ -441,7 +458,7 @@ void ClearSprites(void)
 
 void LoadSprites(void)
 {
-    numMiniFrogs = 0;
+    numKeys = 0;
     for(gTmp2 = 0; gTmp2 < numSprites; gTmp2++)
     {
         gTmp = *gScratchPointer2++;
@@ -461,10 +478,10 @@ void LoadSprites(void)
         gTmp = *gScratchPointer2++;
         gSpriteTable.doesTongueKill[gTmp2] = gTmp;
         gTmp = *gScratchPointer2++;
-        gSpriteTable.spriteStart[gTmp2] =    gTmp;
+        gSpriteTable.spriteOffset[gTmp2] =    gTmp;
 
-        if(gSpriteTable.id[gTmp2] == MINI_FROG_ID) {
-          numMiniFrogs++;
+        if(gSpriteTable.id[gTmp2] == KEY_ID) {
+          numKeys++;
         }
     }
 }
@@ -491,16 +508,6 @@ void palettes(void)
     SET_COLOR(SPRITE3_2, WHITE);
     SET_COLOR(SPRITE3_3, WHITE);
 }
-
-//void ppu_copy( unsigned char* addr, unsigned int len )
-//{
-//    for( i = 0; i < len; i++ )
-//    {
-//        PPU_ADDRESS = 0x20;
-//        PPU_ADDRESS = i;
-//        PPU_DATA = ((unsigned char*) addr)[i];
-//    }
-//}
 
 void load_palette(void)
 {
@@ -1228,15 +1235,6 @@ void update_sprites(void)
             {
                 gSpeed = 1;
                 gSpeedDirection = 0;
-
-                //sprites[1] = 0x01;
-                //sprites[2] = 0x40;
-                //sprites[5] = 0x00;
-                //sprites[6] = 0x40;
-                //sprites[9] = 0x03;
-                //sprites[10] = 0x40;
-                //sprites[13] = 0x02;
-                //sprites[14] = 0x40;
             }
             else
             {
@@ -1260,15 +1258,6 @@ void update_sprites(void)
             {
                 gSpeed = 1;
                 gSpeedDirection = 1;
-
-                //sprites[1] = 0x00;
-                //sprites[2] = 0x00;
-                //sprites[5] = 0x01;
-                //sprites[6] = 0x00;
-                //sprites[9] = 0x02;
-                //sprites[10] = 0x00;
-                //sprites[13] = 0x03;
-                //sprites[14] = 0x00;
             }
             else
             {
@@ -1459,27 +1448,6 @@ void load_stage(void)
     sprites[13] = 0x03;
     sprites[14] = 0x00;
 
-    // Portal
-    sprites[24] = 0x00;
-    sprites[25] = 0x00;
-    sprites[26] = 0x00;
-    sprites[27] = 0x00;
-
-    sprites[28] = 0x00;
-    sprites[29] = 0x00;
-    sprites[30] = 0x00;
-    sprites[31] = 0x00;
-
-    sprites[32] = 0x00;
-    sprites[33] = 0x00;
-    sprites[34] = 0x00;
-    sprites[35] = 0x00;
-
-    sprites[36] = 0x00;
-    sprites[37] = 0x00;
-    sprites[38] = 0x00;
-    sprites[39] = 0x00;
-
     draw_health();
 
     update_sprites();
@@ -1611,7 +1579,14 @@ void put_i_in_collision2_vars(void) {
       height2 = 8;
       break;
 
+    case PORTAL_ID:
+      x2 = sprites[j + 3];
+      y2 = sprites[j];
+      width2 = 16;
+      height2 = 16;
+
     case MINI_FROG_ID:
+    case KEY_ID:
     default:
       x2 = sprites[j + 3];
       y2 = sprites[j];
@@ -1647,6 +1622,133 @@ void take_hit(void)
 }
 
 /**
+ * Depends on:
+ * j as an index into sprites
+ * i as an index into gSpriteTable
+ * Overwrites:
+ * gTmp
+ * gTmp2
+ * gTmp8
+ */
+void spawn_1_by_1_sprite(void)
+{
+    gTmp = gSpriteTable.numSprites[i];
+    sprites[j] = gTmp8;
+    gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
+    sprites[j + 1] = gTmp2;
+    sprites[j + 2] = gSpriteTable.direction[i];
+    if(sprites[j + 3] == 0) {
+      gTmp8 = gSpriteTable.startX[i];
+      sprites[j + 3] = gTmp8;
+    }
+}
+
+/**
+ * Depends on:
+ * j as an index into sprites
+ */
+void despawn_1_sprite(void)
+{
+    sprites[j] = 0;
+    sprites[j + 1] = 0;
+    sprites[j + 2] = 0;
+    sprites[j + 3] = 0;
+}
+
+/**
+ * Depends on:
+ * j as an index into sprites
+ * i as an index into gSpriteTable
+ * Overwrites:
+ * gTmp
+ * gTmp2
+ * gTmp8
+ */
+void spawn_2_by_1_sprite(void)
+{
+    gTmp = gSpriteTable.numSprites[i];
+    sprites[j] = gTmp8;
+    sprites[j + 4] = gTmp8;
+    gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
+    sprites[j + 1] = gTmp2;
+    sprites[j + 5] = gTmp2 + 1;
+    sprites[j + 2] = gSpriteTable.direction[i];
+    sprites[j + 6] = gSpriteTable.direction[i];
+    if(sprites[j + 3] == 0) {
+      gTmp8 = gSpriteTable.startX[i];
+      sprites[j + 3] = gTmp8;
+      gTmp8 = gSpriteTable.startX[i] + 0x8;
+      sprites[j + 7] = gTmp8;
+    }
+}
+
+/**
+ * Depends on:
+ * j as an index into sprites
+ */
+void despawn_2_sprite(void)
+{
+    sprites[j] = 0;
+    sprites[j + 1] = 0;
+    sprites[j + 2] = 0;
+    sprites[j + 3] = 0;
+    sprites[j + 4] = 0;
+    sprites[j + 5] = 0;
+    sprites[j + 6] = 0;
+    sprites[j + 7] = 0;
+}
+
+void spawn_portal_sprite(void)
+{
+    if( numKeys == 0 )
+    {
+        gTmp = gSpriteTable.numSprites[i];
+        sprites[j] = gTmp8;
+        sprites[j + 4] = gTmp8;
+        sprites[j + 8] = gTmp8 + 8;
+        sprites[j + 12] = gTmp8 + 8;
+
+        gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
+        sprites[j + 1] = gTmp2;
+        sprites[j + 5] = gTmp2;
+        sprites[j + 9] = gTmp2;
+        sprites[j + 13] = gTmp2;
+
+        sprites[j + 2] = 0x00;
+        sprites[j + 6] = 0x40;
+        sprites[j + 10] = 0x80;
+        sprites[j + 14] = 0xC0;
+
+        gTmp8 = gSpriteTable.startX[i];
+        sprites[j + 3] = gTmp8;
+        sprites[j + 11] = gTmp8;
+        gTmp8 = gSpriteTable.startX[i] + 0x8;
+        sprites[j + 7] = gTmp8;
+        sprites[j + 15] = gTmp8;
+    }
+}
+
+void despawn_portal_sprite(void)
+{
+    sprites[j] = 0;
+    sprites[j + 1] = 0;
+    sprites[j + 2] = 0;
+    sprites[j + 3] = 0;
+    sprites[j + 4] = 0;
+    sprites[j + 5] = 0;
+    sprites[j + 6] = 0;
+    sprites[j + 7] = 0;
+    sprites[j + 8] = 0;
+    sprites[j + 9] = 0;
+    sprites[j + 10] = 0;
+    sprites[j + 11] = 0;
+    sprites[j + 12] = 0;
+    sprites[j + 13] = 0;
+    sprites[j + 14] = 0;
+    sprites[j + 15] = 0;
+}
+
+/**
  * Overwrites:
  * gTmp4
  * gTmp
@@ -1663,47 +1765,17 @@ void spawn_check(void)
       if(gYNametable == 0) {
         gTmp4 = gSpriteTable.startY[i];
         if(gYScroll > gTmp4) {
-            //should now be displayed
-            gTmp4 = gSpriteTable.startY[i];
-            gTmp = gSpriteTable.numSprites[i];
-            for(k = 0; k < gTmp; k++)
-            {
-                sprites[j + (k << 2)] =  gTmp4 - gYScroll - 0x10;
-                gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern + k;
-                sprites[j + (k << 2) + 1] = gTmp2;
-                sprites[j + (k << 2) + 2] = gSpriteTable.direction[i];
-                if(sprites[j + (k << 2) + 3] == 0) {
-                  sprites[j + (k << 2) + 3] = gSpriteTable.startX[i] + ((k & 1) << 3);
-                }
-            }
+            gTmp8 = gTmp4 - gYScroll - 0x10;
+            spriteProperties[gSpriteTable.id[i]].spawn();
         }
         else {
           //moved offscreen so kill it
-          gTmp = gSpriteTable.numSprites[i];
-          for(k = 0; k < gTmp; k++)
-          {
-              sprites[j + (k << 2)] = 0x00;
-              sprites[j + (k << 2) + 1] = 0x00;
-              sprites[j + (k << 2) + 2] = 0x00;
-              sprites[j + (k << 2) + 3] = 0x00;
-          }
+          spriteProperties[gSpriteTable.id[i]].despawn();
         }
       }
       else {
-        gTmp = gSpriteTable.numSprites[i];
-        for(k = 0; k < gTmp; k++)
-        {
-          //The way we're doing scrolling, for nametable 0, we'll never have a scroll value
-          sprites[j + (k << 2)] = gSpriteTable.startY[i];
-          gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern + k;
-          sprites[j + (k << 2) + 1] = gTmp2;
-          sprites[j + (k << 2) + 2] = gSpriteTable.direction[i];
-          if(sprites[j + (k << 2) + 3] == 0) {
-            gTmp2 = gSpriteTable.startX[i] + ((k & 1) << 3);
-            sprites[j + (k << 2) + 3] = gTmp2;
-          }
-          //gTmp++; //TODO for whatever reason, without something here, the line above doesn't work correctly
-        }
+        gTmp8 = gSpriteTable.startY[i];
+        spriteProperties[gSpriteTable.id[i]].spawn();
       }
     }
     else {
@@ -1711,44 +1783,17 @@ void spawn_check(void)
       if(gYNametable == 0) {
         gTmp4 = gSpriteTable.startY[i];
         if(gYScroll < gTmp4) {
-          gTmp = gSpriteTable.numSprites[i];
-          for(k = 0; k < gTmp; k++)
-          {
-            //should now be displayed
-            gTmp4 = gSpriteTable.startY[i];
-            sprites[j + (k << 2)] = gTmp4 - gYScroll + ((k >> 1) << 3);
-            gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern + k;
-            sprites[j + (k << 2) + 1] = gTmp2;
-            sprites[j + (k << 2) + 2] = gSpriteTable.direction[i];
-            if(sprites[j + (k << 2) + 3] == 0) {
-              sprites[j + (k << 2) + 3] = gSpriteTable.startX[i] + ((k & 1) << 3);
-            }
-          }
+          gTmp8 = gSpriteTable.startY[i] - gYScroll;
+          spriteProperties[gSpriteTable.id[i]].spawn();
         }
         else {
-          gTmp = gSpriteTable.numSprites[i];
-          for(k = 0; k < gTmp; k++)
-          {
-            //moved offscreen so kill it
-            sprites[j + (k << 2)] = 0;
-            sprites[j + (k << 2) + 1] = 0;
-            sprites[j + (k << 2) + 2] = 0;
-            sprites[j + (k << 2) + 3] = 0;
-          }
+          spriteProperties[gSpriteTable.id[i]].despawn();
           gSpriteTable.state[i] = 0;
         }
       }
       else {
         ////The way we're doing scrolling, for nametable 0, we'll never have a scroll value
-        gTmp = gSpriteTable.numSprites[i];
-        for(k = 0; k < gTmp; k++)
-        {
-          //moved offscreen so kill it
-          sprites[j + (k << 2)] = 0;
-          sprites[j + (k << 2) + 1] = 0;
-          sprites[j + (k << 2) + 2] = 0;
-          sprites[j + (k << 2) + 3] = 0;
-        }
+        spriteProperties[gSpriteTable.id[i]].despawn();
       }
     }
   }
@@ -1981,15 +2026,10 @@ void mini_frog_collision_handler(void)
 {
   //remove the item
   gSpriteTable.id[i] = INVALID_ID;
-  gTmp = gSpriteTable.numSprites[i];
-  for(k = 0; k < gTmp; k++)
-  {
-    sprites[j + (k << 2)] = 0;
-    sprites[j + (k << 2) + 1] = 0;
-    sprites[j + (k << 2) + 2] = 0;
-    sprites[j + (k << 2) + 3] = 0;
-    gTmp2++;
-  }
+  sprites[j] = 0;
+  sprites[j + 1] = 0;
+  sprites[j + 2] = 0;
+  sprites[j + 3] = 0;
 
   if( gHealth < 8 )
   {
@@ -1997,7 +2037,6 @@ void mini_frog_collision_handler(void)
     draw_health();
   }
 
-  numMiniFrogs--;
 }
 
 void invalid_ai_handler(void)
@@ -2006,6 +2045,23 @@ void invalid_ai_handler(void)
 
 void invalid_collision_handler(void)
 {
+}
+
+void portal_collision_handler(void)
+{
+    next_stage();
+    load_stage();
+}
+
+void key_collision_handler(void)
+{
+  gSpriteTable.id[i] = INVALID_ID;
+  sprites[j] = 0;
+  sprites[j + 1] = 0;
+  sprites[j + 2] = 0;
+  sprites[j + 3] = 0;
+
+  numKeys--;
 }
 
 void do_physics(void)
@@ -2297,122 +2353,24 @@ void do_physics(void)
         }
     }
 
-    // Portal
-    if( gYNametable == 0 && gYScroll < 0x28)
-    {
-        if( gYScroll < 0x20 )
-        {
-          //Had to put the lock in front of portal so move one of portal tiles back to 128.
-          //Need to do an overhaul of reserved sprites at some point
-            sprites[128] = 0x0F - gYScroll;
-            sprites[129] = PATTERN_PORTAL_0;
-            sprites[130] = 0x00;
-            sprites[131] = 0xE0;
-
-            sprites[28] = 0x0F - gYScroll;
-            sprites[29] = PATTERN_PORTAL_0;
-            sprites[30] = 0x40;
-            sprites[31] = 0xE8;
-        }
-        else
-        {
-            sprites[128] = 0x00;
-            sprites[129] = 0x00;
-            sprites[130] = 0x00;
-            sprites[131] = 0x00;
-
-            sprites[28] = 0x00;
-            sprites[29] = 0x00;
-            sprites[30] = 0x00;
-            sprites[31] = 0x00;
-
-            //lock
-            sprites[24] = 0x00;
-            sprites[25] = 0x00;
-            sprites[26] = 0x00;
-            sprites[27] = 0x00;
-        }
-
-        sprites[32] = 0x17 - gYScroll;
-        sprites[33] = PATTERN_PORTAL_0;
-        sprites[34] = 0x80;
-        sprites[35] = 0xE0;
-
-        sprites[36] = 0x17 - gYScroll;
-        sprites[37] = PATTERN_PORTAL_0;
-        sprites[38] = 0xC0;
-        sprites[39] = 0xE8;
-
-        //lock
-        if(numMiniFrogs > 0) {
-          sprites[24] = 0x14 - gYScroll;
-          sprites[25] = PATTERN_LOCK_0;
-          sprites[26] = 0x00;
-          sprites[27] = 0xE4;
-        }
-        else {
-          sprites[24] = 0x00;
-          sprites[25] = 0x00;
-          sprites[26] = 0x00;
-          sprites[27] = 0x00;
-        }
-    }
-    else
-    {
-        sprites[128] = 0x00;
-        sprites[129] = 0x00;
-        sprites[130] = 0x00;
-        sprites[131] = 0x00;
-
-        sprites[28] = 0x00;
-        sprites[29] = 0x00;
-        sprites[30] = 0x00;
-        sprites[31] = 0x00;
-
-        sprites[32] = 0x00;
-        sprites[33] = 0x00;
-        sprites[34] = 0x00;
-        sprites[35] = 0x00;
-
-        sprites[36] = 0x00;
-        sprites[37] = 0x00;
-        sprites[38] = 0x00;
-        sprites[39] = 0x00;
-
-        sprites[24] = 0x00;
-        sprites[25] = 0x00;
-        sprites[26] = 0x00;
-        sprites[27] = 0x00;
-    }
-
     //Update enemies with movements
     for(i = 0; i < numSprites; i++) {
-      j = gSpriteTable.spriteStart[i];
+      j = FIRST_ENEMY_SPRITE + gSpriteTable.spriteOffset[i];
       gTmp3 = sprites[j];
 
       gTmp2 = gSpriteTable.id[i];
 
       spriteProperties[gTmp2].ai_handler();
-      // In case item/enemy needs to be respawned
-      spawn_check();
 
       // Check if we scrolled this offscreen
       gTmp7 = sprites[j];
       if((gTmp3 > gTmp7 && (gTmp3 - gTmp7) > 200)
        || (gTmp7 > gTmp3 && (gTmp7 - gTmp3) > 200)) {
-        sprites[j] = 0;
-        sprites[j+1] = 0;
-        sprites[j+2] = 0;
-        sprites[j+3] = 0;
-
-        //TODO use numSprites
-        if(gTmp2 == BIRD_ID) {
-          sprites[j+4] = 0;
-          sprites[j+5] = 0;
-          sprites[j+6] = 0;
-          sprites[j+7] = 0;
-        }
+        spriteProperties[gTmp2].despawn();
       }
+
+      // In case item/enemy needs to be respawned
+      spawn_check();
 
       //Tongue collision box
       if(gTongueState != TONGUE_NORMAL) {
@@ -2460,12 +2418,6 @@ void do_physics(void)
           spriteProperties[gSpriteTable.id[i]].collision_handler();
       }
 
-    }
-
-    if( gYNametable == 0 && gYScroll == 0 && gY == 0x0F && gX == 0xE0 && numMiniFrogs == 0)
-    {
-        next_stage();
-        load_stage();
     }
 
     if( gIframes > 0 )
