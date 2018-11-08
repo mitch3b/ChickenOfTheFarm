@@ -2468,8 +2468,6 @@ void game_running_sm(void)
 
         input_poll();
 
-        //pMusicPlay();
-
         if((gController1 & BUTTON_START) == BUTTON_START)
         {
             do
@@ -2497,6 +2495,8 @@ void game_running_sm(void)
         update_sprites();
 
         dma_sprites();
+
+        //pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
         PPU_CTRL = 0x84 + gYNametable;

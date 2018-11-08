@@ -52,7 +52,8 @@ irq:
 _music:
     ;.incbin "starwars.nsf", $80 ;just need the data not the header
     ;.incbin "Z2.nsf", $80 ;just need the data not the header
-    .incbin "test.nsf" ;, $80
+    ;.incbin "test.nsf" ;, $80
+    .incbin "resources/Sound/Music/ChickenOfTheFarm.nsf"
 .popseg
 
 .export _pMusicInit
@@ -66,7 +67,7 @@ _pMusicPlay:
     lda #0
     ldx #0
     ; address of the play function (see nsf header for the offset, adjust based on where we included it in the ROM
-    jmp _music + $84 ;$8084; $8803 ;_music + $703 ;$84 ;$8084
+    jmp _music + $83 ;$8084; $8803 ;_music + $703 ;$84 ;$8084
     rts
 
 .pushseg
