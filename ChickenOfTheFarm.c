@@ -511,10 +511,10 @@ void palettes(void)
 
 void load_palette(void)
 {
-    SET_COLOR(BACKGROUND0_0, Level1Palette[0]);
-    SET_COLOR(BACKGROUND1_0, Level1Palette[0]);
-    SET_COLOR(BACKGROUND2_0, Level1Palette[0]);
-    SET_COLOR(BACKGROUND3_0, Level1Palette[0]);
+    SET_COLOR(BACKGROUND0_0, gScratchPointer[0]);
+    SET_COLOR(BACKGROUND1_0, gScratchPointer[4]);
+    SET_COLOR(BACKGROUND2_0, gScratchPointer[7]);
+    SET_COLOR(BACKGROUND3_0, gScratchPointer[10]);
 
     if( gFade > 0 )
     {
