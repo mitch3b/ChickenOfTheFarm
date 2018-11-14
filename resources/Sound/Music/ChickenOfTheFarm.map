@@ -1,34 +1,34 @@
 Modules list:
 -------------
 ChickenOfTheFarm.o:
-    CODE              Offs=000000  Size=003A7D  Align=00001  Fill=0000
+    CODE              Offs=000000  Size=003A96  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000F0B  Align=00001  Fill=0000
     BSS               Offs=000000  Size=0002CD  Align=00001  Fill=0000
     CHARS             Offs=000000  Size=000DB0  Align=00001  Fill=0000
     OAM               Offs=000000  Size=000100  Align=00001  Fill=0000
 main.o:
-    CODE              Offs=003A7D  Size=00000C  Align=00001  Fill=0000
+    CODE              Offs=003A96  Size=00000C  Align=00001  Fill=0000
     HEADER            Offs=000000  Size=000010  Align=00001  Fill=0000
     VECTORS           Offs=000000  Size=000006  Align=00001  Fill=0000
     STARTUP           Offs=000000  Size=000004  Align=00001  Fill=0000
-    MUSIC             Offs=000000  Size=001AD8  Align=00001  Fill=0000
+    MUSIC             Offs=000000  Size=001B0A  Align=00001  Fill=0000
 asm4c.o:
-    CODE              Offs=003A89  Size=000037  Align=00001  Fill=0000
+    CODE              Offs=003AA2  Size=000037  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000004  Align=00001  Fill=0000
 /Users/mitchken/Documents/cc65/lib/nes.lib(aslax2.o):
-    CODE              Offs=003AC0  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=003AD9  Size=00000B  Align=00001  Fill=0000
 /Users/mitchken/Documents/cc65/lib/nes.lib(aslax3.o):
-    CODE              Offs=003ACB  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=003AE4  Size=00000E  Align=00001  Fill=0000
 /Users/mitchken/Documents/cc65/lib/nes.lib(bneg.o):
-    CODE              Offs=003AD9  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=003AF2  Size=00000E  Align=00001  Fill=0000
 /Users/mitchken/Documents/cc65/lib/nes.lib(call.o):
-    CODE              Offs=003AE7  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=003B00  Size=000007  Align=00001  Fill=0000
 /Users/mitchken/Documents/cc65/lib/nes.lib(mulax9.o):
-    CODE              Offs=003AEE  Size=000017  Align=00001  Fill=0000
+    CODE              Offs=003B07  Size=000017  Align=00001  Fill=0000
 /Users/mitchken/Documents/cc65/lib/nes.lib(shrax2.o):
-    CODE              Offs=003B05  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=003B1E  Size=00000B  Align=00001  Fill=0000
 /Users/mitchken/Documents/cc65/lib/nes.lib(shrax4.o):
-    CODE              Offs=003B10  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=003B29  Size=000011  Align=00001  Fill=0000
 /Users/mitchken/Documents/cc65/lib/nes.lib(zeropage.o):
     ZEROPAGE          Offs=000004  Size=00001A  Align=00001  Fill=0000
 
@@ -43,22 +43,22 @@ ZEROPAGE              000020  00003D  00001E  00001
 OAM                   000200  0002FF  000100  00001
 BSS                   000300  0005CC  0002CD  00001
 STARTUP               008000  008003  000004  00001
-CODE                  008004  00BB24  003B21  00001
-RODATA                00BB25  00CA2F  000F0B  00001
-MUSIC                 00D000  00EAD7  001AD8  00001
+CODE                  008004  00BB3D  003B3A  00001
+RODATA                00BB3E  00CA48  000F0B  00001
+MUSIC                 00D000  00EB09  001B0A  00001
 VECTORS               00FFFA  00FFFF  000006  00001
 
 
 Exports list by name:
 ---------------------
-_UnRLE                    00BA8D RLA    __STARTUP__               000001 REA    
-_main                     00B9F2 RLA    _pMusicInit               00BA81 RLA    
-_pMusicPlay               00BA85 RLA    aslax2                    00BAC4 RLA    
-bnega                     00BAE1 RLA    callax                    00BAEB RLA    
-mulax9                    00BAF2 RLA    ptr1                      00002C RLZ    
-regsave                   000028 RLZ    shlax2                    00BAC4 RLA    
-shlax3                    00BACF RLA    shrax2                    00BB09 RLA    
-shrax4                    00BB14 RLA    sreg                      000026 RLZ    
+_UnRLE                    00BAA6 RLA    __STARTUP__               000001 REA    
+_main                     00BA0B RLA    _pMusicInit               00BA9A RLA    
+_pMusicPlay               00BA9E RLA    aslax2                    00BADD RLA    
+bnega                     00BAFA RLA    callax                    00BB04 RLA    
+mulax9                    00BB0B RLA    ptr1                      00002C RLZ    
+regsave                   000028 RLZ    shlax2                    00BADD RLA    
+shlax3                    00BAE8 RLA    shrax2                    00BB22 RLA    
+shrax4                    00BB2D RLA    sreg                      000026 RLZ    
 tmp1                      000034 RLZ    
 
 
@@ -66,13 +66,13 @@ Exports list by value:
 ----------------------
 __STARTUP__               000001 REA    sreg                      000026 RLZ    
 regsave                   000028 RLZ    ptr1                      00002C RLZ    
-tmp1                      000034 RLZ    _main                     00B9F2 RLA    
-_pMusicInit               00BA81 RLA    _pMusicPlay               00BA85 RLA    
-_UnRLE                    00BA8D RLA    aslax2                    00BAC4 RLA    
-shlax2                    00BAC4 RLA    shlax3                    00BACF RLA    
-bnega                     00BAE1 RLA    callax                    00BAEB RLA    
-mulax9                    00BAF2 RLA    shrax2                    00BB09 RLA    
-shrax4                    00BB14 RLA    
+tmp1                      000034 RLZ    _main                     00BA0B RLA    
+_pMusicInit               00BA9A RLA    _pMusicPlay               00BA9E RLA    
+_UnRLE                    00BAA6 RLA    aslax2                    00BADD RLA    
+shlax2                    00BADD RLA    shlax3                    00BAE8 RLA    
+bnega                     00BAFA RLA    callax                    00BB04 RLA    
+mulax9                    00BB0B RLA    shrax2                    00BB22 RLA    
+shrax4                    00BB2D RLA    
 
 
 Imports list:
@@ -88,18 +88,18 @@ _pMusicInit (main.o):
 _pMusicPlay (main.o):
     ChickenOfTheFarm.o        ChickenOfTheFarm.s(95)
 aslax2 (aslax2.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
 bnega (bneg.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
 callax (call.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
 mulax9 (mulax9.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
 ptr1 (zeropage.o):
     mulax9.o                  runtime/mulax9.s(9)
     call.o                    runtime/call.s(8)
@@ -107,14 +107,14 @@ ptr1 (zeropage.o):
 regsave (zeropage.o):
     ChickenOfTheFarm.o        ChickenOfTheFarm.s(10)
 shlax2 (aslax2.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
 shlax3 (aslax3.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
 shrax2 (shrax2.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
 shrax4 (shrax4.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20464)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.s(20501)
 sreg (zeropage.o):
     ChickenOfTheFarm.o        ChickenOfTheFarm.s(10)
 tmp1 (zeropage.o):

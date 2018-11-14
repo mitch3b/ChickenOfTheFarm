@@ -271,6 +271,7 @@ void vblank_counter(void)
 {
     for( i = 0; i < gCounter; i++ )
     {
+        pMusicPlay();
         vblank();
     }
 }
@@ -1315,6 +1316,7 @@ void update_sprites(void)
 void load_stage(void)
 {
     fade_out();
+    pMusicInit(4);
 
     gYNametable = 2;
     gYScroll = 0;
@@ -1456,6 +1458,7 @@ void load_stage(void)
 
     vblank();
 
+    pMusicInit(2);
     fade_in();
 }
 
@@ -2470,8 +2473,10 @@ void game_running_sm(void)
 
         if((gController1 & BUTTON_START) == BUTTON_START)
         {
+            //Paused so wait until button is released and then pushed again
             do
             {
+             pMusicPlay();
              vblank();
              input_poll();
             }
@@ -2479,6 +2484,7 @@ void game_running_sm(void)
 
             do
             {
+             pMusicPlay();
              vblank();
              input_poll();
             }
@@ -2486,6 +2492,7 @@ void game_running_sm(void)
 
             do
             {
+             pMusicPlay();
              vblank();
              input_poll();
             }
@@ -2513,6 +2520,7 @@ void title_screen_sm(void)
         vblank();
 
         input_poll();
+        pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
         PPU_CTRL = 0x84 + gYNametable;
@@ -2577,7 +2585,7 @@ void main(void)
 
     apuinit();
 
-    pMusicInit(0x0);
+    pMusicInit(0);
 
     gCounter = 5;
     vblank_counter();
