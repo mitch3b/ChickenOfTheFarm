@@ -5,7 +5,7 @@ LD65 = ../../cc65/bin/ld65
 NAME = ChickenOfTheFarm
 
 $(NAME).nes: $(NAME).o main.o asm4c.o nes.cfg
-	$(LD65) -C nes.cfg --dbgfile vars.txt -o $(NAME).nes $(NAME).o main.o asm4c.o nes.lib
+	$(LD65) -C nes.cfg --dbgfile vars.txt -o $(NAME).nes $(NAME).o --mapfile resources/Sound/Music/$(NAME).map main.o asm4c.o nes.lib
 
 	rm *.o
 	rm $(NAME).s
@@ -24,7 +24,6 @@ $(NAME).s: $(NAME).c
 
 clean: cleanGraphics
 	rm -f $(NAME).nes
-
 
 # Generate all the graphics files
 cleanGraphics:

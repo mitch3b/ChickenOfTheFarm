@@ -1,6 +1,7 @@
 *.nes
 *.o
 *.nes.deb
+*DS_Store
 vars.txt
 resources/__pycache__
 resources/Background/*/*-reduced.png

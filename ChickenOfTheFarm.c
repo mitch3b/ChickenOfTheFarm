@@ -2496,7 +2496,7 @@ void game_running_sm(void)
 
         dma_sprites();
 
-        //pMusicPlay();
+        pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
         PPU_CTRL = 0x84 + gYNametable;
