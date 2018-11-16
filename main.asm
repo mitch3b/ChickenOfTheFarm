@@ -10,6 +10,14 @@
 .popseg
 
 .pushseg
+.segment "BSS"
+
+_gVblank: .res 1
+.export _gVblank
+
+.popseg
+
+.pushseg
 .segment "HEADER"
 
 ; iNES header
@@ -39,8 +47,10 @@
 start:
     jmp _main
 
-; no handlers for nmi or irq
 nmi:
+    inc _gVblank
+
+; no handler for irq
 irq:
     rti
 

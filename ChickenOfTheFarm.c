@@ -252,6 +252,9 @@ static unsigned int         gFade;
 static unsigned int         gLives;
 static unsigned int         gDisplayLives;
 static const unsigned char* gScratchPointer;
+static unsigned char        gVblankPrevious;
+
+extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
 extern void pMusicPlay(void);
@@ -263,8 +266,8 @@ void __fastcall__ UnRLE(const unsigned char *data);
 
 void vblank(void)
 {
-    while((*((unsigned char*)0x2002) & 0x80) != 0x00);
-    while((*((unsigned char*)0x2002) & 0x80) != 0x80);
+    gVblankPrevious = gVblank;
+    while(gVblank == gVblankPrevious);
 }
 
 void vblank_counter(void)
@@ -344,7 +347,7 @@ void ppuinit(void)
 void ppudisable(void)
 {
     // Disable graphics
-    PPU_CTRL = 0x00;
+    PPU_CTRL = 0x80;
     PPU_MASK = 0x00;
 }
 
@@ -599,7 +602,7 @@ void fade_out(void)
     gCounter = 20;
     vblank_counter();
 
-    PPU_CTRL = 0x00;
+    PPU_CTRL = 0x80;
     PPU_MASK = 0x00;
     set_scroll();
 }
@@ -1327,6 +1330,8 @@ void load_stage(void)
         PPU_ADDRESS = 0x00;
         UnRLE(Nametable_Lives_bottom_rle);	// uncompresses our data
 
+        vblank();
+
         PPU_ADDRESS = 0x29;
         PPU_ADDRESS = 0xED;
         PPU_DATA = PATTERN_NUMBERS_0 + gLives;
@@ -1352,6 +1357,7 @@ void load_stage(void)
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
+            vblank();
             gScratchPointer = TitleScreenPalette;
             load_palette();
             break;
@@ -1360,11 +1366,14 @@ void load_stage(void)
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level1_bottom_rle);	// uncompresses our data
+            vblank();
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level1_top_rle);	// uncompresses our data
+            vblank();
             gScratchPointer = Level1Palette;
             load_palette();
+            vblank();
 
             ClearSprites();
             numSprites = LEVEL1_ENEMY_COUNT;
@@ -1376,9 +1385,11 @@ void load_stage(void)
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level2_bottom_rle);	// uncompresses our data
+            vblank();
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level2_top_rle);	// uncompresses our data
+            vblank();
             gScratchPointer = Level2Palette;
             load_palette();
 
@@ -1391,9 +1402,11 @@ void load_stage(void)
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level3_bottom_rle);	// uncompresses our data
+            vblank();
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level3_top_rle);	// uncompresses our data
+            vblank();
             gScratchPointer = Level3Palette;
             load_palette();
 
@@ -1406,9 +1419,11 @@ void load_stage(void)
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level4_bottom_rle);	// uncompresses our data
+            vblank();
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_Level4_top_rle);	// uncompresses our data
+            vblank();
             gScratchPointer = Level4Palette;
             load_palette();
 
@@ -1421,6 +1436,7 @@ void load_stage(void)
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
             UnRLE(Nametable_EndingScreen_bottom_rle);	// uncompresses our data
+            vblank();
             gScratchPointer = EndingScreenPalette;
             load_palette();
             break;
@@ -1450,6 +1466,8 @@ void load_stage(void)
     sprites[13] = 0x03;
     sprites[14] = 0x00;
 
+    vblank();
+
     draw_health();
 
     update_sprites();
@@ -1459,6 +1477,9 @@ void load_stage(void)
     vblank();
 
     pMusicInit(2);
+
+    vblank();
+
     fade_in();
 }
 
@@ -2560,11 +2581,10 @@ void end_screen_sm(void)
 
 void main(void)
 {
+    PPU_CTRL = 0x80;
+
     init_globals();
     init_game_state();
-
-    gCounter = 5;
-    vblank_counter();
 
     ppudisable();
 
@@ -2574,6 +2594,7 @@ void main(void)
   	PPU_ADDRESS = 0x28; // address of nametable #2
   	PPU_ADDRESS = 0x00;
   	UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
+  	vblank();
 
     gScratchPointer = TitleScreenPalette;
     load_palette();
