@@ -1321,7 +1321,6 @@ void update_sprites(void)
 void load_stage(void)
 {
     fade_out();
-    pMusicInit(4);
 
     if( gGameState == TITLE_SCREEN_STATE)
     {
@@ -1337,6 +1336,8 @@ void load_stage(void)
 
     if( gDisplayLives == 1)
     {
+        pMusicInit(4);
+
         PPU_ADDRESS = 0x28;
         PPU_ADDRESS = 0x00;
         UnRLE(Nametable_Lives_bottom_rle);	// uncompresses our data
@@ -1487,8 +1488,6 @@ void load_stage(void)
 
     vblank();
 
-    pMusicInit(2);
-
     vblank();
 
     fade_in();
@@ -1518,6 +1517,7 @@ void death(void)
     {
         gStage = 0;
         gGameState = TITLE_SCREEN_STATE;
+        pMusicInit(0);
     }
     else
     {
@@ -2496,6 +2496,8 @@ void init_game_state(void)
 
 void game_running_sm(void)
 {
+    pMusicInit(2);
+
     while( gGameState == GAME_RUNNING_STATE )
     {
         vblank();
@@ -2606,11 +2608,14 @@ void title_screen_sm(void)
 
 void end_screen_sm(void)
 {
+    pMusicInit(3);
+
     while( gGameState == ENDING_STATE )
     {
         vblank();
 
         input_poll();
+        pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
         PPU_CTRL = gPpuCtrlBase + gYNametable;
@@ -2620,6 +2625,7 @@ void end_screen_sm(void)
         {
             gStage = 0;
             gGameState = TITLE_SCREEN_STATE;
+            pMusicInit(0);
             load_stage();
         }
     }
@@ -2636,22 +2642,26 @@ void main(void)
 
     palettes();
     vblank();
+    //gCounter = 10;
+    //vblank_counter();
 
   	PPU_ADDRESS = 0x28; // address of nametable #2
   	PPU_ADDRESS = 0x00;
   	UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
   	vblank();
+    //gCounter = 10;
+    //vblank_counter();
 
     gScratchPointer = TitleScreenPalette;
     load_palette();
 
     loadCollisionFromNametables();
 
-
     vblank();
+    //gCounter = 10;
+    //vblank_counter();
 
     apuinit();
-
     pMusicInit(0);
 
     gCounter = 5;
