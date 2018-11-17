@@ -292,7 +292,8 @@ print("Reducing patterns:")
 for resource in sprite_list:
     reduce_patterns( resource )
 for resource in background_list:
-    reduce_patterns( resource )
+    if resource != 'TitleScreen':
+        reduce_patterns( resource )
 
 #print(raw_patterns)
 #for i in range(0, int(len(reduced_patterns)/16)):
@@ -325,21 +326,31 @@ for resource in background_list:
     start = 0;
     attribute_start = 0
 
-    if len(reduced_nametables[resource]) > 960:
-        for i in range(0,960):
-            nametable_tmp.append(reduced_nametables[resource][i])
-        for i in range(0,64):
+    if resource == 'TitleScreen':
+        for i in range(start,start+960):
+            nametable_tmp.append(raw_nametables[resource][i])
+        for i in range(attribute_start,attribute_start+64):
             nametable_tmp.append(raw_attributes[resource][i])
-        nametable_top_rle[resource] = create_rle(nametable_tmp)
-        start = 960
-        attribute_start = 64
+        nametable_bottom_rle[resource] = create_rle(nametable_tmp)
 
-    nametable_tmp = []
-    for i in range(start,start+960):
-        nametable_tmp.append(reduced_nametables[resource][i])
-    for i in range(attribute_start,attribute_start+64):
-        nametable_tmp.append(raw_attributes[resource][i])
-    nametable_bottom_rle[resource] = create_rle(nametable_tmp)
+    else:
+
+        nametable_tmp = []
+        if len(reduced_nametables[resource]) > 960:
+            for i in range(0,960):
+                nametable_tmp.append(reduced_nametables[resource][i])
+            for i in range(0,64):
+                nametable_tmp.append(raw_attributes[resource][i])
+            nametable_top_rle[resource] = create_rle(nametable_tmp)
+            start = 960
+            attribute_start = 64
+
+        nametable_tmp = []
+        for i in range(start,start+960):
+            nametable_tmp.append(reduced_nametables[resource][i])
+        for i in range(attribute_start,attribute_start+64):
+            nametable_tmp.append(raw_attributes[resource][i])
+        nametable_bottom_rle[resource] = create_rle(nametable_tmp)
 
 #print(nametable_top_rle)
 #print(nametable_bottom_rle)
@@ -362,9 +373,15 @@ for resource in background_list:
 resource_handle.write("\n")
 resource_handle.write("#define PATTERN_BLANK_0 %d\n\n" % (background_id))
 resource_handle.write("#pragma data-name (\"CHARS\")\n")
-resource_handle.write("unsigned char pattern[%d] = {" % (len(reduced_patterns)))
+resource_handle.write("unsigned char pattern[4096] = {")
 for i in range(0,len(reduced_patterns)):
     resource_handle.write("%d," % (reduced_patterns[i]))
+for i in range(0,256*16 - len(reduced_patterns)):
+    resource_handle.write("0,")
+resource_handle.write("};\n\n")
+resource_handle.write("unsigned char pattern2[%d] = {" % (len(raw_patterns['TitleScreen'])))
+for i in range(0,len(raw_patterns['TitleScreen'])):
+    resource_handle.write("%d," % (raw_patterns['TitleScreen'][i]))
 resource_handle.write("};\n\n")
 
 resource_handle.write("#pragma data-name (\"RODATA\")\n")

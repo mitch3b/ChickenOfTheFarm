@@ -253,6 +253,8 @@ static unsigned int         gLives;
 static unsigned int         gDisplayLives;
 static const unsigned char* gScratchPointer;
 static unsigned char        gVblankPrevious;
+static unsigned char        gPpuCtrlBase;
+static unsigned char        gTitleScreenColor;
 
 extern unsigned char        gVblank;
 
@@ -578,7 +580,7 @@ void fade_out(void)
     gFade = 1;
     load_palette();
 
-    PPU_CTRL = 0x84 + gYNametable;
+    PPU_CTRL = gPpuCtrlBase + gYNametable;
     set_scroll();
 
     gCounter = 20;
@@ -587,7 +589,7 @@ void fade_out(void)
     gFade = 2;
     load_palette();
 
-    PPU_CTRL = 0x84 + gYNametable;
+    PPU_CTRL = gPpuCtrlBase + gYNametable;
     set_scroll();
 
     gCounter = 20;
@@ -596,7 +598,7 @@ void fade_out(void)
     gFade = 3;
     load_palette();
 
-    PPU_CTRL = 0x84 + gYNametable;
+    PPU_CTRL = gPpuCtrlBase + gYNametable;
     set_scroll();
 
     gCounter = 20;
@@ -612,7 +614,7 @@ void fade_in(void)
     gFade = 2;
     load_palette();
 
-    PPU_CTRL = 0x84 + gYNametable;
+    PPU_CTRL = gPpuCtrlBase + gYNametable;
     PPU_MASK = 0x0E;
     set_scroll();
 
@@ -622,7 +624,7 @@ void fade_in(void)
     gFade = 1;
     load_palette();
 
-    PPU_CTRL = 0x84 + gYNametable;
+    PPU_CTRL = gPpuCtrlBase + gYNametable;
     set_scroll();
 
     gCounter = 20;
@@ -631,7 +633,7 @@ void fade_in(void)
     gFade = 0;
     load_palette();
 
-    PPU_CTRL = 0x84 + gYNametable;
+    PPU_CTRL = gPpuCtrlBase + gYNametable;
     if( gStage == 0 || gStage > 4 || gDisplayLives == 1)
     {
         PPU_MASK = 0x0E;
@@ -1320,6 +1322,15 @@ void load_stage(void)
 {
     fade_out();
     pMusicInit(4);
+
+    if( gGameState == TITLE_SCREEN_STATE)
+    {
+        gPpuCtrlBase |= 0x10; // switch to the 2nd page of patterns for the title screen
+    }
+    else
+    {
+        gPpuCtrlBase &= 0xEF; // switch to the 1st page of patterns for all non-title screens
+    }
 
     gYNametable = 2;
     gYScroll = 0;
@@ -2454,6 +2465,7 @@ void init_globals(void)
 {
     gGameState = TITLE_SCREEN_STATE;
     gDisplayLives = 0;
+    gPpuCtrlBase = 0x94;
 }
 
 void init_game_state(void)
@@ -2527,7 +2539,7 @@ void game_running_sm(void)
         pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
-        PPU_CTRL = 0x84 + gYNametable;
+        PPU_CTRL = gPpuCtrlBase + gYNametable;
         set_scroll();
 
         do_physics();
@@ -2536,17 +2548,51 @@ void game_running_sm(void)
 
 void title_screen_sm(void)
 {
+    //gTitleScreenColor = TitleScreenPalette[4];
+    gTitleScreenColor = 0x21;
+    gFrameCounter = 0;
+
     while( gGameState == TITLE_SCREEN_STATE )
     {
         vblank();
+
+        // Flashing colors
+        PPU_MASK = 0x00;
+        SET_COLOR(BACKGROUND2_3, gTitleScreenColor);
+
+        if( (gFrameCounter & 0x40) == 0 )
+        {
+            SET_COLOR(BACKGROUND1_1, LIGHT_TAN);
+        }
+        else
+        {
+            SET_COLOR(BACKGROUND1_1, TAN);
+        }
+        PPU_MASK = 0x0E;
+
+        PPU_ADDRESS = 0x28;
+        PPU_ADDRESS = 0x00;
+        set_scroll();
+
+        if( (gFrameCounter & 0x1) == 0 )
+        {
+            gTitleScreenColor++;
+            if( gTitleScreenColor == 0x2C )
+            {
+                gTitleScreenColor = 0x21;
+            }
+        }
+
 
         input_poll();
         pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
-        PPU_CTRL = 0x84 + gYNametable;
+        PPU_CTRL = gPpuCtrlBase + gYNametable;
         gYScroll = 0;
         set_scroll();
+
+        gFrameCounter++;
 
         if( (gController1 & BUTTON_START) != 0 )
         {
@@ -2567,7 +2613,7 @@ void end_screen_sm(void)
         input_poll();
 
         // set bits [1:0] to 0 for nametable
-        PPU_CTRL = 0x84 + gYNametable;
+        PPU_CTRL = gPpuCtrlBase + gYNametable;
         set_scroll();
 
         if( (gController1 & BUTTON_START) != 0 )
@@ -2612,6 +2658,7 @@ void main(void)
     vblank_counter();
 
     gStage = 0;
+    PPU_CTRL = gPpuCtrlBase;
     fade_in();
 
     while(1)
