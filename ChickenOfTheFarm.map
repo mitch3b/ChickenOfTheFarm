@@ -5,31 +5,31 @@ main.o:
     BSS               Offs=000000  Size=000001  Align=00001  Fill=0000
     HEADER            Offs=000000  Size=000010  Align=00001  Fill=0000
     VECTORS           Offs=000000  Size=000006  Align=00001  Fill=0000
-    STARTUP           Offs=000000  Size=000007  Align=00001  Fill=0000
+    STARTUP           Offs=000000  Size=00002C  Align=00001  Fill=0000
     MUSIC             Offs=000000  Size=001B0A  Align=00001  Fill=0000
 ChickenOfTheFarm.o:
-    CODE              Offs=00000C  Size=003B69  Align=00001  Fill=0000
+    CODE              Offs=00000C  Size=003B6F  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000F8B  Align=00001  Fill=0000
-    BSS               Offs=000001  Size=0002D0  Align=00001  Fill=0000
+    BSS               Offs=000001  Size=0002D1  Align=00001  Fill=0000
     CHARS             Offs=000000  Size=001EA0  Align=00001  Fill=0000
     OAM               Offs=000000  Size=000100  Align=00001  Fill=0000
 asm4c.o:
-    CODE              Offs=003B75  Size=000037  Align=00001  Fill=0000
+    CODE              Offs=003B7B  Size=000037  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000004  Align=00001  Fill=0000
 C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(aslax2.o):
-    CODE              Offs=003BAC  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=003BB2  Size=00000B  Align=00001  Fill=0000
 C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(aslax3.o):
-    CODE              Offs=003BB7  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=003BBD  Size=00000E  Align=00001  Fill=0000
 C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(bneg.o):
-    CODE              Offs=003BC5  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=003BCB  Size=00000E  Align=00001  Fill=0000
 C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(call.o):
-    CODE              Offs=003BD3  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=003BD9  Size=000007  Align=00001  Fill=0000
 C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(mulax9.o):
-    CODE              Offs=003BDA  Size=000017  Align=00001  Fill=0000
+    CODE              Offs=003BE0  Size=000017  Align=00001  Fill=0000
 C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(shrax2.o):
-    CODE              Offs=003BF1  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=003BF7  Size=00000B  Align=00001  Fill=0000
 C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(shrax4.o):
-    CODE              Offs=003BFC  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=003C02  Size=000011  Align=00001  Fill=0000
 C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(zeropage.o):
     ZEROPAGE          Offs=000004  Size=00001A  Align=00001  Fill=0000
 
@@ -42,24 +42,24 @@ CHARS                 000000  001E9F  001EA0  00001
 HEADER                000000  00000F  000010  00001
 ZEROPAGE              000020  00003D  00001E  00001
 OAM                   000200  0002FF  000100  00001
-BSS                   000300  0005D0  0002D1  00001
-STARTUP               008000  008006  000007  00001
-CODE                  008007  00BC13  003C0D  00001
-RODATA                00BC14  00CB9E  000F8B  00001
+BSS                   000300  0005D1  0002D2  00001
+STARTUP               008000  00802B  00002C  00001
+CODE                  00802C  00BC3E  003C13  00001
+RODATA                00BC3F  00CBC9  000F8B  00001
 MUSIC                 00D000  00EB09  001B0A  00001
 VECTORS               00FFFA  00FFFF  000006  00001
 
 
 Exports list by name:
 ---------------------
-_UnRLE                    00BB7C RLA    __STARTUP__               000001 REA    
-_gVblank                  000300 RLA    _main                     00BAEC RLA    
-_pMusicInit               008007 RLA    _pMusicPlay               00800B RLA    
-aslax2                    00BBB3 RLA    bnega                     00BBD0 RLA    
-callax                    00BBDA RLA    mulax9                    00BBE1 RLA    
+_UnRLE                    00BBA7 RLA    __STARTUP__               000001 REA    
+_gVblank                  000300 RLA    _main                     00BB05 RLA    
+_pMusicInit               00802C RLA    _pMusicPlay               008030 RLA    
+aslax2                    00BBDE RLA    bnega                     00BBFB RLA    
+callax                    00BC05 RLA    mulax9                    00BC0C RLA    
 ptr1                      00002C RLZ    regsave                   000028 RLZ    
-shlax2                    00BBB3 RLA    shlax3                    00BBBE RLA    
-shrax2                    00BBF8 RLA    shrax4                    00BC03 RLA    
+shlax2                    00BBDE RLA    shlax3                    00BBE9 RLA    
+shrax2                    00BC23 RLA    shrax4                    00BC2E RLA    
 sreg                      000026 RLZ    tmp1                      000034 RLZ    
 
 
@@ -69,12 +69,12 @@ Exports list by value:
 __STARTUP__               000001 REA    sreg                      000026 RLZ    
 regsave                   000028 RLZ    ptr1                      00002C RLZ    
 tmp1                      000034 RLZ    _gVblank                  000300 RLA    
-_pMusicInit               008007 RLA    _pMusicPlay               00800B RLA    
-_main                     00BAEC RLA    _UnRLE                    00BB7C RLA    
-aslax2                    00BBB3 RLA    shlax2                    00BBB3 RLA    
-shlax3                    00BBBE RLA    bnega                     00BBD0 RLA    
-callax                    00BBDA RLA    mulax9                    00BBE1 RLA    
-shrax2                    00BBF8 RLA    shrax4                    00BC03 RLA    
+_pMusicInit               00802C RLA    _pMusicPlay               008030 RLA    
+_main                     00BB05 RLA    _UnRLE                    00BBA7 RLA    
+aslax2                    00BBDE RLA    shlax2                    00BBDE RLA    
+shlax3                    00BBE9 RLA    bnega                     00BBFB RLA    
+callax                    00BC05 RLA    mulax9                    00BC0C RLA    
+shrax2                    00BC23 RLA    shrax4                    00BC2E RLA    
 
 
 

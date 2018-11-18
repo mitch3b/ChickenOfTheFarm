@@ -45,6 +45,35 @@ _gVblank: .res 1
 .pushseg
 .segment "STARTUP"
 start:
+    ; disable interrupts
+    sei
+
+    ; disable BCD mode
+    cld
+
+    ldx #0
+    stx $2000 ;disable nmi
+    stx $2001 ;turn off drawing
+    stx $4010 ;disable DMC IRQs
+
+    ; set stack pointer
+    ldx #$FF
+    txs
+
+    ; clear interrupts
+    bit $2002 ;PPU_STATUS
+    bit $4015 ;APU_CHAN_CTRL
+
+    ; Init APU
+    lda #$40
+    sta $4017 ;APU_FRAME
+    lda #$0F
+    sta $4015 ;APU_CHAN_CTRL
+
+    ; vblank
+:   bit $2002 ;PPU_STATUS
+    bpl :-
+
     jmp _main
 
 nmi:

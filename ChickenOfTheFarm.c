@@ -255,6 +255,7 @@ static const unsigned char* gScratchPointer;
 static unsigned char        gVblankPrevious;
 static unsigned char        gPpuCtrlBase;
 static unsigned char        gTitleScreenColor;
+static unsigned char        gMusicOn;
 
 extern unsigned char        gVblank;
 
@@ -268,6 +269,10 @@ void __fastcall__ UnRLE(const unsigned char *data);
 
 void vblank(void)
 {
+    if( gMusicOn == 1 )
+    {
+        pMusicPlay();
+    }
     gVblankPrevious = gVblank;
     while(gVblank == gVblankPrevious);
 }
@@ -276,7 +281,6 @@ void vblank_counter(void)
 {
     for( i = 0; i < gCounter; i++ )
     {
-        pMusicPlay();
         vblank();
     }
 }
@@ -1517,7 +1521,7 @@ void death(void)
     {
         gStage = 0;
         gGameState = TITLE_SCREEN_STATE;
-        pMusicInit(0);
+        //pMusicInit(0);
     }
     else
     {
@@ -2466,6 +2470,7 @@ void init_globals(void)
     gGameState = TITLE_SCREEN_STATE;
     gDisplayLives = 0;
     gPpuCtrlBase = 0x94;
+    gMusicOn = 0;
 }
 
 void init_game_state(void)
@@ -2511,7 +2516,6 @@ void game_running_sm(void)
             //Paused so wait until button is released and then pushed again
             do
             {
-             pMusicPlay();
              vblank();
              input_poll();
             }
@@ -2519,7 +2523,6 @@ void game_running_sm(void)
 
             do
             {
-             pMusicPlay();
              vblank();
              input_poll();
             }
@@ -2527,7 +2530,6 @@ void game_running_sm(void)
 
             do
             {
-             pMusicPlay();
              vblank();
              input_poll();
             }
@@ -2537,8 +2539,6 @@ void game_running_sm(void)
         update_sprites();
 
         dma_sprites();
-
-        pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
         PPU_CTRL = gPpuCtrlBase + gYNametable;
@@ -2587,7 +2587,6 @@ void title_screen_sm(void)
 
 
         input_poll();
-        pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
         PPU_CTRL = gPpuCtrlBase + gYNametable;
@@ -2615,7 +2614,6 @@ void end_screen_sm(void)
         vblank();
 
         input_poll();
-        pMusicPlay();
 
         // set bits [1:0] to 0 for nametable
         PPU_CTRL = gPpuCtrlBase + gYNametable;
@@ -2625,7 +2623,7 @@ void end_screen_sm(void)
         {
             gStage = 0;
             gGameState = TITLE_SCREEN_STATE;
-            pMusicInit(0);
+            //pMusicInit(0);
             load_stage();
         }
     }
@@ -2633,14 +2631,19 @@ void end_screen_sm(void)
 
 void main(void)
 {
-    PPU_CTRL = 0x80;
+    PPU_CTRL = 0;
+    PPU_MASK = 0;
+
+    ppudisable();
 
     init_globals();
     init_game_state();
 
-    ppudisable();
 
     palettes();
+
+    PPU_CTRL = 0x80;
+
     vblank();
     //gCounter = 10;
     //vblank_counter();
@@ -2663,6 +2666,7 @@ void main(void)
 
     apuinit();
     pMusicInit(0);
+    //apuinit();
 
     gCounter = 5;
     vblank_counter();
@@ -2686,6 +2690,12 @@ void main(void)
             case DEMO_STATE:
             case TITLE_SCREEN_STATE:
             default:
+                //vblank();
+                //apuinit();
+                pMusicInit(0);
+                gMusicOn = 1;
+                //gCounter = 5;
+                //vblank_counter();
                 title_screen_sm();
                 break;
         }
