@@ -1,8 +1,8 @@
 const unsigned char TitleScreenPalette[10]={
 BLACK,
-DARK_GRAY,
 GRAY,
-WHITE,
+DARK_GRAY_2,
+DARK_GRAY,
 TAN,
 RED,
 DARK_RED,

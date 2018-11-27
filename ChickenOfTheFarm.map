@@ -16,21 +16,21 @@ ChickenOfTheFarm.o:
 asm4c.o:
     CODE              Offs=003B7B  Size=000037  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000004  Align=00001  Fill=0000
-C:\Users\omx\NES\cc65\lib\nes.lib(aslax2.o):
+C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(aslax2.o):
     CODE              Offs=003BB2  Size=00000B  Align=00001  Fill=0000
-C:\Users\omx\NES\cc65\lib\nes.lib(aslax3.o):
+C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(aslax3.o):
     CODE              Offs=003BBD  Size=00000E  Align=00001  Fill=0000
-C:\Users\omx\NES\cc65\lib\nes.lib(bneg.o):
+C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(bneg.o):
     CODE              Offs=003BCB  Size=00000E  Align=00001  Fill=0000
-C:\Users\omx\NES\cc65\lib\nes.lib(call.o):
+C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(call.o):
     CODE              Offs=003BD9  Size=000007  Align=00001  Fill=0000
-C:\Users\omx\NES\cc65\lib\nes.lib(mulax9.o):
+C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(mulax9.o):
     CODE              Offs=003BE0  Size=000017  Align=00001  Fill=0000
-C:\Users\omx\NES\cc65\lib\nes.lib(shrax2.o):
+C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(shrax2.o):
     CODE              Offs=003BF7  Size=00000B  Align=00001  Fill=0000
-C:\Users\omx\NES\cc65\lib\nes.lib(shrax4.o):
+C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(shrax4.o):
     CODE              Offs=003C02  Size=000011  Align=00001  Fill=0000
-C:\Users\omx\NES\cc65\lib\nes.lib(zeropage.o):
+C:\Users\pgrimsrud\NES\cc65\lib\nes.lib(zeropage.o):
     ZEROPAGE          Offs=000004  Size=00001A  Align=00001  Fill=0000
 
 
