@@ -145,6 +145,8 @@ void mini_frog_collision_handler(void);
 void portal_collision_handler(void);
 void key_collision_handler(void);
 
+void PlaySoundEffects(void);
+
 typedef struct {
   unsigned char pattern;
   void          (*spawn)(void);
@@ -161,6 +163,16 @@ sprite_properties_t spriteProperties[ID_COUNT] = {
     {     PATTERN_PORTAL_0,  &spawn_portal_sprite, &despawn_portal_sprite,    &item_ai_handler, &portal_collision_handler   }, //PORTAL_ID
     {        PATTERN_KEY_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &key_collision_handler      }, //KEY_ID
 };
+
+#define TONGUE_SOUND_ID     0
+#define TONGUE_SOUND_LENGTH 12
+unsigned char tongueSound400C[TONGUE_SOUND_LENGTH] = {0x39, 0x37, 0x35, 0x34, 0x34, 0x35, 0x37, 0x39, 0x30, 0x30, 0x3F, 0x30};
+unsigned char tongueSound400E[TONGUE_SOUND_LENGTH] = {0x0B, 0x0B, 0x0B, 0x0B, 0x0B, 0x0A, 0x08, 0x05, 0x00, 0x00, 0x09, 0x00};
+
+#define DAMAGE_SOUND_ID     1
+#define DAMAGE_SOUND_LENGTH 8
+unsigned char damageSound400C[DAMAGE_SOUND_LENGTH] = {0x3F, 0x30, 0x3C, 0x3A, 0x36, 0x3A, 0x3C, 0x30};
+unsigned char damageSound400E[DAMAGE_SOUND_LENGTH] = {0x0F, 0x08, 0x09, 0x0B, 0x0D, 0x0E, 0x0F, 0x0E};
 
 //
 // GLOBALS
@@ -256,6 +268,11 @@ static unsigned char        gVblankPrevious;
 static unsigned char        gPpuCtrlBase;
 static unsigned char        gTitleScreenColor;
 static unsigned char        gMusicOn;
+static unsigned char        gSoundEffectCounter;
+static const unsigned char* gSoundEffect400C;
+static const unsigned char* gSoundEffect400E;
+static unsigned char        gSoundEffectLength;
+static unsigned char        gCurrentSoundEffect;
 
 extern unsigned char        gVblank;
 
@@ -272,6 +289,7 @@ void vblank(void)
     if( gMusicOn == 1 )
     {
         pMusicPlay();
+        PlaySoundEffects();
     }
     gVblankPrevious = gVblank;
     while(gVblank == gVblankPrevious);
@@ -282,6 +300,41 @@ void vblank_counter(void)
     for( i = 0; i < gCounter; i++ )
     {
         vblank();
+    }
+}
+
+void PlaySoundEffects(void)
+{
+    switch( gCurrentSoundEffect )
+    {
+        case TONGUE_SOUND_ID:
+            gSoundEffect400C = tongueSound400C;
+            gSoundEffect400E = tongueSound400E;
+            gSoundEffectLength = TONGUE_SOUND_LENGTH;
+        break;
+
+        case DAMAGE_SOUND_ID:
+        default:
+            gSoundEffect400C = damageSound400C;
+            gSoundEffect400E = damageSound400E;
+            gSoundEffectLength = DAMAGE_SOUND_LENGTH;
+        break;
+    }
+
+    if( gSoundEffectCounter != 0xFF )
+    {
+        //*((unsigned char*)0x4015) = 0x0F;
+        *((unsigned char*)0x400C) = gSoundEffect400C[gSoundEffectCounter];
+        *((unsigned char*)0x400E) = gSoundEffect400E[gSoundEffectCounter];
+        *((unsigned char*)0x400F) = 0;
+
+        gSoundEffectCounter++;
+
+        if(gSoundEffectCounter == gSoundEffectLength)
+        {
+            //*((unsigned char*)0x4015) = 0x0;
+            gSoundEffectCounter = 0xFF;
+        }
     }
 }
 
@@ -1200,6 +1253,14 @@ void update_tongue_sprite(void)
         default:
             if( (gController1 & BUTTON_B) != 0 && (gPrevController1 & BUTTON_B) == 0)
             {
+                //pMusicInit(6);
+
+                gCurrentSoundEffect = TONGUE_SOUND_ID;
+                if( gSoundEffectCounter == 0xFF )
+                {
+                    gSoundEffectCounter = 0;
+                }
+
                 gTongueState = TONGUE_EXTENDING;
                 gTongueCounter = TONGUE_EXTEND_DELAY;
 
@@ -1395,6 +1456,7 @@ void load_stage(void)
             numSprites = LEVEL1_ENEMY_COUNT;
             gScratchPointer2 = (unsigned char*)Sprites_Level1;
             LoadSprites();
+            pMusicInit(2);
             break;
 
         case 2:
@@ -1413,6 +1475,7 @@ void load_stage(void)
             numSprites = LEVEL2_ENEMY_COUNT;
             gScratchPointer2 = (unsigned char*)Sprites_Level2;
             LoadSprites();
+            pMusicInit(2);
             break;
         case 3:
             PPU_ADDRESS = 0x28;
@@ -1430,6 +1493,7 @@ void load_stage(void)
             numSprites = LEVEL3_ENEMY_COUNT;
             gScratchPointer2 = (unsigned char*)Sprites_Level3;
             LoadSprites();
+            pMusicInit(2);
             break;
         case 4:
             PPU_ADDRESS = 0x28;
@@ -1447,6 +1511,7 @@ void load_stage(void)
             numSprites = LEVEL4_ENEMY_COUNT;
             gScratchPointer2 = (unsigned char*)Sprites_Level4;
             LoadSprites();
+            pMusicInit(2);
             break;
         default:
             PPU_ADDRESS = 0x28;
@@ -1641,6 +1706,12 @@ void take_hit(void)
   {
       if( gStage != 0 )
       {
+        gCurrentSoundEffect = DAMAGE_SOUND_ID;
+        if( gSoundEffectCounter == 0xFF )
+        {
+            gSoundEffectCounter = 0;
+        }
+
           --gHealth;
       }
       draw_health();
@@ -2471,6 +2542,7 @@ void init_globals(void)
     gDisplayLives = 0;
     gPpuCtrlBase = 0x94;
     gMusicOn = 0;
+    gSoundEffectCounter = 0xFF;
 }
 
 void init_game_state(void)
@@ -2501,8 +2573,6 @@ void init_game_state(void)
 
 void game_running_sm(void)
 {
-    pMusicInit(2);
-
     while( gGameState == GAME_RUNNING_STATE )
     {
         vblank();
