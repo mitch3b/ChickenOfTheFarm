@@ -174,6 +174,34 @@ unsigned char tongueSound400E[TONGUE_SOUND_LENGTH] = {0x0B, 0x0B, 0x0B, 0x0B, 0x
 unsigned char damageSound400C[DAMAGE_SOUND_LENGTH] = {0x3F, 0x30, 0x3C, 0x3A, 0x36, 0x3A, 0x3C, 0x30};
 unsigned char damageSound400E[DAMAGE_SOUND_LENGTH] = {0x0F, 0x08, 0x09, 0x0B, 0x0D, 0x0E, 0x0F, 0x0E};
 
+#define HOP_SOUND_ID     2
+#define HOP_SOUND_LENGTH 6
+unsigned char hopSound4008[HOP_SOUND_LENGTH] = {0x81, 0x81, 0x81, 0x81, 0x81, 0x81};
+unsigned char hopSound400A[HOP_SOUND_LENGTH] = {0x80, 0x5C, 0x3A, 0xDF, 0x67, 0x67};
+unsigned char hopSound400B[HOP_SOUND_LENGTH] = {0x02, 0x02, 0x02, 0x01, 0x01, 0x01};
+
+#define JUMP_SOUND_ID     3
+#define JUMP_SOUND_LENGTH 6
+unsigned char jumpSound4008[JUMP_SOUND_LENGTH] = {0x81, 0x81, 0x81, 0x81, 0x81, 0x81};
+unsigned char jumpSound400A[JUMP_SOUND_LENGTH] = {0xA8, 0x93, 0x7C, 0x3F, 0xEF, 0xEF};
+unsigned char jumpSound400B[JUMP_SOUND_LENGTH] = {0x01, 0x01, 0x01, 0x01, 0x00, 0x00};
+
+#define ITEM_SOUND_ID     4
+#define ITEM_SOUND_LENGTH 12
+unsigned char itemSound4000[ITEM_SOUND_LENGTH] = {0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F};
+unsigned char itemSound4001[ITEM_SOUND_LENGTH] = {0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08};
+unsigned char itemSound4002[ITEM_SOUND_LENGTH] = {0x6A, 0x6A, 0x6A, 0x59, 0x6A, 0x4B, 0x59, 0x3F, 0x4B, 0x34, 0x34, 0x34};
+
+#define PORTAL_SOUND_ID     5
+#define PORTAL_SOUND_LENGTH 12
+#define PORTAL_NOISE_DELAY  6
+unsigned char portalSound4008[PORTAL_SOUND_LENGTH] = {0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81};
+unsigned char portalSound400A[PORTAL_SOUND_LENGTH] = {0x80, 0x5C, 0x3A, 0xDF, 0x67, 0x67, 0xC4, 0x80, 0xDF, 0xBF, 0xFB, 0xF3};
+unsigned char portalSound400B[PORTAL_SOUND_LENGTH] = {0x02, 0x02, 0x02, 0x01, 0x01, 0x01, 0x01, 0x02, 0x01, 0x03, 0x01, 0x05};
+unsigned char portalSound400C[PORTAL_SOUND_LENGTH] = {0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F};
+unsigned char portalSound400E[PORTAL_SOUND_LENGTH] = {0x0C, 0x09, 0x07, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x01, 0x01, 0x01, 0x01};
+
+
 //
 // GLOBALS
 //
@@ -269,8 +297,9 @@ static unsigned char        gPpuCtrlBase;
 static unsigned char        gTitleScreenColor;
 static unsigned char        gMusicOn;
 static unsigned char        gSoundEffectCounter;
-static const unsigned char* gSoundEffect400C;
-static const unsigned char* gSoundEffect400E;
+static const unsigned char* gSoundEffect0;
+static const unsigned char* gSoundEffect1;
+static const unsigned char* gSoundEffect2;
 static unsigned char        gSoundEffectLength;
 static unsigned char        gCurrentSoundEffect;
 
@@ -305,34 +334,75 @@ void vblank_counter(void)
 
 void PlaySoundEffects(void)
 {
-    switch( gCurrentSoundEffect )
-    {
-        case TONGUE_SOUND_ID:
-            gSoundEffect400C = tongueSound400C;
-            gSoundEffect400E = tongueSound400E;
-            gSoundEffectLength = TONGUE_SOUND_LENGTH;
-        break;
-
-        case DAMAGE_SOUND_ID:
-        default:
-            gSoundEffect400C = damageSound400C;
-            gSoundEffect400E = damageSound400E;
-            gSoundEffectLength = DAMAGE_SOUND_LENGTH;
-        break;
-    }
-
     if( gSoundEffectCounter != 0xFF )
     {
-        //*((unsigned char*)0x4015) = 0x0F;
-        *((unsigned char*)0x400C) = gSoundEffect400C[gSoundEffectCounter];
-        *((unsigned char*)0x400E) = gSoundEffect400E[gSoundEffectCounter];
-        *((unsigned char*)0x400F) = 0;
+        switch( gCurrentSoundEffect )
+        {
+            case TONGUE_SOUND_ID:
+                gSoundEffect0 = tongueSound400C;
+                gSoundEffect1 = tongueSound400E;
+                gSoundEffectLength = TONGUE_SOUND_LENGTH;
+                break;
+
+            case DAMAGE_SOUND_ID:
+            default:
+                gSoundEffect0 = damageSound400C;
+                gSoundEffect1 = damageSound400E;
+                gSoundEffectLength = DAMAGE_SOUND_LENGTH;
+                break;
+
+            case HOP_SOUND_ID:
+                gSoundEffect0 = hopSound4008;
+                gSoundEffect1 = hopSound400A;
+                gSoundEffect2 = hopSound400B;
+                gSoundEffectLength = HOP_SOUND_LENGTH;
+                break;
+
+            case JUMP_SOUND_ID:
+                gSoundEffect0 = jumpSound4008;
+                gSoundEffect1 = jumpSound400A;
+                gSoundEffect2 = jumpSound400B;
+                gSoundEffectLength = JUMP_SOUND_LENGTH;
+                break;
+
+            case ITEM_SOUND_ID:
+                *((unsigned char*)0x4000) = itemSound4000[gSoundEffectCounter];
+                *((unsigned char*)0x4001) = itemSound4001[gSoundEffectCounter];
+                *((unsigned char*)0x4002) = itemSound4002[gSoundEffectCounter];
+                gSoundEffectLength = ITEM_SOUND_LENGTH;
+                break;
+
+            case PORTAL_SOUND_ID:
+                *((unsigned char*)0x4008) = portalSound4008[gSoundEffectCounter];
+                *((unsigned char*)0x400A) = portalSound400A[gSoundEffectCounter];
+                *((unsigned char*)0x400B) = portalSound400B[gSoundEffectCounter];
+                if( gSoundEffectCounter >= PORTAL_NOISE_DELAY )
+                {
+                    *((unsigned char*)0x400C) = portalSound400C[gSoundEffectCounter - PORTAL_NOISE_DELAY];
+                    *((unsigned char*)0x400E) = portalSound400E[gSoundEffectCounter - PORTAL_NOISE_DELAY];
+                    *((unsigned char*)0x400F) = 0;
+                }
+                gSoundEffectLength = ITEM_SOUND_LENGTH + PORTAL_NOISE_DELAY;
+                break;
+        }
+
+        if( gCurrentSoundEffect < 2 )
+        {
+            *((unsigned char*)0x400C) = gSoundEffect0[gSoundEffectCounter];
+            *((unsigned char*)0x400E) = gSoundEffect1[gSoundEffectCounter];
+            *((unsigned char*)0x400F) = 0;
+        }
+        else if( gCurrentSoundEffect < 4 )
+        {
+            *((unsigned char*)0x4008) = gSoundEffect0[gSoundEffectCounter];
+            *((unsigned char*)0x400A) = gSoundEffect1[gSoundEffectCounter];
+            *((unsigned char*)0x400B) = gSoundEffect2[gSoundEffectCounter];
+        }
 
         gSoundEffectCounter++;
 
         if(gSoundEffectCounter == gSoundEffectLength)
         {
-            //*((unsigned char*)0x4015) = 0x0;
             gSoundEffectCounter = 0xFF;
         }
     }
@@ -785,6 +855,14 @@ void small_jump(void)
       gJumping = 1;
       gVelocity = 6;
       gVelocityDirection = 1;
+
+      if( gSoundEffectCounter == 0xFF )
+      {
+          gCurrentSoundEffect = HOP_SOUND_ID;
+          gSoundEffectCounter = 0;
+      }
+
+      //pMusicInit(10);
     }
 }
 
@@ -795,6 +873,9 @@ void big_jump(void)
       gVelocity = 13;
       gVelocityDirection = 1;
       gPrevController1Change |= BUTTON_A;
+
+      gCurrentSoundEffect = JUMP_SOUND_ID;
+      gSoundEffectCounter = 0;
     }
 }
 
@@ -1256,10 +1337,7 @@ void update_tongue_sprite(void)
                 //pMusicInit(6);
 
                 gCurrentSoundEffect = TONGUE_SOUND_ID;
-                if( gSoundEffectCounter == 0xFF )
-                {
-                    gSoundEffectCounter = 0;
-                }
+                gSoundEffectCounter = 0;
 
                 gTongueState = TONGUE_EXTENDING;
                 gTongueCounter = TONGUE_EXTEND_DELAY;
@@ -1707,10 +1785,7 @@ void take_hit(void)
       if( gStage != 0 )
       {
         gCurrentSoundEffect = DAMAGE_SOUND_ID;
-        if( gSoundEffectCounter == 0xFF )
-        {
-            gSoundEffectCounter = 0;
-        }
+        gSoundEffectCounter = 0;
 
           --gHealth;
       }
@@ -2147,6 +2222,8 @@ void mini_frog_collision_handler(void)
     draw_health();
   }
 
+  gCurrentSoundEffect = ITEM_SOUND_ID;
+  gSoundEffectCounter = 0;
 }
 
 void invalid_ai_handler(void)
@@ -2159,6 +2236,9 @@ void invalid_collision_handler(void)
 
 void portal_collision_handler(void)
 {
+    gCurrentSoundEffect = PORTAL_SOUND_ID;
+    gSoundEffectCounter = 0;
+
     next_stage();
     load_stage();
 }
@@ -2172,6 +2252,9 @@ void key_collision_handler(void)
   sprites[j + 3] = 0;
 
   numKeys--;
+
+  gCurrentSoundEffect = ITEM_SOUND_ID;
+  gSoundEffectCounter = 0;
 }
 
 void do_physics(void)
