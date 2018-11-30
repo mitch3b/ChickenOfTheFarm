@@ -59,7 +59,7 @@
 #define MAX_TOP_BUFFER    0x3F
 
 #define ARROW_SPEED 3
-#define MAX_NUM_SPRITES 16        // need to reserve enough space for max sprites
+#define MAX_NUM_SPRITES 18        // need to reserve enough space for max sprites
 #define FIRST_ENEMY_SPRITE 84
 //#define LAST_ENEMY_SPRITE 124 //Reserve 10 sprites for now
 
