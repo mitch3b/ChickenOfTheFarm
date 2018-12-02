@@ -201,6 +201,7 @@ unsigned char portalSound400B[PORTAL_SOUND_LENGTH] = {0x02, 0x02, 0x02, 0x01, 0x
 unsigned char portalSound400C[PORTAL_SOUND_LENGTH] = {0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F};
 unsigned char portalSound400E[PORTAL_SOUND_LENGTH] = {0x0C, 0x09, 0x07, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x01, 0x01, 0x01, 0x01};
 
+#define MAX_FROG_SPEED 8
 
 //
 // GLOBALS
@@ -1373,7 +1374,7 @@ void update_sprites(void)
     {
         if( gSpeedDirection == 0 )
         {
-            if( gSpeed < 12 )
+            if( gSpeed < MAX_FROG_SPEED )
             {
                 ++gSpeed;
             }
@@ -1396,7 +1397,7 @@ void update_sprites(void)
     {
         if( gSpeedDirection == 1 )
         {
-            if( gSpeed < 12 )
+            if( gSpeed < MAX_FROG_SPEED )
             {
                 ++gSpeed;
             }
@@ -1520,19 +1521,20 @@ void load_stage(void)
         case 1:
             PPU_ADDRESS = 0x28;
             PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Level1_bottom_rle);	// uncompresses our data
+            UnRLE(Nametable_Intro_bottom_rle);	// uncompresses our data
             vblank();
             PPU_ADDRESS = 0x20;
             PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Level1_top_rle);	// uncompresses our data
+            UnRLE(Nametable_Intro_top_rle);	// uncompresses our data
             vblank();
-            gScratchPointer = Level1Palette;
+            gScratchPointer = IntroPalette;
             load_palette();
             vblank();
 
             ClearSprites();
-            numSprites = LEVEL1_ENEMY_COUNT;
+            numSprites = INTRO_ENEMY_COUNT;
             gScratchPointer2 = (unsigned char*)Sprites_Level1;
+            gScratchPointer2 = (unsigned char*)Sprites_Intro;
             LoadSprites();
             pMusicInit(2);
             break;
@@ -1604,7 +1606,7 @@ void load_stage(void)
     loadCollisionFromNametables();
 
     gX = 0x10;
-    gY = 0xCF;
+    gY = 0xBF;
     gYNametable = 2;
     gVelocity = 0;
     gVelocityDirection = 0;
@@ -1800,7 +1802,7 @@ void take_hit(void)
       }
       //if(gSpeed != 0)
       {
-          gSpeed = 16;
+          gSpeed = MAX_FROG_SPEED;
           gSpeedDirection ^= 1;
       }
   }
@@ -2118,7 +2120,7 @@ void bird_ai_handler(void)
             x1 = sprites[j + 3];
             y1 = sprites[j] + 1;
             height1 = 8;
-            width1 = 16; //Don't count the tip
+            width1 = 15; //Don't count the tip
             if(is_background_collision()) {
               sprites[j] -= 1;
               sprites[j+4] -= 1;
@@ -2132,7 +2134,7 @@ void bird_ai_handler(void)
             x1 = sprites[j + 3];
             y1 = sprites[j] + 1;
             height1 = 8;
-            width1 = 16; //Don't count the tip
+            width1 = 15; //Don't count the tip
             if(is_background_collision()) {
               sprites[j] += 1;
               sprites[j+4] += 1;
@@ -2152,7 +2154,7 @@ void bird_ai_handler(void)
             x1 = sprites[j + 3];
             y1 = sprites[j] + 1;
             height1 = 8;
-            width1 = 16; //Don't count the tip
+            width1 = 15; //Don't count the tip
             if(is_background_collision()) {
               sprites[j+3] -= 1;
               sprites[j+7] -= 1;
@@ -2173,7 +2175,7 @@ void bird_ai_handler(void)
             x1 = sprites[j + 3];
             y1 = sprites[j] + 1;
             height1 = 8;
-            width1 = 16; //Don't count the tip
+            width1 = 15; //Don't count the tip
             if(is_background_collision()) {
               sprites[j+3] += 1;
               sprites[j+7] += 1;
