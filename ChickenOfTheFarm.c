@@ -186,13 +186,19 @@ unsigned char jumpSound4008[JUMP_SOUND_LENGTH] = {0x81, 0x81, 0x81, 0x81, 0x81, 
 unsigned char jumpSound400A[JUMP_SOUND_LENGTH] = {0xA8, 0x93, 0x7C, 0x3F, 0xEF, 0xEF};
 unsigned char jumpSound400B[JUMP_SOUND_LENGTH] = {0x01, 0x01, 0x01, 0x01, 0x00, 0x00};
 
-#define ITEM_SOUND_ID     4
+#define PAUSE_SOUND_ID     4
+#define PAUSE_SOUND_LENGTH 12
+unsigned char pauseSound4008[PAUSE_SOUND_LENGTH] = {0x81, 0x81, 0x81, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x81, 0x81, 0x81};
+unsigned char pauseSound400A[PAUSE_SOUND_LENGTH] = {0x23, 0x31, 0x5E, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0x23, 0x31, 0x5E};
+unsigned char pauseSound400B[PAUSE_SOUND_LENGTH] = {0x00, 0x00, 0x00, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x00, 0x00, 0x00};
+
+#define ITEM_SOUND_ID     5
 #define ITEM_SOUND_LENGTH 12
 unsigned char itemSound4000[ITEM_SOUND_LENGTH] = {0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F};
 unsigned char itemSound4001[ITEM_SOUND_LENGTH] = {0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08};
 unsigned char itemSound4002[ITEM_SOUND_LENGTH] = {0x6A, 0x6A, 0x6A, 0x59, 0x6A, 0x4B, 0x59, 0x3F, 0x4B, 0x34, 0x34, 0x34};
 
-#define PORTAL_SOUND_ID     5
+#define PORTAL_SOUND_ID     6
 #define PORTAL_SOUND_LENGTH 12
 #define PORTAL_NOISE_DELAY  6
 unsigned char portalSound4008[PORTAL_SOUND_LENGTH] = {0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81};
@@ -366,6 +372,13 @@ void PlaySoundEffects(void)
                 gSoundEffectLength = JUMP_SOUND_LENGTH;
                 break;
 
+            case PAUSE_SOUND_ID:
+                gSoundEffect0 = pauseSound4008;
+                gSoundEffect1 = pauseSound400A;
+                gSoundEffect2 = pauseSound400B;
+                gSoundEffectLength = PAUSE_SOUND_LENGTH;
+                break;
+
             case ITEM_SOUND_ID:
                 *((unsigned char*)0x4000) = itemSound4000[gSoundEffectCounter];
                 *((unsigned char*)0x4001) = itemSound4001[gSoundEffectCounter];
@@ -393,7 +406,7 @@ void PlaySoundEffects(void)
             *((unsigned char*)0x400E) = gSoundEffect1[gSoundEffectCounter];
             *((unsigned char*)0x400F) = 0;
         }
-        else if( gCurrentSoundEffect < 4 )
+        else if( gCurrentSoundEffect < 5 )
         {
             *((unsigned char*)0x4008) = gSoundEffect0[gSoundEffectCounter];
             *((unsigned char*)0x400A) = gSoundEffect1[gSoundEffectCounter];
@@ -863,7 +876,7 @@ void small_jump(void)
           gSoundEffectCounter = 0;
       }
 
-      //pMusicInit(10);
+      //pMusicInit(11);
     }
 }
 
@@ -2668,6 +2681,11 @@ void game_running_sm(void)
 
         if((gController1 & BUTTON_START) == BUTTON_START)
         {
+            (*(unsigned char*) 0x4015) = 0xC; // turn off the square wave channels
+
+            gCurrentSoundEffect = PAUSE_SOUND_ID;
+            gSoundEffectCounter = 0;
+
             //Paused so wait until button is released and then pushed again
             do
             {
@@ -2689,6 +2707,11 @@ void game_running_sm(void)
              input_poll();
             }
             while((gController1 & BUTTON_START) == BUTTON_START);
+
+            gCurrentSoundEffect = PAUSE_SOUND_ID;
+            gSoundEffectCounter = 0;
+
+            (*(unsigned char*) 0x4015) = 0xF; // restore off the square wave channels
         }
 
         update_sprites();

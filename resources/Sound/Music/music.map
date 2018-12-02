@@ -1,7 +1,7 @@
 Modules list:
 -------------
 nsf_wrap.o:
-    CODE              Offs=000000  Size=001BF2  Align=00001  Fill=0000
+    CODE              Offs=000000  Size=001C32  Align=00001  Fill=0000
     BSS               Offs=000000  Size=0000F5  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000015  Align=00001  Fill=0000
     HEADER            Offs=000000  Size=000080  Align=00001  Fill=0000
@@ -13,8 +13,8 @@ Name                   Start     End    Size  Align
 ----------------------------------------------------
 ZEROPAGE              000000  000014  000015  00001
 BSS                   000700  0007F4  0000F5  00001
-HEADER                00D000  00D07F  000080  00001
-CODE                  00D080  00EC71  001BF2  00001
+HEADER                00E000  00E07F  000080  00001
+CODE                  00E080  00FCB1  001C32  00001
 
 
 Exports list by name:
