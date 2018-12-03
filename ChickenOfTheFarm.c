@@ -164,6 +164,26 @@ sprite_properties_t spriteProperties[ID_COUNT] = {
     {        PATTERN_KEY_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &key_collision_handler      }, //KEY_ID
 };
 
+typedef struct {
+    const unsigned char* bottom_rle;
+    const unsigned char* top_rle;
+    const unsigned char* palette;
+    const unsigned char* sprites;
+    unsigned char        numSprites;
+    unsigned char        music;
+} level_properties_t;
+
+#define NUM_LEVELS 7
+level_properties_t LevelTable[NUM_LEVELS] = {
+    {Nametable_TitleScreen_bottom_rle,  0,                        TitleScreenPalette,  0,              0,                  0},
+    {Nametable_Intro_bottom_rle,        Nametable_Intro_top_rle,  IntroPalette,        Sprites_Intro,  INTRO_ENEMY_COUNT,  2},
+    {Nametable_Level1_bottom_rle,       Nametable_Level1_top_rle, Level1Palette,       Sprites_Level1, LEVEL1_ENEMY_COUNT, 2},
+    {Nametable_Level2_bottom_rle,       Nametable_Level2_top_rle, Level2Palette,       Sprites_Level2, LEVEL2_ENEMY_COUNT, 2},
+    {Nametable_Level3_bottom_rle,       Nametable_Level3_top_rle, Level3Palette,       Sprites_Level3, LEVEL3_ENEMY_COUNT, 2},
+    {Nametable_Level4_bottom_rle,       Nametable_Level4_top_rle, Level4Palette,       Sprites_Level4, LEVEL4_ENEMY_COUNT, 2},
+    {Nametable_EndingScreen_bottom_rle, 0,                        EndingScreenPalette, 0,              0,                  0},
+};
+
 #define TONGUE_SOUND_ID     0
 #define TONGUE_SOUND_LENGTH 12
 unsigned char tongueSound400C[TONGUE_SOUND_LENGTH] = {0x39, 0x37, 0x35, 0x34, 0x34, 0x35, 0x37, 0x39, 0x30, 0x30, 0x3F, 0x30};
@@ -775,7 +795,7 @@ void fade_in(void)
     load_palette();
 
     PPU_CTRL = gPpuCtrlBase + gYNametable;
-    if( gStage == 0 || gStage > 4 || gDisplayLives == 1)
+    if( gStage == 0 || gStage > (NUM_LEVELS-2) || gDisplayLives == 1)
     {
         PPU_MASK = 0x0E;
     }
@@ -1520,100 +1540,40 @@ void load_stage(void)
         gDisplayLives = 0;
     }
 
-    switch( gStage )
+
+
+    if (LevelTable[gStage].top_rle != 0)
     {
-        case 0:
-            PPU_ADDRESS = 0x28;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
-            vblank();
-            gScratchPointer = TitleScreenPalette;
-            load_palette();
-            break;
+        PPU_ADDRESS = 0x20;
+        PPU_ADDRESS = 0x00;
+        UnRLE(LevelTable[gStage].top_rle);	// uncompresses our data
+        vblank();
+    }
 
-        case 1:
-            PPU_ADDRESS = 0x28;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Intro_bottom_rle);	// uncompresses our data
-            vblank();
-            PPU_ADDRESS = 0x20;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Intro_top_rle);	// uncompresses our data
-            vblank();
-            gScratchPointer = IntroPalette;
-            load_palette();
-            vblank();
+    PPU_ADDRESS = 0x28;
+    PPU_ADDRESS = 0x00;
+    UnRLE(LevelTable[gStage].bottom_rle);	// uncompresses our data
+    vblank();
 
-            ClearSprites();
-            numSprites = INTRO_ENEMY_COUNT;
-            gScratchPointer2 = (unsigned char*)Sprites_Level1;
-            gScratchPointer2 = (unsigned char*)Sprites_Intro;
-            LoadSprites();
-            pMusicInit(2);
-            break;
+    gScratchPointer = LevelTable[gStage].palette;
+    load_palette();
+    vblank();
 
-        case 2:
-            PPU_ADDRESS = 0x28;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Level2_bottom_rle);	// uncompresses our data
-            vblank();
-            PPU_ADDRESS = 0x20;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Level2_top_rle);	// uncompresses our data
-            vblank();
-            gScratchPointer = Level2Palette;
-            load_palette();
+    if( LevelTable[gStage].numSprites != 0 )
+    {
+        ClearSprites();
+        numSprites = LevelTable[gStage].numSprites;
+    }
 
-            ClearSprites();
-            numSprites = LEVEL2_ENEMY_COUNT;
-            gScratchPointer2 = (unsigned char*)Sprites_Level2;
-            LoadSprites();
-            pMusicInit(2);
-            break;
-        case 3:
-            PPU_ADDRESS = 0x28;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Level3_bottom_rle);	// uncompresses our data
-            vblank();
-            PPU_ADDRESS = 0x20;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Level3_top_rle);	// uncompresses our data
-            vblank();
-            gScratchPointer = Level3Palette;
-            load_palette();
+    if( LevelTable[gStage].sprites != 0 )
+    {
+        gScratchPointer2 = (unsigned char*)LevelTable[gStage].sprites;
+        LoadSprites();
+    }
 
-            ClearSprites();
-            numSprites = LEVEL3_ENEMY_COUNT;
-            gScratchPointer2 = (unsigned char*)Sprites_Level3;
-            LoadSprites();
-            pMusicInit(2);
-            break;
-        case 4:
-            PPU_ADDRESS = 0x28;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Level4_bottom_rle);	// uncompresses our data
-            vblank();
-            PPU_ADDRESS = 0x20;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_Level4_top_rle);	// uncompresses our data
-            vblank();
-            gScratchPointer = Level4Palette;
-            load_palette();
-
-            ClearSprites();
-            numSprites = LEVEL4_ENEMY_COUNT;
-            gScratchPointer2 = (unsigned char*)Sprites_Level4;
-            LoadSprites();
-            pMusicInit(2);
-            break;
-        default:
-            PPU_ADDRESS = 0x28;
-            PPU_ADDRESS = 0x00;
-            UnRLE(Nametable_EndingScreen_bottom_rle);	// uncompresses our data
-            vblank();
-            gScratchPointer = EndingScreenPalette;
-            load_palette();
-            break;
+    if( LevelTable[gStage].music != 0 )
+    {
+        pMusicInit(LevelTable[gStage].music);
     }
 
     loadCollisionFromNametables();
@@ -1659,7 +1619,7 @@ void next_stage(void)
 {
     switch( gStage )
     {
-        case 4:
+        case NUM_LEVELS-2:
             gGameState = ENDING_STATE;
 
         default:
