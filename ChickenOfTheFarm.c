@@ -1579,7 +1579,7 @@ void load_stage(void)
     loadCollisionFromNametables();
 
     gX = 0x10;
-    gY = 0xBF;
+    gY = (gStage == 1) ? 0xBF : 0xCF;
     gYNametable = 2;
     gVelocity = 0;
     gVelocityDirection = 0;
