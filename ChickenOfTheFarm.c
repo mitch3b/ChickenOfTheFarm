@@ -173,9 +173,12 @@ typedef struct {
     unsigned char        music;
 } level_properties_t;
 
-#define NUM_LEVELS 8
+#define NUM_LEVELS 11
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,  0,                          TitleScreenPalette,  0,                0,                    0},
+	{Nametable_LevelUpAndDown_bottom_rle,       Nametable_LevelUpAndDown_top_rle,   LevelUpAndDownPalette,       Sprites_LevelUpAndDown,   LEVELUPANDDOWN_ENEMY_COUNT,   2},	
+	{Nametable_LevelBackAndForth_bottom_rle,       Nametable_LevelBackAndForth_top_rle,   LevelBackAndForthPalette,       Sprites_LevelBackAndForth,   LEVELBACKANDFORTH_ENEMY_COUNT,   2},
+	{Nametable_LevelOutfacingShelves_bottom_rle,       Nametable_LevelOutfacingShelves_top_rle,   LevelOutfacingShelvesPalette,       Sprites_LevelOutfacingShelves,   LEVELOUTFACINGSHELVES_ENEMY_COUNT,   2},
     {Nametable_Intro_bottom_rle,        Nametable_Intro_top_rle,    IntroPalette,        Sprites_Intro,    INTRO_ENEMY_COUNT,    2},
     {Nametable_OneArrow_bottom_rle,     Nametable_OneArrow_top_rle, OneArrowPalette,     Sprites_OneArrow, ONEARROW_ENEMY_COUNT, 2},
     {Nametable_Level1_bottom_rle,       Nametable_Level1_top_rle,   Level1Palette,       Sprites_Level1,   LEVEL1_ENEMY_COUNT,   2},
@@ -2575,9 +2578,9 @@ void do_physics(void)
       }
 
       //Frog collision box
-      x1 = sprites[3] + 1;
+      x1 = sprites[3] + 2;
       y1 = sprites[0] + 1;
-      width1 = 14;
+      width1 = 12;
       height1 = 15;
 
       put_i_in_collision2_vars();

@@ -3,6 +3,8 @@
 *.nes.deb
 *DS_Store
 vars.txt
+ChickenOfTheFarm.asm
+ChickenOfTheFarm.map
 resources/__pycache__
 resources/Background/*/*-reduced.png
 resources/Background/*/*-tmp.h
