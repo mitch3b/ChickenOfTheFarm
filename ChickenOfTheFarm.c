@@ -173,19 +173,20 @@ typedef struct {
     unsigned char        music;
 } level_properties_t;
 
-#define NUM_LEVELS 11
+#define NUM_LEVELS 12
 level_properties_t LevelTable[NUM_LEVELS] = {
-    {Nametable_TitleScreen_bottom_rle,  0,                          TitleScreenPalette,  0,                0,                    0},
-	{Nametable_LevelUpAndDown_bottom_rle,       Nametable_LevelUpAndDown_top_rle,   LevelUpAndDownPalette,       Sprites_LevelUpAndDown,   LEVELUPANDDOWN_ENEMY_COUNT,   2},	
-	{Nametable_LevelBackAndForth_bottom_rle,       Nametable_LevelBackAndForth_top_rle,   LevelBackAndForthPalette,       Sprites_LevelBackAndForth,   LEVELBACKANDFORTH_ENEMY_COUNT,   2},
-	{Nametable_LevelOutfacingShelves_bottom_rle,       Nametable_LevelOutfacingShelves_top_rle,   LevelOutfacingShelvesPalette,       Sprites_LevelOutfacingShelves,   LEVELOUTFACINGSHELVES_ENEMY_COUNT,   2},
-    {Nametable_Intro_bottom_rle,        Nametable_Intro_top_rle,    IntroPalette,        Sprites_Intro,    INTRO_ENEMY_COUNT,    2},
-    {Nametable_OneArrow_bottom_rle,     Nametable_OneArrow_top_rle, OneArrowPalette,     Sprites_OneArrow, ONEARROW_ENEMY_COUNT, 2},
-    {Nametable_Level1_bottom_rle,       Nametable_Level1_top_rle,   Level1Palette,       Sprites_Level1,   LEVEL1_ENEMY_COUNT,   2},
-    {Nametable_Level2_bottom_rle,       Nametable_Level2_top_rle,   Level2Palette,       Sprites_Level2,   LEVEL2_ENEMY_COUNT,   2},
-    {Nametable_Level3_bottom_rle,       Nametable_Level3_top_rle,   Level3Palette,       Sprites_Level3,   LEVEL3_ENEMY_COUNT,   2},
-    {Nametable_Level4_bottom_rle,       Nametable_Level4_top_rle,   Level4Palette,       Sprites_Level4,   LEVEL4_ENEMY_COUNT,   2},
-    {Nametable_EndingScreen_bottom_rle, 0,                          EndingScreenPalette, 0,                0,                    0},
+    {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0},
+    {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2},
+    {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              OneArrowPalette,              Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2},
+    {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            ShortClimbPalette,            Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2},
+    {Nametable_Level1_bottom_rle,                Nametable_Level1_top_rle,                Level1Palette,                Sprites_Level1,                LEVEL1_ENEMY_COUNT,                2},
+    {Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2},
+    {Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2},
+    {Nametable_Level4_bottom_rle,                Nametable_Level4_top_rle,                Level4Palette,                Sprites_Level4,                LEVEL4_ENEMY_COUNT,                2},
+	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2},
+	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2},
+	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2},
+    {Nametable_EndingScreen_bottom_rle,          0,                                       EndingScreenPalette,          0,                             0,                                 0},
 };
 
 #define TONGUE_SOUND_ID     0
