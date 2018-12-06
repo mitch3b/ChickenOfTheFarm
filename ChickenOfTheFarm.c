@@ -59,7 +59,7 @@
 #define MAX_TOP_BUFFER    0x3F
 
 #define ARROW_SPEED 3
-#define MAX_NUM_SPRITES 16        // need to reserve enough space for max sprites
+#define MAX_NUM_SPRITES 21        // need to reserve enough space for max sprites
 #define FIRST_ENEMY_SPRITE 84
 //#define LAST_ENEMY_SPRITE 124 //Reserve 10 sprites for now
 
@@ -173,20 +173,46 @@ typedef struct {
     unsigned char        music;
 } level_properties_t;
 
-#define NUM_LEVELS 12
+typedef struct {
+    unsigned char        FrogStartX;
+    unsigned char        FrogStartY;
+} start_position_t;
+
+#define NUM_LEVELS 11
 level_properties_t LevelTable[NUM_LEVELS] = {
-    {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0},
-    {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2},
-    {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              OneArrowPalette,              Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2},
-    {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            ShortClimbPalette,            Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2},
-    {Nametable_Level1_bottom_rle,                Nametable_Level1_top_rle,                Level1Palette,                Sprites_Level1,                LEVEL1_ENEMY_COUNT,                2},
-    {Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2},
-    {Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2},
-    {Nametable_Level4_bottom_rle,                Nametable_Level4_top_rle,                Level4Palette,                Sprites_Level4,                LEVEL4_ENEMY_COUNT,                2},
-	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2},
-	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2},
-	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2},
-    {Nametable_EndingScreen_bottom_rle,          0,                                       EndingScreenPalette,          0,                             0,                                 0},
+    {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0, },
+    {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2, },
+    {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              OneArrowPalette,              Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2, },
+    {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            ShortClimbPalette,            Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2, },
+    {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             BirdClimbPalette,             Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2, },
+    {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               OpenPitPalette,               Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2, },
+    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2, },
+    //{Nametable_Level1_bottom_rle,                Nametable_Level1_top_rle,                Level1Palette,                Sprites_Level1,                LEVEL1_ENEMY_COUNT,                2, },
+    //{Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2, },
+    //{Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2, },
+    //{Nametable_Level4_bottom_rle,                Nametable_Level4_top_rle,                Level4Palette,                Sprites_Level4,                LEVEL4_ENEMY_COUNT,                2, },
+	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2, },
+	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2, },
+	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2, },
+    {Nametable_EndingScreen_bottom_rle,          0,                                       EndingScreenPalette,          0,                             0,                                 0, },
+};
+
+start_position_t FrogStart[NUM_LEVELS] = {
+    {0x10, 0xBF},
+    {0x10, 0xBF},
+    {0x10, 0xBF},
+    {0x10, 0xBF},
+    {0x10, 0xBF},
+    {0x10, 0xBF},
+    {0x78, 0xBF},
+    //{0x10, 0xCF},
+    //{0x10, 0xCF},
+    //{0x10, 0xCF},
+    //{0x10, 0xCF},
+    {0x10, 0xCF},
+    {0x10, 0xCF},
+    {0x10, 0xCF},
+    {0x10, 0xCF},
 };
 
 #define TONGUE_SOUND_ID     0
@@ -294,6 +320,7 @@ static unsigned char        gTmp5;
 static unsigned char        gTmp6;
 static unsigned char        gTmp7;
 static unsigned char        gTmp8;
+static unsigned int         gTmp9;
 
 // These are probably overkill, but it makes collision detection a lot cleaner
 static unsigned char        x1;
@@ -621,7 +648,7 @@ void ClearSprites(void)
     }
 
     gScratchPointer2 = (unsigned char*)sprites;
-    for(gTmp2 = 0; gTmp2 < (MAX_NUM_SPRITES * SPRITES_T_MEMBER_COUNT); gTmp2++)
+    for(gTmp9 = 0; gTmp9 < (MAX_NUM_SPRITES * SPRITES_T_MEMBER_COUNT); gTmp9++)
     {
         gScratchPointer2 = 0;
         gScratchPointer2++;
@@ -1545,8 +1572,6 @@ void load_stage(void)
         gDisplayLives = 0;
     }
 
-
-
     if (LevelTable[gStage].top_rle != 0)
     {
         PPU_ADDRESS = 0x20;
@@ -1583,8 +1608,9 @@ void load_stage(void)
 
     loadCollisionFromNametables();
 
-    gX = 0x10;
-    gY = (gStage <= 2) ? 0xBF : 0xCF;
+    gX = FrogStart[gStage].FrogStartX;
+    gY = FrogStart[gStage].FrogStartY;
+
     gYNametable = 2;
     gVelocity = 0;
     gVelocityDirection = 0;
@@ -2446,18 +2472,15 @@ void do_physics(void)
 
             if(gYNametable == 2 )
             {
+                if(gY == 0xEF)
+                {
+                    death();
+                }
                 //Bottom half of level
                 if( collision[240 + (((gY + 0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
                     collision[240 + (((gY + 0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
-                    if(gY == 0xF0)
-                    {
-                        death();
-                    }
-                    else
-                    {
-                        gY += 1;
-                    }
+                    gY += 1;
                 }
                 else
                 {
