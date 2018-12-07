@@ -309,8 +309,8 @@ static unsigned char        gYNametable;
 static unsigned char        gYPrevNametable;
 static unsigned char        numKeys;
 static unsigned char        devnull;
-static unsigned int         i;
-static unsigned int         j;
+static unsigned char        i;
+static unsigned char        j;
 static unsigned char        k;
 static unsigned char        gTmp;
 static unsigned char        gTmp2;
@@ -320,7 +320,7 @@ static unsigned char        gTmp5;
 static unsigned char        gTmp6;
 static unsigned char        gTmp7;
 static unsigned char        gTmp8;
-static unsigned int         gTmp9;
+static unsigned char        gTmp9;
 
 // These are probably overkill, but it makes collision detection a lot cleaner
 static unsigned char        x1;
@@ -331,25 +331,24 @@ static unsigned char        x2;
 static unsigned char        y2;
 static unsigned char        width2;
 static unsigned char        height2;
-static unsigned int         gJumping; // 0 if not currently in the air from a jump, 1 if yes
-static unsigned int         gBounceCounter;
-static unsigned int         gVelocity;
-static unsigned int         gVelocityDirection;
-static unsigned int         gSpeed;
-static unsigned int         gSpeedDirection;
-static unsigned int         gStage;
-static unsigned int         gCounter;
-static unsigned int         gHealth;
-static unsigned int         gIframes;
+static unsigned char        gJumping; // 0 if not currently in the air from a jump, 1 if yes
+static unsigned char        gVelocity;
+static unsigned char        gVelocityDirection;
+static unsigned char        gSpeed;
+static unsigned char        gSpeedDirection;
+static unsigned char        gStage;
+static unsigned char        gCounter;
+static unsigned char        gHealth;
+static unsigned char        gIframes;
 static sprites_t            gSpriteTable;
 static unsigned char        numSprites;
 static GameState_t          gGameState;
 static FrogAnimationState_t gFrogAnimationState;
 static TongueState_t        gTongueState;
-static unsigned int         gTongueCounter;
-static unsigned int         gFade;
-static unsigned int         gLives;
-static unsigned int         gDisplayLives;
+static unsigned char        gTongueCounter;
+static unsigned char        gFade;
+static unsigned char        gLives;
+static unsigned char        gDisplayLives;
 static const unsigned char* gScratchPointer;
 static unsigned char        gVblankPrevious;
 static unsigned char        gPpuCtrlBase;
@@ -361,6 +360,8 @@ static const unsigned char* gSoundEffect1;
 static const unsigned char* gSoundEffect2;
 static unsigned char        gSoundEffectLength;
 static unsigned char        gCurrentSoundEffect;
+static unsigned char        gCurrentMusic;
+static unsigned char        gCurrentMusicTmp;
 
 extern unsigned char        gVblank;
 
@@ -435,6 +436,7 @@ void PlaySoundEffects(void)
                 *((unsigned char*)0x4000) = itemSound4000[gSoundEffectCounter];
                 *((unsigned char*)0x4001) = itemSound4001[gSoundEffectCounter];
                 *((unsigned char*)0x4002) = itemSound4002[gSoundEffectCounter];
+                *((unsigned char*)0x4003) = 0;
                 gSoundEffectLength = ITEM_SOUND_LENGTH;
                 break;
 
@@ -642,10 +644,11 @@ void loadCollisionFromNametables(void)
 void ClearSprites(void)
 {
     // clear sprite ram
-    for( i = 0; i < 256; i++ )
+    for( i = 0; i < 255; i++ )
     {
         sprites[i] = 0x00;
     }
+    sprites[255] = 0x00;
 
     gScratchPointer2 = (unsigned char*)sprites;
     for(gTmp9 = 0; gTmp9 < (MAX_NUM_SPRITES * SPRITES_T_MEMBER_COUNT); gTmp9++)
@@ -940,8 +943,11 @@ void big_jump(void)
       gVelocityDirection = 1;
       gPrevController1Change |= BUTTON_A;
 
-      gCurrentSoundEffect = JUMP_SOUND_ID;
-      gSoundEffectCounter = 0;
+      if( gSoundEffectCounter == 0xFF )
+      {
+          gCurrentSoundEffect = JUMP_SOUND_ID;
+          gSoundEffectCounter = 0;
+      }
     }
 }
 
@@ -1545,6 +1551,7 @@ void load_stage(void)
 
     if( gDisplayLives == 1)
     {
+        gCurrentMusic = 4;
         pMusicInit(4);
 
         PPU_ADDRESS = 0x28;
@@ -1601,8 +1608,10 @@ void load_stage(void)
         LoadSprites();
     }
 
-    if( LevelTable[gStage].music != 0 )
+    gCurrentMusicTmp = LevelTable[gStage].music;
+    if( gCurrentMusicTmp != 0 && gCurrentMusicTmp != gCurrentMusic )
     {
+        gCurrentMusic = LevelTable[gStage].music;
         pMusicInit(LevelTable[gStage].music);
     }
 
@@ -1619,7 +1628,6 @@ void load_stage(void)
     gSpeed = 0;
     gSpeedDirection = 1;
     gJumping = 0;
-    gBounceCounter = 0;
 
     // Frog direction
     sprites[1] = 0x00;
@@ -2643,7 +2651,6 @@ void init_game_state(void)
     gSpeed = 0;
     gSpeedDirection = 1;
     gJumping = 0;
-    gBounceCounter = 0;
     gIframes = 0;
     gHealth = 8;
     draw_health();
@@ -2773,6 +2780,7 @@ void title_screen_sm(void)
 
 void end_screen_sm(void)
 {
+    gCurrentMusic = 3;
     pMusicInit(3);
 
     while( gGameState == ENDING_STATE )
@@ -2831,6 +2839,7 @@ void main(void)
     //vblank_counter();
 
     apuinit();
+    gCurrentMusic = 0;
     pMusicInit(0);
     //apuinit();
 
@@ -2858,6 +2867,7 @@ void main(void)
             default:
                 //vblank();
                 //apuinit();
+                gCurrentMusic = 0;
                 pMusicInit(0);
                 gMusicOn = 1;
                 //gCounter = 5;
