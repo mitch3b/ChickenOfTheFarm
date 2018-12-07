@@ -178,7 +178,7 @@ typedef struct {
     unsigned char        FrogStartY;
 } start_position_t;
 
-#define NUM_LEVELS 11
+#define NUM_LEVELS 12
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0, },
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2, },
@@ -187,6 +187,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             BirdClimbPalette,             Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2, },
     {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               OpenPitPalette,               Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2, },
     {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2, },
+    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          TwoBirdClimbPalette,          Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2, },
     //{Nametable_Level1_bottom_rle,                Nametable_Level1_top_rle,                Level1Palette,                Sprites_Level1,                LEVEL1_ENEMY_COUNT,                2, },
     //{Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2, },
     //{Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2, },
@@ -204,6 +205,7 @@ start_position_t FrogStart[NUM_LEVELS] = {
     {0x10, 0xBF},
     {0x10, 0xBF},
     {0x10, 0xBF},
+    {0x78, 0xBF},
     {0x78, 0xBF},
     //{0x10, 0xCF},
     //{0x10, 0xCF},
