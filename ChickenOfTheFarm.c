@@ -146,6 +146,7 @@ void portal_collision_handler(void);
 void key_collision_handler(void);
 
 void PlaySoundEffects(void);
+void init_physics(void);
 
 typedef struct {
   unsigned char pattern;
@@ -178,7 +179,7 @@ typedef struct {
     unsigned char        FrogStartY;
 } start_position_t;
 
-#define NUM_LEVELS 12
+#define NUM_LEVELS 13
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0, },
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2, },
@@ -187,6 +188,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             BirdClimbPalette,             Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2, },
     {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               OpenPitPalette,               Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2, },
     {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2, },
+    {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        SmallPlatformsPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2, },
     {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          TwoBirdClimbPalette,          Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2, },
     //{Nametable_Level1_bottom_rle,                Nametable_Level1_top_rle,                Level1Palette,                Sprites_Level1,                LEVEL1_ENEMY_COUNT,                2, },
     //{Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2, },
@@ -206,6 +208,7 @@ start_position_t FrogStart[NUM_LEVELS] = {
     {0x10, 0xBF},
     {0x10, 0xBF},
     {0x78, 0xBF},
+    {0x10, 0xBF},
     {0x78, 0xBF},
     //{0x10, 0xCF},
     //{0x10, 0xCF},
@@ -1689,6 +1692,7 @@ void death(void)
     }
 
     draw_health();
+    init_physics();
     load_stage();
 }
 
@@ -1813,9 +1817,6 @@ void take_hit(void)
       else
       {
           gIframes = 120;
-      }
-      //if(gSpeed != 0)
-      {
           gSpeed = MAX_FROG_SPEED;
           gSpeedDirection ^= 1;
       }
@@ -2119,7 +2120,7 @@ void arrow_ai_handler(void)
  */
 void bird_ai_handler(void)
 {
-  if(sprites[j+3] != 0) {
+  if(sprites[j+1] != 0) {
     sprite_maintain_y_position();
 
     //Bird in general moves towards the frog
@@ -2641,25 +2642,30 @@ void init_globals(void)
     gSoundEffectCounter = 0xFF;
 }
 
-void init_game_state(void)
+void init_physics(void)
 {
-    gX = 0x10;
-    gY = 0xCF;
-    gYNametable = 2;
     gVelocity = 0;
     gVelocityDirection = 0;
-    gXScroll = 0;
-    gYScroll = 0;
     gSpeed = 0;
     gSpeedDirection = 1;
     gJumping = 0;
     gIframes = 0;
-    gHealth = 8;
-    draw_health();
     gFrogAnimationState = FROG_NORMAL;
     gTongueState = TONGUE_CLEANUP;
     gTongueCounter = 0;
     update_tongue_sprite();
+}
+
+void init_game_state(void)
+{
+    gX = 0x10;
+    gY = 0xCF;
+    gXScroll = 0;
+    gYScroll = 0;
+    gYNametable = 2;
+    gHealth = 8;
+    draw_health();
+    init_physics();
     gFade = 3;
     gFrameCounter = 0;
     gLives = 2;
