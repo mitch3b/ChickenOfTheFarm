@@ -194,9 +194,9 @@ level_properties_t LevelTable[NUM_LEVELS] = {
     //{Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2, },
     //{Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2, },
     //{Nametable_Level4_bottom_rle,                Nametable_Level4_top_rle,                Level4Palette,                Sprites_Level4,                LEVEL4_ENEMY_COUNT,                2, },
+	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2, },
 	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2, },
 	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2, },
-	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2, },
     {Nametable_EndingScreen_bottom_rle,          0,                                       EndingScreenPalette,          0,                             0,                                 0, },
 };
 
@@ -305,6 +305,7 @@ static unsigned char        gPrevController1;
 static unsigned char        gPrevController1Change;
 static unsigned char        gFrameCounter;
 static unsigned char        gTmpX;
+static unsigned char        gTmpX2;
 static unsigned char        gX;
 static unsigned char        gY;
 static unsigned long        gXScroll;
@@ -2392,12 +2393,13 @@ void do_physics(void)
     {
         for( i = 0; (i<<2) < gVelocity; i++ )
         {
-            gTmpX = gX + 0xF;
+            gTmpX = gX + 0xE;
+            gTmpX2 = gX + 1;
 
             if( gYNametable == 2 )
             {
                 //Bottom half of level
-                if( collision[240 + (((gY)&0xF0) ) + ((gX) >> 4)] == 0 &&
+                if( collision[240 + (((gY)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
                     collision[240 + (((gY)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY > MAX_TOP_BUFFER )
@@ -2421,7 +2423,7 @@ void do_physics(void)
             }
             else if((gYScroll + gY) >= 0xF0 )
             {
-                if( collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + ((gX) >> 4)] == 0 &&
+                if( collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
                     collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY > MAX_TOP_BUFFER)
@@ -2443,7 +2445,7 @@ void do_physics(void)
             }
             else
             {
-                if( collision[(((gYScroll + gY - 0x100) & 0xF0) ) + ((gX) >> 4)] == 0 &&
+                if( collision[(((gYScroll + gY - 0x100) & 0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
                     collision[(((gYScroll + gY - 0x100) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                   //Approaching the top. Scroll until we can't anymore
@@ -2479,16 +2481,19 @@ void do_physics(void)
     {
         for( i = 0; (i<<2) < gVelocity; i++ )
         {
-            gTmpX = gX + 0xF;
+            gTmpX = gX + 0xE;
+            gTmpX2 = gX + 1;
 
             if(gYNametable == 2 )
             {
                 if(gY == 0xEF)
                 {
+                    gController1 = 0; // A may have been buffered which would cause a jump after the respawn
                     death();
+                    return;
                 }
                 //Bottom half of level
-                if( collision[240 + (((gY + 0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
+                if( collision[240 + (((gY + 0x11)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
                     collision[240 + (((gY + 0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     gY += 1;
@@ -2503,7 +2508,7 @@ void do_physics(void)
             }
             else if((gYScroll + gY + 0x11) >= 0xF0)
             {
-                if( collision[240 + (((gYScroll + gY+0x11 - 0xF0)&0xF0) ) + ((gX) >> 4)] == 0 &&
+                if( collision[240 + (((gYScroll + gY+0x11 - 0xF0)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
                     collision[240 + (((gYScroll + gY+0x11 - 0xF0)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY < MAX_BOTTOM_BUFFER)
@@ -2533,7 +2538,7 @@ void do_physics(void)
             }
             else
             {
-                if( collision[(((gYScroll + gY+0x11)&0xF0) ) + ((gX) >> 4)] == 0 &&
+                if( collision[(((gYScroll + gY+0x11)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
                     collision[(((gYScroll + gY+0x11)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY < MAX_BOTTOM_BUFFER)
