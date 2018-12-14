@@ -375,6 +375,7 @@ extern void pMusicInit(unsigned char);
 extern void pMusicPlay(void);
 
 void __fastcall__ UnRLE(const unsigned char *data);
+void __fastcall__ Title_UnRLE(const unsigned char *data);
 
 
 #pragma bss-name (pop)
@@ -1595,7 +1596,14 @@ void load_stage(void)
 
     PPU_ADDRESS = 0x28;
     PPU_ADDRESS = 0x00;
-    UnRLE(LevelTable[gStage].bottom_rle);	// uncompresses our data
+    if( gStage == 0 )
+    {
+        Title_UnRLE(LevelTable[gStage].bottom_rle);	// uncompresses our data
+    }
+    else
+    {
+        UnRLE(LevelTable[gStage].bottom_rle);	// uncompresses our data
+    }
     vblank();
 
     gScratchPointer = LevelTable[gStage].palette;
@@ -1723,7 +1731,7 @@ int is_background_collision(void) {
       if( collision[240 + (((y1)&0xF0)) + (x1 >> 4)] == 0 &&
           collision[240 + (((y1 + height1)&0xF0)) + (x1 >> 4)] == 0 &&
           collision[240 + (((y1)&0xF0)) + ((x1 + width1) >> 4)] == 0 &&
-              collision[240 + (((y1 + height1)&0xF0)) + ((x1 + width1) >> 4)] == 0)
+          collision[240 + (((y1 + height1)&0xF0)) + ((x1 + width1) >> 4)] == 0)
       {
           return 0;
       }
@@ -2837,7 +2845,7 @@ void main(void)
 
   	PPU_ADDRESS = 0x28; // address of nametable #2
   	PPU_ADDRESS = 0x00;
-  	UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
+  	Title_UnRLE(Nametable_TitleScreen_bottom_rle);	// uncompresses our data
   	vblank();
     //gCounter = 10;
     //vblank_counter();

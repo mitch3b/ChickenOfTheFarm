@@ -110,6 +110,7 @@ raw_patterns = {}
 reduced_patterns = []
 raw_nametables = {}
 reduced_nametables = {}
+compressed_nametables = {}
 raw_attributes = {}
 background_list = []
 sprite_list = []
@@ -150,6 +151,7 @@ def create_patterns(folder, pattern_type):
     raw_patterns[folder] = []
     raw_nametables[folder] = []
     reduced_nametables[folder] = []
+    compressed_nametables[folder] = []
     raw_attributes[folder] = []
 
     if pattern_type == "Sprite":
@@ -246,6 +248,7 @@ for folder in os.listdir(os.path.join(getPathWithResources(), "Sprite")):
 for folder in os.listdir(os.path.join(getPathWithResources(), "Background")):
     create_patterns(folder, "Background")
 
+
 #print(background_list)
 #print(sprite_list)
 #print(raw_nametables)
@@ -316,6 +319,33 @@ for resource in background_list:
 #          reduced_patterns[i*16 + 15]))
 #print(reduced_nametables)
 
+tile_list = []
+
+print("Compressing:")
+for resource in background_list:
+    if resource != 'TitleScreen':
+        for i in range(0,int(len(reduced_nametables[resource])/4)):
+            found = False
+            for j in range(0, len(tile_list)):
+                if ((tile_list[j][0] == reduced_nametables[resource][int(i/16)*64 + (i%16)*2]) and
+                    (tile_list[j][1] == reduced_nametables[resource][int(i/16)*64 + (i%16)*2 + 1]) and
+                    (tile_list[j][2] == reduced_nametables[resource][int(i/16)*64 + (i%16)*2 + 32]) and
+                    (tile_list[j][3] == reduced_nametables[resource][int(i/16)*64 + (i%16)*2 + 33])):
+                    found = True
+                    compressed_nametables[resource].append(j)
+
+            if found == False:
+                compressed_nametables[resource].append(len(tile_list))
+                tile_list.append([reduced_nametables[resource][int(i/16)*64 + (i%16)*2],
+                                  reduced_nametables[resource][int(i/16)*64 + (i%16)*2 + 1],
+                                  reduced_nametables[resource][int(i/16)*64 + (i%16)*2 + 32],
+                                  reduced_nametables[resource][int(i/16)*64 + (i%16)*2 + 33]])
+
+print(tile_list)
+for resource in background_list:
+    print(resource)
+    print(compressed_nametables[resource])
+
 nametable_top_rle = {}
 nametable_bottom_rle = {}
 
@@ -323,7 +353,7 @@ print("Encoding:")
 for resource in background_list:
     #print(resource)
     nametable_tmp = []
-    start = 0;
+    start = 0
     attribute_start = 0
 
     if resource == 'TitleScreen':
@@ -335,19 +365,36 @@ for resource in background_list:
 
     else:
 
+        #nametable_tmp = []
+        #if len(reduced_nametables[resource]) > 960:
+        #    for i in range(0,960):
+        #        nametable_tmp.append(reduced_nametables[resource][i])
+        #    for i in range(0,64):
+        #        nametable_tmp.append(raw_attributes[resource][i])
+        #    nametable_top_rle[resource] = create_rle(nametable_tmp)
+        #    start = 960
+        #    attribute_start = 64
+        #
+        #nametable_tmp = []
+        #for i in range(start,start+960):
+        #    nametable_tmp.append(reduced_nametables[resource][i])
+        #for i in range(attribute_start,attribute_start+64):
+        #    nametable_tmp.append(raw_attributes[resource][i])
+        #nametable_bottom_rle[resource] = create_rle(nametable_tmp)
+
         nametable_tmp = []
-        if len(reduced_nametables[resource]) > 960:
-            for i in range(0,960):
-                nametable_tmp.append(reduced_nametables[resource][i])
+        if len(compressed_nametables[resource]) > 240:
+            for i in range(0,240):
+                nametable_tmp.append(compressed_nametables[resource][i])
             for i in range(0,64):
                 nametable_tmp.append(raw_attributes[resource][i])
             nametable_top_rle[resource] = create_rle(nametable_tmp)
-            start = 960
+            start = 240
             attribute_start = 64
 
         nametable_tmp = []
-        for i in range(start,start+960):
-            nametable_tmp.append(reduced_nametables[resource][i])
+        for i in range(start,start+240):
+            nametable_tmp.append(compressed_nametables[resource][i])
         for i in range(attribute_start,attribute_start+64):
             nametable_tmp.append(raw_attributes[resource][i])
         nametable_bottom_rle[resource] = create_rle(nametable_tmp)
@@ -393,6 +440,12 @@ for resource in sprite_list:
         resource_handle.write("#define PATTERN_" + resource.upper() + "_%d" % (i) + " %d" % (reduced_nametables[resource][i]) + "\n")
 
     resource_handle.write("\n")
+
+resource_handle.write("const unsigned char TileList[%d] = {" % (len(tile_list)*4))
+for i in range(0,len(tile_list)):
+    for j in range(0,len(tile_list[i])):
+        resource_handle.write("%d," % tile_list[i][j])
+resource_handle.write("};\n\n")
 
 for resource in background_list:
     if resource in nametable_top_rle:
