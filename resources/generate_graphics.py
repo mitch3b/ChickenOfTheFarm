@@ -341,10 +341,10 @@ for resource in background_list:
                                   reduced_nametables[resource][int(i/16)*64 + (i%16)*2 + 32],
                                   reduced_nametables[resource][int(i/16)*64 + (i%16)*2 + 33]])
 
-print(tile_list)
-for resource in background_list:
-    print(resource)
-    print(compressed_nametables[resource])
+#print(tile_list)
+#for resource in background_list:
+#    print(resource)
+#    print(compressed_nametables[resource])
 
 nametable_top_rle = {}
 nametable_bottom_rle = {}

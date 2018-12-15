@@ -177,47 +177,50 @@ typedef struct {
 typedef struct {
     unsigned char        FrogStartX;
     unsigned char        FrogStartY;
-} start_position_t;
+    unsigned char        world;
+} level_additional_properties_t;
 
-#define NUM_LEVELS 13
+#define NUM_LEVELS 14
 level_properties_t LevelTable[NUM_LEVELS] = {
-    {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0, },
-    {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2, },
-    {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              OneArrowPalette,              Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2, },
-    {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            ShortClimbPalette,            Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2, },
-    {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             BirdClimbPalette,             Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2, },
-    {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               OpenPitPalette,               Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2, },
-    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2, },
-    {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        SmallPlatformsPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2, },
-    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          TwoBirdClimbPalette,          Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2, },
-    //{Nametable_Level1_bottom_rle,                Nametable_Level1_top_rle,                Level1Palette,                Sprites_Level1,                LEVEL1_ENEMY_COUNT,                2, },
-    //{Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2, },
-    //{Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2, },
-    //{Nametable_Level4_bottom_rle,                Nametable_Level4_top_rle,                Level4Palette,                Sprites_Level4,                LEVEL4_ENEMY_COUNT,                2, },
-	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2, },
-	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2, },
-	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2, },
-    {Nametable_EndingScreen_bottom_rle,          0,                                       EndingScreenPalette,          0,                             0,                                 0, },
+    {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+    {Nametable_FirstIce_bottom_rle,              Nametable_FirstIce_top_rle,              FirstIcePalette,              Sprites_FirstIce,              FIRSTICE_ENEMY_COUNT,              2,},
+    {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
+    {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              OneArrowPalette,              Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2,},
+    {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            ShortClimbPalette,            Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
+    {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             BirdClimbPalette,             Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2,},
+    {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               OpenPitPalette,               Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
+    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
+    {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        SmallPlatformsPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
+    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          TwoBirdClimbPalette,          Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
+    //{Nametable_Level1_bottom_rle,                Nametable_Level1_top_rle,                Level1Palette,                Sprites_Level1,                LEVEL1_ENEMY_COUNT,                2,},
+    //{Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2,},
+    //{Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2,},
+    //{Nametable_Level4_bottom_rle,                Nametable_Level4_top_rle,                Level4Palette,                Sprites_Level4,                LEVEL4_ENEMY_COUNT,                2,},
+	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2,},
+	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2,},
+	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
+    {Nametable_EndingScreen_bottom_rle,          0,                                       EndingScreenPalette,          0,                             0,                                 0,},
 };
 
-start_position_t FrogStart[NUM_LEVELS] = {
-    {0x10, 0xBF},
-    {0x10, 0xBF},
-    {0x10, 0xBF},
-    {0x10, 0xBF},
-    {0x10, 0xBF},
-    {0x10, 0xBF},
-    {0x78, 0xBF},
-    {0x10, 0xBF},
-    {0x78, 0xBF},
-    //{0x10, 0xCF},
-    //{0x10, 0xCF},
-    //{0x10, 0xCF},
-    //{0x10, 0xCF},
-    {0x10, 0xCF},
-    {0x10, 0xCF},
-    {0x10, 0xCF},
-    {0x10, 0xCF},
+level_additional_properties_t LevelProperties[NUM_LEVELS] = {
+    {0x10, 0xBF, 1},
+    {0x20, 0xBF, 2},
+    {0x10, 0xBF, 1},
+    {0x10, 0xBF, 1},
+    {0x10, 0xBF, 1},
+    {0x10, 0xBF, 1},
+    {0x10, 0xBF, 1},
+    {0x78, 0xBF, 1},
+    {0x10, 0xBF, 1},
+    {0x78, 0xBF, 1},
+    //{0x10, 0xCF, 1},
+    //{0x10, 0xCF, 1},
+    //{0x10, 0xCF, 1},
+    //{0x10, 0xCF, 1},
+    {0x10, 0xCF, 3},
+    {0x10, 0xCF, 3},
+    {0x10, 0xCF, 3},
+    {0x10, 0xCF, 1},
 };
 
 #define TONGUE_SOUND_ID     0
@@ -927,7 +930,8 @@ void input_poll(void)
 
 void small_jump(void)
 {
-    if(gJumping == 0) {
+    if( ((gController1 & (BUTTON_RIGHT | BUTTON_LEFT)) != 0) && (gJumping == 0) )
+    {
       gJumping = 1;
       gVelocity = 6;
       gVelocityDirection = 1;
@@ -1125,24 +1129,24 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x02;
-                    sprites[79] = gX + 24;
+                    sprites[79] = gX + 23;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 16;
+                    sprites[75] = gX - 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 8;
+                    sprites[79] = gX - 7;
                 }
                 gTongueState = TONGUE_EXTENDING2;
                 gTongueCounter = TONGUE_EXTEND_DELAY;
@@ -1154,14 +1158,14 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 7;
                 }
                 gTongueCounter--;
             }
@@ -1174,34 +1178,34 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x02;
-                    sprites[79] = gX + 24;
+                    sprites[79] = gX + 23;
 
                     sprites[80] = gY + 4;
                     sprites[81] = PATTERN_TONGUE_1;
                     sprites[82] = 0x02;
-                    sprites[83] = gX + 32;
+                    sprites[83] = gX + 31;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 24;
+                    sprites[75] = gX - 23;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 16;
+                    sprites[79] = gX - 15;
 
                     sprites[80] = gY + 4;
                     sprites[81] = PATTERN_TONGUE_0;
                     sprites[82] = 0x42;
-                    sprites[83] = gX - 8;
+                    sprites[83] = gX - 7;
                 }
                 gTongueState = TONGUE_OUT;
                 gTongueCounter = TONGUE_RETRACT_DELAY;
@@ -1213,24 +1217,24 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x02;
-                    sprites[79] = gX + 24;
+                    sprites[79] = gX + 23;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 16;
+                    sprites[75] = gX - 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 8;
+                    sprites[79] = gX - 7;
                 }
                 gTongueCounter--;
             }
@@ -1243,12 +1247,12 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x02;
-                    sprites[79] = gX + 24;
+                    sprites[79] = gX + 23;
 
                     sprites[80] = 0x00;
                     sprites[81] = 0x00;
@@ -1260,12 +1264,12 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 16;
+                    sprites[75] = gX - 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 8;
+                    sprites[79] = gX - 7;
 
                     sprites[80] = 0x00;
                     sprites[81] = 0x00;
@@ -1282,34 +1286,34 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x02;
-                    sprites[79] = gX + 24;
+                    sprites[79] = gX + 23;
 
                     sprites[80] = gY + 4;
                     sprites[81] = PATTERN_TONGUE_1;
                     sprites[82] = 0x02;
-                    sprites[83] = gX + 32;
+                    sprites[83] = gX + 31;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 24;
+                    sprites[75] = gX - 23;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 16;
+                    sprites[79] = gX - 15;
 
                     sprites[80] = gY + 4;
                     sprites[81] = PATTERN_TONGUE_0;
                     sprites[82] = 0x42;
-                    sprites[83] = gX - 8;
+                    sprites[83] = gX - 7;
                 }
                 gTongueCounter--;
             }
@@ -1322,7 +1326,7 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
 
                     sprites[76] = 0x00;
                     sprites[77] = 0x00;
@@ -1334,7 +1338,7 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 7;
 
                     sprites[76] = 0x00;
                     sprites[77] = 0x00;
@@ -1351,24 +1355,24 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_0;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_1;
                     sprites[78] = 0x02;
-                    sprites[79] = gX + 24;
+                    sprites[79] = gX + 23;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 16;
+                    sprites[75] = gX - 15;
 
                     sprites[76] = gY + 4;
                     sprites[77] = PATTERN_TONGUE_0;
                     sprites[78] = 0x42;
-                    sprites[79] = gX - 8;
+                    sprites[79] = gX - 7;
                 }
                 gTongueCounter--;
             }
@@ -1390,14 +1394,14 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 7;
                 }
                 gTongueCounter--;
             }
@@ -1426,14 +1430,14 @@ void update_tongue_sprite(void)
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x02;
-                    sprites[75] = gX + 16;
+                    sprites[75] = gX + 15;
                 }
                 else
                 {
                     sprites[72] = gY + 4;
                     sprites[73] = PATTERN_TONGUE_1;
                     sprites[74] = 0x42;
-                    sprites[75] = gX - 8;
+                    sprites[75] = gX - 7;
                 }
             }
             break;
@@ -1495,7 +1499,11 @@ void update_sprites(void)
     }
     if( ((gController1 & (BUTTON_RIGHT | BUTTON_LEFT)) == 0) && (gSpeed > 0) )
     {
-        --gSpeed;
+        // do this for ice physics
+        if( (LevelProperties[gStage].world != 2) || ((gFrameCounter & 0x03) == 0x00) )
+        {
+            --gSpeed;
+        }
     }
     if(gController1 & BUTTON_B)
     {
@@ -1543,6 +1551,8 @@ void update_sprites(void)
 void load_stage(void)
 {
     fade_out();
+
+    init_physics();
 
     if( gGameState == TITLE_SCREEN_STATE)
     {
@@ -1631,8 +1641,8 @@ void load_stage(void)
 
     loadCollisionFromNametables();
 
-    gX = FrogStart[gStage].FrogStartX;
-    gY = FrogStart[gStage].FrogStartY;
+    gX = LevelProperties[gStage].FrogStartX;
+    gY = LevelProperties[gStage].FrogStartY;
 
     gYNametable = 2;
     gVelocity = 0;
@@ -1795,6 +1805,7 @@ void put_i_in_collision2_vars(void) {
       y2 = sprites[j];
       width2 = 16;
       height2 = 16;
+      break;
 
     case MINI_FROG_ID:
     case KEY_ID:
@@ -1877,19 +1888,26 @@ void despawn_1_sprite(void)
  */
 void spawn_2_by_1_sprite(void)
 {
-    gTmp = gSpriteTable.numSprites[i];
-    sprites[j] = gTmp8;
-    sprites[j + 4] = gTmp8;
-    gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
-    sprites[j + 1] = gTmp2;
-    sprites[j + 5] = gTmp2 + 1;
-    sprites[j + 2] = gSpriteTable.direction[i];
-    sprites[j + 6] = gSpriteTable.direction[i];
-    if(sprites[j + 3] == 0) {
-      gTmp8 = gSpriteTable.startX[i];
-      sprites[j + 3] = gTmp8;
-      gTmp8 = gSpriteTable.startX[i] + 0x8;
-      sprites[j + 7] = gTmp8;
+    if( gSpriteTable.state[i] != 0 )
+    {
+        --gSpriteTable.state[i];
+    }
+    else
+    {
+        gTmp = gSpriteTable.numSprites[i];
+        sprites[j] = gTmp8;
+        sprites[j + 4] = gTmp8;
+        gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
+        sprites[j + 1] = gTmp2;
+        sprites[j + 5] = gTmp2 + 1;
+        sprites[j + 2] = gSpriteTable.direction[i];
+        sprites[j + 6] = gSpriteTable.direction[i];
+        if(sprites[j + 3] == 0) {
+          gTmp8 = gSpriteTable.startX[i];
+          sprites[j + 3] = gTmp8;
+          gTmp8 = gSpriteTable.startX[i] + 0x8;
+          sprites[j + 7] = gTmp8;
+        }
     }
 }
 
@@ -2567,6 +2585,11 @@ void do_physics(void)
             }
         }
 
+        if( gVelocity != 0 )
+        {
+            gJumping = 1;
+        }
+
         if( i == ((gVelocity+3)>>2) )
         {
             gVelocity+=1;
@@ -2604,13 +2627,23 @@ void do_physics(void)
         if(is_collision()) {
           //Reset tongue
           sprites[72] = 0;
+          sprites[73] = 0;
+          sprites[74] = 0;
           sprites[75] = 0;
           sprites[76] = 0;
+          sprites[77] = 0;
+          sprites[78] = 0;
           sprites[79] = 0;
           sprites[80] = 0;
+          sprites[81] = 0;
+          sprites[82] = 0;
           sprites[83] = 0;
           gTongueState = TONGUE_NORMAL;
           gTongueCounter = 0;
+          if( gSpriteTable.id[i] == BIRD_ID )
+          {
+              gSpriteTable.state[i] = 0x5A; // set the respawn time to 1.5s
+          }
 
           gTmp = gSpriteTable.numSprites[i];
           for(k = 0; k < gTmp; k++)
