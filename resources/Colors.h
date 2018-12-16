@@ -1,6 +1,6 @@
 // Colors
-#define            BLACK         0x0D
-#define            BLACK_2       0x0E
+#define            BLACK         0x0E
+#define            BLACK_2       0x0D
 #define            BLACK_3       0x0F
 #define            BLACK_4       0x1D
 #define            BLACK_5       0x1E

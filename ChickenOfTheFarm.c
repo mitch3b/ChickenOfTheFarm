@@ -69,7 +69,8 @@
 #define BIRD_ID      3
 #define PORTAL_ID    4
 #define KEY_ID       5
-#define ID_COUNT     6
+#define SNAKE_ID     6
+#define ID_COUNT     7
 
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
@@ -145,6 +146,7 @@ void invalid_ai_handler(void);
 void arrow_ai_handler(void);
 void bird_ai_handler(void);
 void item_ai_handler(void);
+void snake_ai_handler(void);
 
 void invalid_collision_handler(void);
 void enemy_collision_handler(void);
@@ -170,6 +172,7 @@ sprite_properties_t spriteProperties[ID_COUNT] = {
     {       PATTERN_BIRD_0,  &spawn_2_by_1_sprite,      &despawn_2_sprite,    &bird_ai_handler, &enemy_collision_handler    }, //BIRD_ID
     {     PATTERN_PORTAL_0,  &spawn_portal_sprite, &despawn_portal_sprite,    &item_ai_handler, &portal_collision_handler   }, //PORTAL_ID
     {        PATTERN_KEY_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &key_collision_handler      }, //KEY_ID
+    {      PATTERN_SNAKE_0,  &spawn_2_by_1_sprite,      &despawn_2_sprite,   &snake_ai_handler, &enemy_collision_handler    }, //SNAKE_ID
 };
 
 typedef struct {
@@ -382,6 +385,7 @@ static unsigned char        gCurrentSoundEffect;
 static unsigned char        gCurrentMusic;
 static unsigned char        gCurrentMusicTmp;
 static unsigned char        gBirdMovement;
+static unsigned char        gSnakeMovement;
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -1900,24 +1904,27 @@ void despawn_1_sprite(void)
  */
 void spawn_2_by_1_sprite(void)
 {
-    if( gSpriteTable.state[i] != 0 )
+    if( gSpriteTable.state[i] != 0xFF )
     {
-        --gSpriteTable.state[i];
-    }
-    else
-    {
-        sprites[j] = gTmp8;
-        sprites[j + 4] = gTmp8;
-        gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
-        sprites[j + 1] = gTmp2;
-        sprites[j + 5] = gTmp2 + 1;
-        sprites[j + 2] = gSpriteTable.direction[i];
-        sprites[j + 6] = gSpriteTable.direction[i];
-        if(sprites[j + 3] == 0) {
-          gTmp8 = gSpriteTable.startX[i];
-          sprites[j + 3] = gTmp8;
-          gTmp8 = gSpriteTable.startX[i] + 0x8;
-          sprites[j + 7] = gTmp8;
+        if( gSpriteTable.state[i] != 0 )
+        {
+            --gSpriteTable.state[i];
+        }
+        else
+        {
+            sprites[j] = gTmp8;
+            sprites[j + 4] = gTmp8;
+            gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
+            sprites[j + 1] = gTmp2;
+            sprites[j + 5] = gTmp2 + 1;
+            sprites[j + 2] = gSpriteTable.direction[i];
+            sprites[j + 6] = gSpriteTable.direction[i];
+            if(sprites[j + 3] == 0) {
+              gTmp8 = gSpriteTable.startX[i];
+              sprites[j + 3] = gTmp8;
+              gTmp8 = gSpriteTable.startX[i] + 0x8;
+              sprites[j + 7] = gTmp8;
+            }
         }
     }
 }
@@ -2278,6 +2285,117 @@ void item_ai_handler(void)
   {
     //Update Y
     sprite_maintain_y_position();
+  }
+}
+
+void snake_ai_handler(void)
+{
+  gSnakeMovement = 0;
+
+  if(gSpriteTable.state[i] == 0xFF)
+  {
+      despawn_2_sprite();
+  }
+
+  if(sprites[j+1] != 0)
+  {
+    sprite_maintain_y_position();
+
+    gTmp = gSpriteTable.state[i];
+
+    (*(unsigned char*) 0x2F0) = gSpriteTable.state[i];
+
+    //Update Y
+    sprites[j] = sprites[j] +     gTmp;//gSpriteTable.state[i];
+    sprites[j+4] = sprites[j+4] + gTmp;//gSpriteTable.state[i];
+
+    if((gFrameCounter & 0x8) != 0)
+    {
+        gSnakeMovement = 1;
+    }
+
+    x1 = sprites[j + 3];
+    y1 = sprites[j];
+    height1 = 8;
+    width1 = 15; //Don't count the tip
+    if(is_background_collision()) {
+      sprites[j] =   sprites[j] -   gTmp;//gSpriteTable.state[i];
+      sprites[j+4] = sprites[j+4] - gTmp;//gSpriteTable.state[i];
+
+      // reset the snake falling speed
+      gSpriteTable.state[i] = 1;
+    }
+    else
+    {
+        if( gSpriteTable.state[i] < 15 && (gFrameCounter & 1) == 0 )
+        {
+            ++gSpriteTable.state[i];
+        }
+    }
+
+    //Update X
+    if( (gSpriteTable.direction[i] & 0x10) == 0x10 )
+    {
+        sprites[j+3] += 1;
+        sprites[j+7] += 1;
+
+        x1 = sprites[j + 3];
+        y1 = sprites[j];
+        height1 = 8;
+        width1 = 15; //Don't count the tip
+        if(is_background_collision()) {
+          sprites[j+3] -= 1;
+          sprites[j+7] -= 1;
+          gSpriteTable.direction[i] ^= 0x10;
+        }
+
+        gSnakeMovement += 0x10;
+    }
+    else
+    {
+        sprites[j+3] = sprites[j+3] - 1;
+        sprites[j+7] = sprites[j+7] - 1;
+
+        x1 = sprites[j + 3];
+        y1 = sprites[j];
+        height1 = 8;
+        width1 = 15; //Don't count the tip
+        if(is_background_collision()) {
+          sprites[j+3] += 1;
+          sprites[j+7] += 1;
+          gSpriteTable.direction[i] ^= 0x10;
+        }
+    }
+
+    // Tiles
+    if( (gSnakeMovement & 0x10) == 0x10 )
+    {
+        if( (gSnakeMovement & 1) == 1)
+        {
+            sprites[j+1] = PATTERN_SNAKE2_1;
+        }
+        else
+        {
+            sprites[j+1] = PATTERN_SNAKE_1;
+        }
+        sprites[j+2] = 0x42;
+        sprites[j+5] = PATTERN_SNAKE_0;
+        sprites[j+6] = 0x42;
+    }
+    else
+    {
+        sprites[j+1] = PATTERN_SNAKE_0;
+        sprites[j+2] = 0x02;
+        if( (gSnakeMovement & 1) == 1)
+        {
+            sprites[j+5] = PATTERN_SNAKE2_1;
+        }
+        else
+        {
+            sprites[j+5] = PATTERN_SNAKE_1;
+        }
+        sprites[j+6] = 0x02;
+    }
   }
 }
 
@@ -2678,6 +2796,11 @@ void do_physics(void)
           sprites[83] = 0;
           gTongueState = TONGUE_NORMAL;
           gTongueCounter = 0;
+          if( gSpriteTable.id[i] == SNAKE_ID )
+          {
+              gSpriteTable.state[i] = 0xFF; // kill the snake
+          }
+
           if( gSpriteTable.id[i] == BIRD_ID )
           {
               gSpriteTable.state[i] = 0x5A; // set the respawn time to 1.5s
