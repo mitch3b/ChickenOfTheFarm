@@ -15,7 +15,7 @@ WHITE,
 };
 
 #define OPENPIT_ENEMY_COUNT 14
-static const unsigned char Sprites_OpenPit[OPENPIT_ENEMY_COUNT * 9] = {
+static const unsigned char Sprites_OpenPit[OPENPIT_ENEMY_COUNT * 7] = {
 //   id, startX, startY, startNametable, state, direction, doesTongueKill,
    0x05,   0x74,   0x1F,           0x00,  0x00,      0x01,           0x00,
    0x05,   0x74,   0x7F,           0x00,  0x00,      0x01,           0x00,

@@ -381,7 +381,7 @@ static unsigned char        gSoundEffectLength;
 static unsigned char        gCurrentSoundEffect;
 static unsigned char        gCurrentMusic;
 static unsigned char        gCurrentMusicTmp;
-
+static unsigned char        gBirdMovement;
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -2157,6 +2157,8 @@ void arrow_ai_handler(void)
  */
 void bird_ai_handler(void)
 {
+  gBirdMovement = 0;
+
   if(sprites[j+1] != 0) {
     sprite_maintain_y_position();
 
@@ -2182,6 +2184,11 @@ void bird_ai_handler(void)
         {
             sprites[j] -= 1;
             sprites[j+4] -= 1;
+
+            if((gFrameCounter & 0x8) != 0)
+            {
+                gBirdMovement = 1;
+            }
 
             x1 = sprites[j + 3];
             y1 = sprites[j] + 1;
@@ -2212,11 +2219,8 @@ void bird_ai_handler(void)
               sprites[j+7] -= 1;
             }
 
-            // Tiles
-            sprites[j+1] = PATTERN_BIRD_1;
-            sprites[j+2] = 0x41;
-            sprites[j+5] = PATTERN_BIRD_0;
-            sprites[j+6] = 0x41;
+            gBirdMovement += 0x10;
+
         }
         else
         {
@@ -2232,13 +2236,37 @@ void bird_ai_handler(void)
               sprites[j+3] += 1;
               sprites[j+7] += 1;
             }
-
-            // Tiles
-            sprites[j+1] = PATTERN_BIRD_0;
-            sprites[j+2] = 0x01;
-            sprites[j+5] = PATTERN_BIRD_1;
-            sprites[j+6] = 0x01;
         }
+    }
+
+    // Tiles
+    if( (gBirdMovement & 0x10) == 0x10 )
+    {
+        if( (gBirdMovement & 1) == 1)
+        {
+            sprites[j+1] = PATTERN_BIRD2_1;
+        }
+        else
+        {
+            sprites[j+1] = PATTERN_BIRD_1;
+        }
+        sprites[j+2] = 0x41;
+        sprites[j+5] = PATTERN_BIRD_0;
+        sprites[j+6] = 0x41;
+    }
+    else
+    {
+        sprites[j+1] = PATTERN_BIRD_0;
+        sprites[j+2] = 0x01;
+        if( (gBirdMovement & 1) == 1)
+        {
+            sprites[j+5] = PATTERN_BIRD2_1;
+        }
+        else
+        {
+            sprites[j+5] = PATTERN_BIRD_1;
+        }
+        sprites[j+6] = 0x01;
     }
   }
 }

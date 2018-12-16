@@ -15,7 +15,7 @@ GREEN,
 };
 
 #define SMALLPLATFORMS_ENEMY_COUNT 5
-static const unsigned char Sprites_SmallPlatforms[SMALLPLATFORMS_ENEMY_COUNT * 9] = {
+static const unsigned char Sprites_SmallPlatforms[SMALLPLATFORMS_ENEMY_COUNT * 7] = {
 //   id, startX, startY, startNametable, state, direction, doesTongueKill,
    0x05,   0x5C,   0x0F,           0x00,  0x00,      0x01,           0x00,
    0x05,   0xBC,   0x0F,           0x00,  0x00,      0x01,           0x00,

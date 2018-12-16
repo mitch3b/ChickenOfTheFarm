@@ -15,7 +15,7 @@ WHITE,
 };
 
 #define ARROWCLIMB_ENEMY_COUNT 21
-static const unsigned char Sprites_ArrowClimb[ARROWCLIMB_ENEMY_COUNT * 9] = {
+static const unsigned char Sprites_ArrowClimb[ARROWCLIMB_ENEMY_COUNT * 7] = {
 //   id, startX, startY, startNametable, state, direction, doesTongueKill,
    0x02,   0xF0,   0xB7,           0x02,  0x00,      0x40,           0x00,
    0x02,   0xF0,   0x87,           0x02,  0x00,      0x40,           0x00,

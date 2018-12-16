@@ -6,7 +6,7 @@ WHITE,
 };
 
 #define LEVELOUTFACINGSHELVES_ENEMY_COUNT 15
-static const unsigned char Sprites_LevelOutfacingShelves[LEVELOUTFACINGSHELVES_ENEMY_COUNT * 9] = {
+static const unsigned char Sprites_LevelOutfacingShelves[LEVELOUTFACINGSHELVES_ENEMY_COUNT * 7] = {
 //   id, startX, startY, startNametable, state, direction, doesTongueKill,
    0x02,   0x08,   0x47,           0x00,  0x00,      0x00,           0x00,   //10 right arrows
    0x02,   0x08,   0x4F,           0x00,  0x00,      0x00,           0x00,

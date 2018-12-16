@@ -15,7 +15,7 @@ WHITE,
 };
 
 #define ICESTAIRS_ENEMY_COUNT 12
-static const unsigned char Sprites_IceStairs[ICESTAIRS_ENEMY_COUNT * 9] = {
+static const unsigned char Sprites_IceStairs[ICESTAIRS_ENEMY_COUNT * 7] = {
 //   id, startX, startY, startNametable, state, direction, doesTongueKill,
    0x05,   0x40,   0x12,           0x00,  0x00,      0x01,           0x00,
    0x05,   0x7C,   0x12,           0x00,  0x00,      0x01,           0x00,

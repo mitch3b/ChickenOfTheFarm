@@ -15,7 +15,7 @@ LIGHT_GREEN,
 };
 
 #define LEVEL2_ENEMY_COUNT 13
-static const unsigned char Sprites_Level2[LEVEL2_ENEMY_COUNT * 9] = {
+static const unsigned char Sprites_Level2[LEVEL2_ENEMY_COUNT * 7] = {
 //   id, startX, startY, startNametable, state, direction, doesTongueKill,
    0x02,   0x08,   0x0F,           0x00,  0x00,      0x00,           0x00,
    0x03,   0x20,   0x30,           0x00,  0x00,      0x00,           0x01,

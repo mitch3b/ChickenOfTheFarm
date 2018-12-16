@@ -6,7 +6,7 @@ WHITE,
 };
 
 #define LEVELUPANDDOWN_ENEMY_COUNT 11
-static const unsigned char Sprites_LevelUpAndDown[LEVELUPANDDOWN_ENEMY_COUNT * 9] = {
+static const unsigned char Sprites_LevelUpAndDown[LEVELUPANDDOWN_ENEMY_COUNT * 7] = {
 //   id, startX, startY, startNametable, state, direction, doesTongueKill,
    0x02,   0x08,   0xAF,           0x02,  0x00,      0x00,           0x00,  //5 right arrows
    0x02,   0x08,   0x4F,           0x02,  0x00,      0x00,           0x00,
