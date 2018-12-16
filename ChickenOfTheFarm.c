@@ -120,11 +120,18 @@ typedef struct {
   unsigned char startNametable[MAX_NUM_SPRITES];
   unsigned char state[MAX_NUM_SPRITES];
   unsigned char direction[MAX_NUM_SPRITES]; //Also palette color, bit 7 is direction
-  unsigned char numSprites[MAX_NUM_SPRITES]; //Not using this yet... not sure if we need it
   unsigned char doesTongueKill[MAX_NUM_SPRITES];
-  unsigned char spriteOffset[MAX_NUM_SPRITES];
 } sprites_t;
 #define SPRITES_T_MEMBER_COUNT 9
+
+static unsigned char SpriteSize[ID_COUNT] = {
+    0,  //INVALID_ID   0
+    1,  //MINI_FROG_ID 1
+    1,  //ARROW_ID     2
+    2,  //BIRD_ID      3
+    4,  //PORTAL_ID    4
+    1,  //KEY_ID       5
+};
 
 void spawn_1_by_1_sprite(void);
 void spawn_2_by_1_sprite(void);
@@ -180,9 +187,10 @@ typedef struct {
     unsigned char        world;
 } level_additional_properties_t;
 
-#define NUM_LEVELS 14
+#define NUM_LEVELS 15
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+    {Nametable_IceStairs_bottom_rle,             Nametable_IceStairs_top_rle,             IceStairsPalette,             Sprites_IceStairs,             ICESTAIRS_ENEMY_COUNT,             2,},
     {Nametable_FirstIce_bottom_rle,              Nametable_FirstIce_top_rle,              FirstIcePalette,              Sprites_FirstIce,              FIRSTICE_ENEMY_COUNT,              2,},
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
     {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              OneArrowPalette,              Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2,},
@@ -204,6 +212,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
+    {0x10, 0xBF, 2},
     {0x20, 0xBF, 2},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
@@ -350,7 +359,8 @@ static unsigned char        gCounter;
 static unsigned char        gHealth;
 static unsigned char        gIframes;
 static sprites_t            gSpriteTable;
-static unsigned char        numSprites;
+static unsigned char        gSpriteOffset[MAX_NUM_SPRITES];
+static unsigned char        gNumSprites;
 static GameState_t          gGameState;
 static FrogAnimationState_t gFrogAnimationState;
 static TongueState_t        gTongueState;
@@ -671,7 +681,7 @@ void ClearSprites(void)
 void LoadSprites(void)
 {
     numKeys = 0;
-    for(gTmp2 = 0; gTmp2 < numSprites; gTmp2++)
+    for(gTmp2 = 0; gTmp2 < gNumSprites; gTmp2++)
     {
         gTmp = *gScratchPointer2++;
         gSpriteTable.id[gTmp2] =             gTmp;
@@ -686,11 +696,16 @@ void LoadSprites(void)
         gTmp = *gScratchPointer2++;
         gSpriteTable.direction[gTmp2] =      gTmp;
         gTmp = *gScratchPointer2++;
-        gSpriteTable.numSprites[gTmp2] =     gTmp;
-        gTmp = *gScratchPointer2++;
         gSpriteTable.doesTongueKill[gTmp2] = gTmp;
-        gTmp = *gScratchPointer2++;
-        gSpriteTable.spriteOffset[gTmp2] =    gTmp;
+
+        if( gTmp2 == 0 )
+        {
+            gSpriteOffset[gTmp2] = 0;
+        }
+        else
+        {
+            gSpriteOffset[gTmp2] = gSpriteOffset[gTmp2-1] + (SpriteSize[gSpriteTable.id[gTmp2-1]] << 2);
+        }
 
         if(gSpriteTable.id[gTmp2] == KEY_ID) {
           numKeys++;
@@ -1623,7 +1638,7 @@ void load_stage(void)
     if( LevelTable[gStage].numSprites != 0 )
     {
         ClearSprites();
-        numSprites = LevelTable[gStage].numSprites;
+        gNumSprites = LevelTable[gStage].numSprites;
     }
 
     if( LevelTable[gStage].sprites != 0 )
@@ -1848,13 +1863,11 @@ void take_hit(void)
  * j as an index into sprites
  * i as an index into gSpriteTable
  * Overwrites:
- * gTmp
  * gTmp2
  * gTmp8
  */
 void spawn_1_by_1_sprite(void)
 {
-    gTmp = gSpriteTable.numSprites[i];
     sprites[j] = gTmp8;
     gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
     sprites[j + 1] = gTmp2;
@@ -1882,7 +1895,6 @@ void despawn_1_sprite(void)
  * j as an index into sprites
  * i as an index into gSpriteTable
  * Overwrites:
- * gTmp
  * gTmp2
  * gTmp8
  */
@@ -1894,7 +1906,6 @@ void spawn_2_by_1_sprite(void)
     }
     else
     {
-        gTmp = gSpriteTable.numSprites[i];
         sprites[j] = gTmp8;
         sprites[j + 4] = gTmp8;
         gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
@@ -1931,7 +1942,6 @@ void spawn_portal_sprite(void)
 {
     if( numKeys == 0 )
     {
-        gTmp = gSpriteTable.numSprites[i];
         sprites[j] = gTmp8;
         sprites[j + 4] = gTmp8;
         sprites[j + 8] = gTmp8 + 8;
@@ -2056,7 +2066,7 @@ void sprite_maintain_y_position(void) {
 
   k = j;
 
-  gTmp5 = gSpriteTable.numSprites[i];
+  gTmp5 = SpriteSize[gSpriteTable.id[i]];
   for(gTmp4 = 0 ; gTmp4 < gTmp5 ; gTmp4++) {
     gTmp6 = sprites[k];
     sprites[k] = gTmp6 - gTmp;
@@ -2597,8 +2607,8 @@ void do_physics(void)
     }
 
     //Update enemies with movements
-    for(i = 0; i < numSprites; i++) {
-      j = FIRST_ENEMY_SPRITE + gSpriteTable.spriteOffset[i];
+    for(i = 0; i < gNumSprites; i++) {
+      j = FIRST_ENEMY_SPRITE + gSpriteOffset[i];
       gTmp3 = sprites[j];
 
       gTmp2 = gSpriteTable.id[i];
@@ -2645,7 +2655,7 @@ void do_physics(void)
               gSpriteTable.state[i] = 0x5A; // set the respawn time to 1.5s
           }
 
-          gTmp = gSpriteTable.numSprites[i];
+          gTmp = SpriteSize[gSpriteTable.id[i]];
           for(k = 0; k < gTmp; k++)
           {
             //moved offscreen so kill it
