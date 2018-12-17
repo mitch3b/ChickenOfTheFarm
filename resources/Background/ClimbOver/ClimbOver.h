@@ -14,7 +14,7 @@ LIGHT_BLUE,
 WHITE,
 };
 
-#define CLIMBOVER_ENEMY_COUNT 12
+#define CLIMBOVER_ENEMY_COUNT 9
 static const unsigned char Sprites_ClimbOver[CLIMBOVER_ENEMY_COUNT * 7] = {
 //   id, startX, startY, startNametable, state, direction, doesTongueKill,
    0x02,   0x88,   0xC3,           0x02,  0x00,      0x00,           0x00,
