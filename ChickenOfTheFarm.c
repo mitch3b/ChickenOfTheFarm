@@ -190,9 +190,10 @@ typedef struct {
     unsigned char        world;
 } level_additional_properties_t;
 
-#define NUM_LEVELS 15
+#define NUM_LEVELS 16
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+    {Nametable_ClimbOver_bottom_rle,             Nametable_ClimbOver_top_rle,             ClimbOverPalette,             Sprites_ClimbOver,             CLIMBOVER_ENEMY_COUNT,             2,},
     {Nametable_IceStairs_bottom_rle,             Nametable_IceStairs_top_rle,             IceStairsPalette,             Sprites_IceStairs,             ICESTAIRS_ENEMY_COUNT,             2,},
     {Nametable_FirstIce_bottom_rle,              Nametable_FirstIce_top_rle,              FirstIcePalette,              Sprites_FirstIce,              FIRSTICE_ENEMY_COUNT,              2,},
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 IntroPalette,                 Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
@@ -215,6 +216,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
+    {0x10, 0xBF, 2},
     {0x10, 0xBF, 2},
     {0x20, 0xBF, 2},
     {0x10, 0xBF, 1},
