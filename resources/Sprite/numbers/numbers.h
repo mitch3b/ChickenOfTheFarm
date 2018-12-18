@@ -1,4 +1,4 @@
-const unsigned int numbersPalette[4]={
+const unsigned char numbersPalette[4]={
 BLACK,
 DARK_GRAY,
 GRAY,

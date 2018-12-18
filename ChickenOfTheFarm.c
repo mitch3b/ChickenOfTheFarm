@@ -119,9 +119,7 @@ typedef struct {
   unsigned char startX[MAX_NUM_SPRITES];
   unsigned char startY[MAX_NUM_SPRITES];
   unsigned char startNametable[MAX_NUM_SPRITES];
-  unsigned char state[MAX_NUM_SPRITES];
   unsigned char direction[MAX_NUM_SPRITES]; //Also palette color, bit 7 is direction
-  unsigned char doesTongueKill[MAX_NUM_SPRITES];
 } sprites_t;
 #define SPRITES_T_MEMBER_COUNT 9
 
@@ -189,6 +187,8 @@ typedef struct {
     unsigned char        FrogStartY;
     unsigned char        world;
 } level_additional_properties_t;
+
+
 
 #define NUM_LEVELS 17
 level_properties_t LevelTable[NUM_LEVELS] = {
@@ -367,6 +367,7 @@ static unsigned char        gCounter;
 static unsigned char        gHealth;
 static unsigned char        gIframes;
 static sprites_t            gSpriteTable;
+static unsigned char        gSpriteState[MAX_NUM_SPRITES];
 static unsigned char        gSpriteOffset[MAX_NUM_SPRITES];
 static unsigned char        gNumSprites;
 static GameState_t          gGameState;
@@ -701,11 +702,9 @@ void LoadSprites(void)
         gTmp = *gScratchPointer2++;
         gSpriteTable.startNametable[gTmp2] = gTmp;
         gTmp = *gScratchPointer2++;
-        gSpriteTable.state[gTmp2] =          gTmp;
-        gTmp = *gScratchPointer2++;
         gSpriteTable.direction[gTmp2] =      gTmp;
-        gTmp = *gScratchPointer2++;
-        gSpriteTable.doesTongueKill[gTmp2] = gTmp;
+
+        gSpriteState[gTmp2] = 0;
 
         if( gTmp2 == 0 )
         {
@@ -1910,11 +1909,11 @@ void despawn_1_sprite(void)
  */
 void spawn_2_by_1_sprite(void)
 {
-    if( gSpriteTable.state[i] != 0xFF )
+    if( gSpriteState[i] != 0xFF )
     {
-        if( gSpriteTable.state[i] != 0 )
+        if( gSpriteState[i] != 0 )
         {
-            --gSpriteTable.state[i];
+            --gSpriteState[i];
         }
         else
         {
@@ -2040,7 +2039,7 @@ void spawn_check(void)
         }
         else {
           spriteProperties[gSpriteTable.id[i]].despawn();
-          gSpriteTable.state[i] = 0;
+          gSpriteState[i] = 0;
         }
       }
       else {
@@ -2096,7 +2095,7 @@ void arrow_ai_handler(void)
     sprite_maintain_y_position();
 
     //Update X
-    if(gSpriteTable.state[i] == 2 || gSpriteTable.state[i] == 1)
+    if(gSpriteState[i] == 2 || gSpriteState[i] == 1)
     {
         //Arrow is in flight
         //if arrow is just long enough to stick into a wall
@@ -2104,9 +2103,9 @@ void arrow_ai_handler(void)
         y1 = sprites[j] + 4;
         height1 = 2;
         width1 = 8; //Don't count the tip
-        if(gSpriteTable.state[i] == 2 && is_background_collision())
+        if(gSpriteState[i] == 2 && is_background_collision())
         {
-          gSpriteTable.state[i] = 3;
+          gSpriteState[i] = 3;
         }
         else
         {
@@ -2119,7 +2118,7 @@ void arrow_ai_handler(void)
             gTmp4 -= gSpriteTable.startX[i];
 
             if(gTmp4 > 8) {
-              gSpriteTable.state[i] = 2;
+              gSpriteState[i] = 2;
             }
           }
           else {
@@ -2130,28 +2129,28 @@ void arrow_ai_handler(void)
             gTmp4 -= sprites[j + 3];
 
             if(gTmp4 > 8) {
-              gSpriteTable.state[i] = 2;
+              gSpriteState[i] = 2;
             }
           }
         }
     }
-    else if(gSpriteTable.state[i] == 0)
+    else if(gSpriteState[i] == 0)
     {
       //Arrow isn't moving/waiting for trigger
       if(sprites[j] >= sprites[0] && sprites[j] <= sprites[8])
       {
         //Start moving if frog becomes in path
-        gSpriteTable.state[i] = 1;
+        gSpriteState[i] = 1;
       }
     }
     else
     {
         //Arrow is stuck in wall
-        gTmp4 = gSpriteTable.state[i];
-        gSpriteTable.state[i] = gTmp4 + 1;
+        gTmp4 = gSpriteState[i];
+        gSpriteState[i] = gTmp4 + 1;
         //Check if its been stuck long enough to respawn
-        if(gSpriteTable.state[i] > 120) {
-          gSpriteTable.state[i] = 0;
+        if(gSpriteState[i] > 120) {
+          gSpriteState[i] = 0;
           gTmp4 = gSpriteTable.startX[i];
           sprites[j + 3] = gTmp4;
         }
@@ -2298,7 +2297,7 @@ void snake_ai_handler(void)
 {
   gSnakeMovement = 0;
 
-  if(gSpriteTable.state[i] == 0xFF)
+  if(gSpriteState[i] == 0xFF)
   {
       despawn_2_sprite();
   }
@@ -2307,13 +2306,13 @@ void snake_ai_handler(void)
   {
     sprite_maintain_y_position();
 
-    gTmp = gSpriteTable.state[i];
+    gTmp = gSpriteState[i];
 
-    (*(unsigned char*) 0x2F0) = gSpriteTable.state[i];
+    (*(unsigned char*) 0x2F0) = gSpriteState[i];
 
     //Update Y
-    sprites[j] = sprites[j] +     gTmp;//gSpriteTable.state[i];
-    sprites[j+4] = sprites[j+4] + gTmp;//gSpriteTable.state[i];
+    sprites[j] = sprites[j] +     gTmp;
+    sprites[j+4] = sprites[j+4] + gTmp;
 
     if((gFrameCounter & 0x8) != 0)
     {
@@ -2325,17 +2324,17 @@ void snake_ai_handler(void)
     height1 = 8;
     width1 = 15; //Don't count the tip
     if(is_background_collision()) {
-      sprites[j] =   sprites[j] -   gTmp;//gSpriteTable.state[i];
-      sprites[j+4] = sprites[j+4] - gTmp;//gSpriteTable.state[i];
+      sprites[j] =   sprites[j] -   gTmp;
+      sprites[j+4] = sprites[j+4] - gTmp;
 
       // reset the snake falling speed
-      gSpriteTable.state[i] = 1;
+      gSpriteState[i] = 1;
     }
     else
     {
-        if( gSpriteTable.state[i] < 15 && (gFrameCounter & 1) == 0 )
+        if( gSpriteState[i] < 15 && (gFrameCounter & 1) == 0 )
         {
-            ++gSpriteTable.state[i];
+            ++gSpriteState[i];
         }
     }
 
@@ -2804,12 +2803,12 @@ void do_physics(void)
           gTongueCounter = 0;
           if( gSpriteTable.id[i] == SNAKE_ID )
           {
-              gSpriteTable.state[i] = 0xFF; // kill the snake
+              gSpriteState[i] = 0xFF; // kill the snake
           }
 
           if( gSpriteTable.id[i] == BIRD_ID )
           {
-              gSpriteTable.state[i] = 0x5A; // set the respawn time to 1.5s
+              gSpriteState[i] = 0x5A; // set the respawn time to 1.5s
           }
 
           gTmp = SpriteSize[gSpriteTable.id[i]];

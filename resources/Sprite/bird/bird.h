@@ -1,4 +1,4 @@
-const unsigned int birdPalette[4]={
+const unsigned char birdPalette[4]={
 BLACK,
 GRAY_BLUE,
 DARK_BLUE,

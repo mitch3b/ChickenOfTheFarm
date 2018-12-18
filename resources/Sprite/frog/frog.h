@@ -1,4 +1,4 @@
-const unsigned int frogPalette[4]={
+const unsigned char frogPalette[4]={
 BLACK,
 DARK_GREEN,
 GREEN,

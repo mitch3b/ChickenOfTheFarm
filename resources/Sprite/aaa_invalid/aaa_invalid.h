@@ -1,4 +1,4 @@
-const unsigned int aaa_invalidPalette[4]={
+const unsigned char aaa_invalidPalette[4]={
 BLACK,
 DARK_GREEN,
 GREEN,

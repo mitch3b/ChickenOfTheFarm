@@ -1,4 +1,4 @@
-const unsigned int tonguePalette[4]={
+const unsigned char tonguePalette[4]={
 BLACK,
 DARK_RED,
 RED,

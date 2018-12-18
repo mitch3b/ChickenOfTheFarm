@@ -1,4 +1,4 @@
-const unsigned int arrowPalette[4]={
+const unsigned char arrowPalette[4]={
 BLACK,
 GRAY_BLUE,
 DARK_BLUE,

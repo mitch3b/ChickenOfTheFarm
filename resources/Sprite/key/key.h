@@ -1,4 +1,4 @@
-const unsigned int keyPalette[4]={
+const unsigned char keyPalette[4]={
 BLACK,
 GRAY_BLUE,
 DARK_BLUE,
