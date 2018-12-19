@@ -190,9 +190,10 @@ typedef struct {
 
 
 
-#define NUM_LEVELS 17
+#define NUM_LEVELS 18
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+    {Nametable_KeyRescue_bottom_rle,             Nametable_KeyRescue_top_rle,             KeyRescuePalette,             Sprites_KeyRescue,             KEYRESCUE_ENEMY_COUNT,             2,},
     {Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IceRunPalette,                Sprites_IceRun,                ICERUN_ENEMY_COUNT,                2,},
     {Nametable_ClimbOver_bottom_rle,             Nametable_ClimbOver_top_rle,             ClimbOverPalette,             Sprites_ClimbOver,             CLIMBOVER_ENEMY_COUNT,             2,},
     {Nametable_IceStairs_bottom_rle,             Nametable_IceStairs_top_rle,             IceStairsPalette,             Sprites_IceStairs,             ICESTAIRS_ENEMY_COUNT,             2,},
@@ -217,7 +218,8 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
-    {0xF0, 0xBF, 2},
+    {0x80, 0x4F, 2},
+    {0x10, 0xBF, 2},
     {0x10, 0xBF, 2},
     {0x10, 0xBF, 2},
     {0x20, 0xBF, 2},
@@ -392,6 +394,8 @@ static unsigned char        gCurrentMusic;
 static unsigned char        gCurrentMusicTmp;
 static unsigned char        gBirdMovement;
 static unsigned char        gSnakeMovement;
+static unsigned char        gSpeedCounter;
+static unsigned char        gVelocityCounter;
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -1523,9 +1527,14 @@ void update_sprites(void)
     if( ((gController1 & (BUTTON_RIGHT | BUTTON_LEFT)) == 0) && (gSpeed > 0) )
     {
         // do this for ice physics
-        if( (LevelProperties[gStage].world != 2) || ((gFrameCounter & 0x03) == 0x00) )
+        if( (LevelProperties[gStage].world != 2) || (gSpeedCounter == 0x04) )
         {
             --gSpeed;
+            gSpeedCounter = 0;
+        }
+        else
+        {
+            ++gSpeedCounter;
         }
     }
     if(gController1 & BUTTON_B)
@@ -2658,9 +2667,14 @@ void do_physics(void)
         }
         else
         {
-            if((gController1 & BUTTON_A) != BUTTON_A || (gFrameCounter & 1))
+            if((gController1 & BUTTON_A) != BUTTON_A || (gVelocityCounter & 1))
             {
                 gVelocity -= 1;
+                gVelocityCounter = 0;
+            }
+            else
+            {
+                ++gVelocityCounter;
             }
         }
     }
