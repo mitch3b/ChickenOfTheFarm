@@ -193,6 +193,7 @@ typedef struct {
 #define NUM_LEVELS 18
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
     {Nametable_KeyRescue_bottom_rle,             Nametable_KeyRescue_top_rle,             KeyRescuePalette,             Sprites_KeyRescue,             KEYRESCUE_ENEMY_COUNT,             2,},
     {Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IceRunPalette,                Sprites_IceRun,                ICERUN_ENEMY_COUNT,                2,},
     {Nametable_ClimbOver_bottom_rle,             Nametable_ClimbOver_top_rle,             ClimbOverPalette,             Sprites_ClimbOver,             CLIMBOVER_ENEMY_COUNT,             2,},
@@ -212,12 +213,12 @@ level_properties_t LevelTable[NUM_LEVELS] = {
     //{Nametable_Level4_bottom_rle,                Nametable_Level4_top_rle,                Level4Palette,                Sprites_Level4,                LEVEL4_ENEMY_COUNT,                2,},
 	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2,},
 	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2,},
-	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
     {Nametable_EndingScreen_bottom_rle,          0,                                       EndingScreenPalette,          0,                             0,                                 0,},
 };
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
+    {0x10, 0xCF, 3},
     {0x80, 0x4F, 2},
     {0x10, 0xBF, 2},
     {0x10, 0xBF, 2},
@@ -235,7 +236,6 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     //{0x10, 0xCF, 1},
     //{0x10, 0xCF, 1},
     //{0x10, 0xCF, 1},
-    {0x10, 0xCF, 3},
     {0x10, 0xCF, 3},
     {0x10, 0xCF, 3},
     {0x10, 0xCF, 1},
@@ -1527,7 +1527,7 @@ void update_sprites(void)
     if( ((gController1 & (BUTTON_RIGHT | BUTTON_LEFT)) == 0) && (gSpeed > 0) )
     {
         // do this for ice physics
-        if( (LevelProperties[gStage].world != 2) || (gSpeedCounter == 0x04) )
+        if( (LevelProperties[gStage].world != 2) || (gSpeedCounter == gSpeed) || (gSpeedCounter == 0x04) )
         {
             --gSpeed;
             gSpeedCounter = 0;
