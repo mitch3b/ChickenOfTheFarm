@@ -191,9 +191,10 @@ typedef struct {
 
 
 
-#define NUM_LEVELS 19
+#define NUM_LEVELS 20
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+	{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               RavePitPalette,               Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,               2,},
 	{Nametable_FirstRave_bottom_rle,             Nametable_FirstRave_top_rle,             FirstRavePalette,             Sprites_FirstRave,             FIRSTRAVE_ENEMY_COUNT,             2,},
 	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
     {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
@@ -220,6 +221,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
+    {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xCF, 3},
     {0x78, 0xBF, 1},
@@ -401,6 +403,7 @@ static unsigned char        gSpeedCounter;
 static unsigned char        gVelocityCounter;
 static unsigned char        gColorTimer;
 static unsigned char        gColorTimer2;
+static unsigned char        gTmpDirection;
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -712,6 +715,11 @@ void LoadSprites(void)
         gSpriteTable.startNametable[gTmp2] = gTmp;
         gTmp = *gScratchPointer2++;
         gSpriteTable.direction[gTmp2] =      gTmp;
+
+        if( gSpriteTable.id[gTmp2] == SNAKE_ID && ((gSpriteTable.direction[gTmp2] & 0x10) == 0x10))
+        {
+            gSpriteTable.direction[gTmp2] = gSpriteTable.direction[gTmp2] | 0x20;
+        }
 
         gSpriteState[gTmp2] = 0;
 
@@ -1940,13 +1948,30 @@ void spawn_2_by_1_sprite(void)
         }
         else
         {
+            if( gSpriteTable.id[i] == SNAKE_ID )
+            {
+                gTmpDirection = ((gSpriteTable.direction[i] & 0x20) >> 1);
+                gSpriteTable.direction[i] = gSpriteTable.direction[i] & 0xEF;
+                gSpriteTable.direction[i] = gSpriteTable.direction[i] | gTmpDirection;
+            }
+
             sprites[j] = gTmp8;
             sprites[j + 4] = gTmp8;
             gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
-            sprites[j + 1] = gTmp2;
-            sprites[j + 5] = gTmp2 + 1;
-            sprites[j + 2] = gSpriteTable.direction[i];
-            sprites[j + 6] = gSpriteTable.direction[i];
+            if((gSpriteTable.direction[i] & 0x10) == 0x10 )
+            {
+                sprites[j + 5] = gTmp2;
+                sprites[j + 1] = gTmp2 + 1;
+                sprites[j + 2] = gSpriteTable.direction[i] | 0x40;
+                sprites[j + 6] = gSpriteTable.direction[i] | 0x40;
+            }
+            else
+            {
+                sprites[j + 1] = gTmp2;
+                sprites[j + 5] = gTmp2 + 1;
+                sprites[j + 2] = gSpriteTable.direction[i];
+                sprites[j + 6] = gSpriteTable.direction[i];
+            }
             if(sprites[j + 3] == 0) {
               gTmp8 = gSpriteTable.startX[i];
               sprites[j + 3] = gTmp8;
