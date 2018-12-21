@@ -130,6 +130,7 @@ static unsigned char SpriteSize[ID_COUNT] = {
     2,  //BIRD_ID      3
     4,  //PORTAL_ID    4
     1,  //KEY_ID       5
+    2,  //SNAKE_ID     6
 };
 
 void spawn_1_by_1_sprite(void);
@@ -190,10 +191,14 @@ typedef struct {
 
 
 
-#define NUM_LEVELS 18
+#define NUM_LEVELS 19
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+	{Nametable_FirstRave_bottom_rle,             Nametable_FirstRave_top_rle,             FirstRavePalette,             Sprites_FirstRave,             FIRSTRAVE_ENEMY_COUNT,             2,},
 	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
+    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
+    {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        SmallPlatformsPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
+    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          TwoBirdClimbPalette,          Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
     {Nametable_KeyRescue_bottom_rle,             Nametable_KeyRescue_top_rle,             KeyRescuePalette,             Sprites_KeyRescue,             KEYRESCUE_ENEMY_COUNT,             2,},
     {Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IceRunPalette,                Sprites_IceRun,                ICERUN_ENEMY_COUNT,                2,},
     {Nametable_ClimbOver_bottom_rle,             Nametable_ClimbOver_top_rle,             ClimbOverPalette,             Sprites_ClimbOver,             CLIMBOVER_ENEMY_COUNT,             2,},
@@ -204,9 +209,6 @@ level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            ShortClimbPalette,            Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
     {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             BirdClimbPalette,             Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2,},
     {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               OpenPitPalette,               Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
-    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
-    {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        SmallPlatformsPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
-    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          TwoBirdClimbPalette,          Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
     //{Nametable_Level1_bottom_rle,                Nametable_Level1_top_rle,                Level1Palette,                Sprites_Level1,                LEVEL1_ENEMY_COUNT,                2,},
     //{Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2,},
     //{Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2,},
@@ -218,7 +220,11 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
+    {0x10, 0xBF, 4},
     {0x10, 0xCF, 3},
+    {0x78, 0xBF, 1},
+    {0x10, 0xBF, 1},
+    {0x78, 0xBF, 1},
     {0x80, 0x4F, 2},
     {0x10, 0xBF, 2},
     {0x10, 0xBF, 2},
@@ -229,9 +235,6 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
-    {0x78, 0xBF, 1},
-    {0x10, 0xBF, 1},
-    {0x78, 0xBF, 1},
     //{0x10, 0xCF, 1},
     //{0x10, 0xCF, 1},
     //{0x10, 0xCF, 1},
@@ -396,6 +399,8 @@ static unsigned char        gBirdMovement;
 static unsigned char        gSnakeMovement;
 static unsigned char        gSpeedCounter;
 static unsigned char        gVelocityCounter;
+static unsigned char        gColorTimer;
+static unsigned char        gColorTimer2;
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -750,56 +755,65 @@ void palettes(void)
 
 void load_palette(void)
 {
-    SET_COLOR(BACKGROUND0_0, gScratchPointer[0]);
-    SET_COLOR(BACKGROUND1_0, gScratchPointer[4]);
-    SET_COLOR(BACKGROUND2_0, gScratchPointer[7]);
-    SET_COLOR(BACKGROUND3_0, gScratchPointer[10]);
-
-    if( gFade > 0 )
+    if( gDisplayLives == 1 || LevelProperties[gStage].world != 4 )
     {
-        SET_COLOR(BACKGROUND0_1, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND1_1, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND2_1, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND3_1, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND0_0, gScratchPointer[0]);
+        SET_COLOR(BACKGROUND1_0, gScratchPointer[4]);
+        SET_COLOR(BACKGROUND2_0, gScratchPointer[7]);
+        SET_COLOR(BACKGROUND3_0, gScratchPointer[10]);
+
+        if( gFade > 0 )
+        {
+            SET_COLOR(BACKGROUND0_1, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND1_1, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND2_1, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND3_1, gScratchPointer[0]);
+        }
+        else
+        {
+            SET_COLOR(BACKGROUND0_1, gScratchPointer[1 ]);
+            SET_COLOR(BACKGROUND1_1, gScratchPointer[4 ]);
+            SET_COLOR(BACKGROUND2_1, gScratchPointer[7 ]);
+            SET_COLOR(BACKGROUND3_1, gScratchPointer[10]);
+        }
+
+        if( gFade > 1 )
+        {
+            SET_COLOR(BACKGROUND0_2, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND1_2, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND2_2, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND3_2, gScratchPointer[0]);
+        }
+        else
+        {
+            SET_COLOR(BACKGROUND0_2, gScratchPointer[2  - gFade]);
+            SET_COLOR(BACKGROUND1_2, gScratchPointer[5  - gFade]);
+            SET_COLOR(BACKGROUND2_2, gScratchPointer[8  - gFade]);
+            SET_COLOR(BACKGROUND3_2, gScratchPointer[11 - gFade]);
+        }
+
+        if( gFade > 2 )
+        {
+            SET_COLOR(BACKGROUND0_3, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND1_3, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND2_3, gScratchPointer[0]);
+            SET_COLOR(BACKGROUND3_3, gScratchPointer[0]);
+        }
+        else
+        {
+            SET_COLOR(BACKGROUND0_3, gScratchPointer[3  - gFade]);
+            SET_COLOR(BACKGROUND1_3, gScratchPointer[6  - gFade]);
+            SET_COLOR(BACKGROUND2_3, gScratchPointer[9  - gFade]);
+            SET_COLOR(BACKGROUND3_3, gScratchPointer[12 - gFade]);
+        }
     }
     else
     {
-        SET_COLOR(BACKGROUND0_1, gScratchPointer[1 ]);
-        SET_COLOR(BACKGROUND1_1, gScratchPointer[4 ]);
-        SET_COLOR(BACKGROUND2_1, gScratchPointer[7 ]);
-        SET_COLOR(BACKGROUND3_1, gScratchPointer[10]);
+        SET_COLOR(BACKGROUND0_0, BLACK);
+        SET_COLOR(BACKGROUND0_1, BLACK);
+        SET_COLOR(BACKGROUND0_2, DARK_GRAY);
+        SET_COLOR(BACKGROUND0_3, BLACK);
     }
-
-    if( gFade > 1 )
-    {
-        SET_COLOR(BACKGROUND0_2, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND1_2, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND2_2, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND3_2, gScratchPointer[0]);
-    }
-    else
-    {
-        SET_COLOR(BACKGROUND0_2, gScratchPointer[2  - gFade]);
-        SET_COLOR(BACKGROUND1_2, gScratchPointer[5  - gFade]);
-        SET_COLOR(BACKGROUND2_2, gScratchPointer[8  - gFade]);
-        SET_COLOR(BACKGROUND3_2, gScratchPointer[11 - gFade]);
-    }
-
-    if( gFade > 2 )
-    {
-        SET_COLOR(BACKGROUND0_3, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND1_3, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND2_3, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND3_3, gScratchPointer[0]);
-    }
-    else
-    {
-        SET_COLOR(BACKGROUND0_3, gScratchPointer[3  - gFade]);
-        SET_COLOR(BACKGROUND1_3, gScratchPointer[6  - gFade]);
-        SET_COLOR(BACKGROUND2_3, gScratchPointer[9  - gFade]);
-        SET_COLOR(BACKGROUND3_3, gScratchPointer[12 - gFade]);
-    }
-
 }
 
 void fade_out(void)
@@ -2879,6 +2893,9 @@ void init_physics(void)
     gFrogAnimationState = FROG_NORMAL;
     gTongueState = TONGUE_CLEANUP;
     gTongueCounter = 0;
+    gColorTimer = 0x20;
+    gColorTimer2 = 0;
+    gTitleScreenColor = 0x11;
     update_tongue_sprite();
 }
 
@@ -2905,6 +2922,43 @@ void game_running_sm(void)
         vblank();
 
         gFrameCounter++;
+
+        if( LevelProperties[gStage].world == 4 )
+        {
+            if( gColorTimer == 0x20 )
+            {
+
+                // Flashing colors
+                //PPU_MASK = 0x00;
+                SET_COLOR(BACKGROUND0_1, BLACK);
+                SET_COLOR(BACKGROUND0_2, BLACK);
+                SET_COLOR(BACKGROUND0_3, BLACK);
+                //SET_COLOR((BACKGROUND0_1 + gColorTimer2), (gTitleScreenColor + (gColorTimer2 << 4)));
+                SET_COLOR((BACKGROUND0_1 + gColorTimer2), gTitleScreenColor);
+                //SET_COLOR((BACKGROUND0_1 + gColorTimer2), gTitleScreenColor);
+
+                gColorTimer = 0;
+
+                if( gColorTimer2 == 2 )
+                {
+                    gTitleScreenColor++;
+                    if( gTitleScreenColor == 0x1D )
+                    {
+                        gTitleScreenColor = 0x11;
+                    }
+
+                    gColorTimer2 = 0;
+                }
+                else
+                {
+                    ++gColorTimer2;
+                }
+            }
+            else
+            {
+                ++gColorTimer;
+            }
+        }
 
         input_poll();
 
