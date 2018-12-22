@@ -191,9 +191,10 @@ typedef struct {
 
 
 
-#define NUM_LEVELS 21
+#define NUM_LEVELS 22
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+	{Nametable_RaveSnakeStairs_bottom_rle,       Nametable_RaveSnakeStairs_top_rle,       RaveSnakeStairsPalette,       Sprites_RaveSnakeStairs,       RAVESNAKESTAIRS_ENEMY_COUNT,       2,},
 	{Nametable_RaveSmallGaps_bottom_rle,         Nametable_RaveSmallGaps_top_rle,         RaveSmallGapsPalette,         Sprites_RaveSmallGaps,         RAVESMALLGAPS_ENEMY_COUNT,         2,},
 	{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               RavePitPalette,               Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,               2,},
 	{Nametable_FirstRave_bottom_rle,             Nametable_FirstRave_top_rle,             FirstRavePalette,             Sprites_FirstRave,             FIRSTRAVE_ENEMY_COUNT,             2,},
@@ -222,6 +223,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
+    {0x70, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
@@ -405,6 +407,7 @@ static unsigned char        gSpeedCounter;
 static unsigned char        gVelocityCounter;
 static unsigned char        gColorTimer;
 static unsigned char        gColorTimer2;
+static unsigned char        gColorTimerLimit;
 static unsigned char        gTmpDirection;
 extern unsigned char        gVblank;
 
@@ -2921,7 +2924,7 @@ void init_physics(void)
     gFrogAnimationState = FROG_NORMAL;
     gTongueState = TONGUE_CLEANUP;
     gTongueCounter = 0;
-    gColorTimer = 0x20;
+    gColorTimer = (gHealth << 3);
     gColorTimer2 = 0;
     gTitleScreenColor = 0x11;
     update_tongue_sprite();
@@ -2953,7 +2956,8 @@ void game_running_sm(void)
 
         if( LevelProperties[gStage].world == 4 )
         {
-            if( gColorTimer == 0x20 )
+            gColorTimerLimit = (gHealth << 3);
+            if( gColorTimer >= gColorTimerLimit )
             {
 
                 // Flashing colors

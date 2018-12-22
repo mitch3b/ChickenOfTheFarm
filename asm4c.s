@@ -170,6 +170,7 @@ _UnCMP:
     asl
     bcc @100
     inc <CMP_TILE_HI
+    inc <CMP_TILE_HI
 @100:
     asl
     bcc @101
