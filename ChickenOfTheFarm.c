@@ -191,9 +191,10 @@ typedef struct {
 
 
 
-#define NUM_LEVELS 20
+#define NUM_LEVELS 21
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+	{Nametable_RaveSmallGaps_bottom_rle,         Nametable_RaveSmallGaps_top_rle,         RaveSmallGapsPalette,         Sprites_RaveSmallGaps,         RAVESMALLGAPS_ENEMY_COUNT,         2,},
 	{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               RavePitPalette,               Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,               2,},
 	{Nametable_FirstRave_bottom_rle,             Nametable_FirstRave_top_rle,             FirstRavePalette,             Sprites_FirstRave,             FIRSTRAVE_ENEMY_COUNT,             2,},
 	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
@@ -221,6 +222,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
+    {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xCF, 3},
@@ -2822,7 +2824,8 @@ void do_physics(void)
       // Check if we scrolled this offscreen
       gTmp7 = sprites[j];
       if((gTmp3 > gTmp7 && (gTmp3 - gTmp7) > 200)
-       || (gTmp7 > gTmp3 && (gTmp7 - gTmp3) > 200)) {
+       || (gTmp7 > gTmp3 && (gTmp7 - gTmp3) > 200)
+       || (gTmp7 == 0xFF)) {
         spriteProperties[gTmp2].despawn();
       }
 
