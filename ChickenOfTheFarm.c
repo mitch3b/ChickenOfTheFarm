@@ -191,15 +191,18 @@ typedef struct {
 
 
 
-#define NUM_LEVELS 22
+#define NUM_LEVELS 23
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,           0,                             0,                                 0,},
+	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
+	{Nametable_RaveTwoTowers_bottom_rle,         Nametable_RaveTwoTowers_top_rle,         RaveTwoTowersPalette,         Sprites_RaveTwoTowers,         RAVETWOTOWERS_ENEMY_COUNT,         2,},
+	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2,},
+	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2,},
+    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
 	{Nametable_RaveSnakeStairs_bottom_rle,       Nametable_RaveSnakeStairs_top_rle,       RaveSnakeStairsPalette,       Sprites_RaveSnakeStairs,       RAVESNAKESTAIRS_ENEMY_COUNT,       2,},
 	{Nametable_RaveSmallGaps_bottom_rle,         Nametable_RaveSmallGaps_top_rle,         RaveSmallGapsPalette,         Sprites_RaveSmallGaps,         RAVESMALLGAPS_ENEMY_COUNT,         2,},
 	{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               RavePitPalette,               Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,               2,},
 	{Nametable_FirstRave_bottom_rle,             Nametable_FirstRave_top_rle,             FirstRavePalette,             Sprites_FirstRave,             FIRSTRAVE_ENEMY_COUNT,             2,},
-	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     LevelBackAndForthPalette,     Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
-    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            ArrowClimbPalette,            Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
     {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        SmallPlatformsPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
     {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          TwoBirdClimbPalette,          Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
     {Nametable_KeyRescue_bottom_rle,             Nametable_KeyRescue_top_rle,             KeyRescuePalette,             Sprites_KeyRescue,             KEYRESCUE_ENEMY_COUNT,             2,},
@@ -216,19 +219,20 @@ level_properties_t LevelTable[NUM_LEVELS] = {
     //{Nametable_Level2_bottom_rle,                Nametable_Level2_top_rle,                Level2Palette,                Sprites_Level2,                LEVEL2_ENEMY_COUNT,                2,},
     //{Nametable_Level3_bottom_rle,                Nametable_Level3_top_rle,                Level3Palette,                Sprites_Level3,                LEVEL3_ENEMY_COUNT,                2,},
     //{Nametable_Level4_bottom_rle,                Nametable_Level4_top_rle,                Level4Palette,                Sprites_Level4,                LEVEL4_ENEMY_COUNT,                2,},
-	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, LevelOutfacingShelvesPalette, Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2,},
-	{Nametable_LevelUpAndDown_bottom_rle,        Nametable_LevelUpAndDown_top_rle,        LevelUpAndDownPalette,        Sprites_LevelUpAndDown,        LEVELUPANDDOWN_ENEMY_COUNT,        2,},
     {Nametable_EndingScreen_bottom_rle,          0,                                       EndingScreenPalette,          0,                             0,                                 0,},
 };
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
+    {0x10, 0xCF, 3},
+    {0x10, 0x9F, 4},
+    {0x10, 0xCF, 3},
+    {0x10, 0xCF, 3},
+    {0x78, 0xBF, 1},
     {0x70, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
-    {0x10, 0xCF, 3},
-    {0x78, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x78, 0xBF, 1},
     {0x80, 0x4F, 2},
@@ -245,8 +249,6 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     //{0x10, 0xCF, 1},
     //{0x10, 0xCF, 1},
     //{0x10, 0xCF, 1},
-    {0x10, 0xCF, 3},
-    {0x10, 0xCF, 3},
     {0x10, 0xCF, 1},
 };
 
