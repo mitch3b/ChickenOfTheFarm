@@ -1,18 +1,4 @@
-const unsigned char IntroPalette[13]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-DARK_TAN,
-DARK_GREEN,
-GREEN,
-DARK_TAN,
-DARK_GREEN,
-TAN,
-GREEN,
-GRAY,
-WHITE,
-};
+#include "../GrassPalette.h"
 
 #define INTRO_ENEMY_COUNT 2
 static const unsigned char Sprites_Intro[INTRO_ENEMY_COUNT * 5] = {

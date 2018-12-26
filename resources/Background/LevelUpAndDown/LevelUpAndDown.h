@@ -1,9 +1,4 @@
-const unsigned char LevelUpAndDownPalette[4]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-};
+#include "../CastlePalette.h"
 
 #define LEVELUPANDDOWN_ENEMY_COUNT 11
 static const unsigned char Sprites_LevelUpAndDown[LEVELUPANDDOWN_ENEMY_COUNT * 5] = {

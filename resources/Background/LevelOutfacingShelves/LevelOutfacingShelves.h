@@ -1,9 +1,4 @@
-const unsigned char LevelOutfacingShelvesPalette[4]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-};
+#include "../CastlePalette.h"
 
 #define LEVELOUTFACINGSHELVES_ENEMY_COUNT 15
 static const unsigned char Sprites_LevelOutfacingShelves[LEVELOUTFACINGSHELVES_ENEMY_COUNT * 5] = {

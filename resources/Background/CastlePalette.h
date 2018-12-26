@@ -1,0 +1,20 @@
+#ifndef CASTLEPALETTE_H
+#define CASTLEPALETTE_H 1
+
+const unsigned char CastlePalette[13]={
+BLACK,
+DARK_GRAY,
+GRAY,
+WHITE,
+DARK_TAN,
+DARK_GREEN,
+TAN,
+PURPLE,
+PURPLE,
+PURPLE,
+DARK_GREEN,
+GREEN,
+WHITE,
+};
+
+#endif

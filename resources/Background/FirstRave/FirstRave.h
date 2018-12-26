@@ -1,18 +1,4 @@
-const unsigned char FirstRavePalette[13]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-DARK_BLUE,
-BLUE,
-LIGHT_BLUE,
-DARK_PURPLE,
-PURPLE,
-LIGHT_PURPLE,
-DARK_GREEN,
-GREEN,
-LIGHT_GREEN,
-};
+#include "../CastlePalette.h"
 
 #define FIRSTRAVE_ENEMY_COUNT 9
 static const unsigned char Sprites_FirstRave[FIRSTRAVE_ENEMY_COUNT * 5] = {

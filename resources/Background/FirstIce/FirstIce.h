@@ -1,18 +1,4 @@
-const unsigned char FirstIcePalette[13]={
-BLACK,
-VERY_LIGHT_GRAY_BLUE,
-WHITE,
-LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-WHITE,
-VERY_LIGHT_GRAY_BLUE,
-LIGHT_BLUE,
-LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-LIGHT_BLUE,
-WHITE,
-};
+#include "../IcePalette.h"
 
 #define FIRSTICE_ENEMY_COUNT 3
 static const unsigned char Sprites_FirstIce[FIRSTICE_ENEMY_COUNT * 5] = {

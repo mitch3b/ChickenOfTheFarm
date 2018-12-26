@@ -1,18 +1,4 @@
-const unsigned char BirdClimbPalette[13]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-DARK_TAN,
-DARK_GREEN,
-GREEN,
-DARK_TAN,
-DARK_GREEN,
-TAN,
-GREEN,
-GRAY,
-WHITE,
-};
+#include "../GrassPalette.h"
 
 #define BIRDCLIMB_ENEMY_COUNT 3
 static const unsigned char Sprites_BirdClimb[BIRDCLIMB_ENEMY_COUNT * 5] = {

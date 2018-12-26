@@ -1,18 +1,4 @@
-const unsigned char LevelBackAndForthPalette[13]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-DARK_BLUE,
-BLUE,
-LIGHT_BLUE,
-DARK_PURPLE,
-PURPLE,
-LIGHT_PURPLE,
-DARK_GREEN,
-GREEN,
-LIGHT_GREEN,
-};
+#include "../CastlePalette.h"
 
 #define LEVELBACKANDFORTH_ENEMY_COUNT 2
 static const unsigned char Sprites_LevelBackAndForth[LEVELBACKANDFORTH_ENEMY_COUNT * 5] = {

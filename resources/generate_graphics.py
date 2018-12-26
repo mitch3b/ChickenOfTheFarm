@@ -105,7 +105,10 @@ colors = {
 }
 
 palettes = {}
-new_headers = {}
+palette_names = {}
+color_map = {}
+count = {}
+#new_headers = {}
 raw_patterns = {}
 reduced_patterns = []
 raw_nametables = {}
@@ -116,6 +119,7 @@ background_list = []
 sprite_list = []
 background_id = 0
 
+
 # This path can be run from resources folder or from above, but needs it in the path either way
 def getPathWithResources() :
     currentPath = os.getcwd()
@@ -125,18 +129,73 @@ def getPathWithResources() :
 
     return currentPath
 
-def create_patterns(folder, pattern_type):
+def create_palettes(folder, pattern_type):
     global palettes
-    global new_headers
+    global palette_names
+    global color_map
+    global count
+    #global new_headers
     global raw_patterns
     global raw_nametables
     global reduced_nametables
+
+    match = re.search("(.*)\.h",folder)
+    if match:
+        palette_header = os.path.join(getPathWithResources(), pattern_type, folder)
+        header_handle = open(palette_header, 'r')
+        palette_found = 0
+        palette_end_found = 0
+        palette_name = match.group(1)
+
+        palettes[palette_name] = []
+        color_map[palette_name] = ""
+        count[palette_name] = 0
+        for header_line in header_handle.readlines():
+            match = re.search(palette_name, header_line)
+            if match:
+                palette_found = 1
+            if palette_found == 1 and palette_end_found == 0:
+                match = re.search("}", header_line)
+                if match:
+                    palette_end_found = 1
+                match = re.search("(\w+),", header_line)
+                if match:
+                    #print(match.group(0))
+                    palettes[palette_name].append(match.group(1))
+                    color_map[palette_name] = color_map[palette_name] + colors[match.group(1)] + ":"
+                    count[palette_name] = count[palette_name] + 1
+        header_handle.close()
+
+def create_patterns(folder, pattern_type):
+    global palettes
+    global palette_names
+    global color_map
+    global count
+    #global new_headers
+    global raw_patterns
+    global raw_nametables
+    global reduced_nametables
+
+    match = re.search("(.*)\.h",folder)
+    if match:
+        return
 
     base_name = os.path.join(getPathWithResources(), pattern_type, folder, folder)
 
     image = base_name + ".png"
     header = base_name + ".h"
-    color_map = ""
+
+    header_handle = open(header, 'r')
+    palette_found = 0
+    palette_end_found = 0
+
+    for header_line in header_handle.readlines():
+        #new_headers[folder].append(header_line)
+        match = re.search("\/(.*)\.h", header_line)
+        if match:
+            palette_found = 1
+            palette_names[folder] = match.group(1)
+    header_handle.close()
 
     print(folder)
     if not os.path.isfile(image):
@@ -146,8 +205,8 @@ def create_patterns(folder, pattern_type):
         print("missing " + header)
         exit()
 
-    palettes[folder] = []
-    new_headers[folder] = []
+    #palettes[folder] = []
+    #new_headers[folder] = []
     raw_patterns[folder] = []
     raw_nametables[folder] = []
     reduced_nametables[folder] = []
@@ -159,32 +218,10 @@ def create_patterns(folder, pattern_type):
     if pattern_type == "Background":
         background_list.append(folder)
 
-    header_handle = open(header, 'r')
-    palette_found = 0
-    palette_end_found = 0
-
-    count = 0
-    for header_line in header_handle.readlines():
-        new_headers[folder].append(header_line)
-        match = re.search(folder + "Palette", header_line)
-        if match:
-            palette_found = 1
-        if palette_found == 1 and palette_end_found == 0:
-            match = re.search("}", header_line)
-            if match:
-                palette_end_found = 1
-            match = re.search("(\w+),", header_line)
-            if match:
-                #print(match.group(0))
-                palettes[folder].append(match.group(1))
-                color_map = color_map + colors[match.group(1)] + ":"
-                count = count + 1
-    header_handle.close()
-
-    if pattern_type == "Sprite" and count > 4:
+    if pattern_type == "Sprite" and count[palette_names[folder]] > 4:
         print(folder + " specifies too many colors.")
         exit()
-    if pattern_type == "Background" and count > 13:
+    if pattern_type == "Background" and count[palette_names[folder]] > 13:
         print(folder + " specifies too many colors.")
         exit()
     if palette_found == 0:
@@ -201,14 +238,14 @@ def create_patterns(folder, pattern_type):
         result = call([sys.executable,os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
                        "--in=" + image,
                        "--out=" + base_name + "-reduced.png",
-                       "--map=" + color_map,
+                       "--map=" + color_map[palette_names[folder]],
                        "--c=" + base_name + "-tmp.h",
                        "--attribute"])
     else:
         result = call([sys.executable,os.path.join(getPathWithResources(), "sprite_mapper/sprite_pattern_mapper.py"),
                        "--in=" + image,
                        "--out=" + base_name + "-reduced.png",
-                       "--map=" + color_map,
+                       "--map=" + color_map[palette_names[folder]],
                        "--c=" + base_name + "-tmp.h"])
     if result != 0:
         print("Failed to generate %s" % folder)
@@ -241,6 +278,14 @@ def create_patterns(folder, pattern_type):
     #print(raw_patterns)
     #print(raw_nametables)
 
+print("Creating palettes:")
+for folder in os.listdir(os.path.join(getPathWithResources(), "Sprite")):
+    create_palettes(folder, "Sprite")
+
+for folder in os.listdir(os.path.join(getPathWithResources(), "Background")):
+    create_palettes(folder, "Background")
+
+
 print("Creating patterns:")
 for folder in os.listdir(os.path.join(getPathWithResources(), "Sprite")):
     create_patterns(folder, "Sprite")
@@ -255,7 +300,7 @@ for folder in os.listdir(os.path.join(getPathWithResources(), "Background")):
 
 def reduce_patterns( resource ):
     global palettes
-    global new_headers
+    #global new_headers
     global raw_patterns
     global raw_nametables
     global reduced_patterns

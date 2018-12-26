@@ -1,18 +1,4 @@
-const unsigned char SmallPlatformsPalette[13]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-DARK_TAN,
-DARK_GREEN,
-GREEN,
-DARK_TAN,
-DARK_GREEN,
-TAN,
-DARK_GREEN,
-TAN,
-GREEN,
-};
+#include "../GrassPalette.h"
 
 #define SMALLPLATFORMS_ENEMY_COUNT 5
 static const unsigned char Sprites_SmallPlatforms[SMALLPLATFORMS_ENEMY_COUNT * 5] = {

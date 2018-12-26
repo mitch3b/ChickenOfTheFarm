@@ -1,18 +1,4 @@
-const unsigned char IceStairsPalette[13]={
-BLACK,
-VERY_LIGHT_GRAY_BLUE,
-WHITE,
-LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-WHITE,
-VERY_LIGHT_GRAY_BLUE,
-LIGHT_BLUE,
-LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-LIGHT_BLUE,
-WHITE,
-};
+#include "../IcePalette.h"
 
 #define ICESTAIRS_ENEMY_COUNT 12
 static const unsigned char Sprites_IceStairs[ICESTAIRS_ENEMY_COUNT * 5] = {

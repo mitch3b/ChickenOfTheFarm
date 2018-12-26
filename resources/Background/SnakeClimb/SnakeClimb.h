@@ -1,18 +1,4 @@
-const unsigned char SnakeClimbPalette[13]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-DARK_BLUE,
-BLUE,
-LIGHT_BLUE,
-DARK_PURPLE,
-PURPLE,
-LIGHT_PURPLE,
-DARK_GREEN,
-GREEN,
-LIGHT_GREEN,
-};
+#include "../CastlePalette.h"
 
 #define SNAKECLIMB_ENEMY_COUNT 17
 static const unsigned char Sprites_SnakeClimb[SNAKECLIMB_ENEMY_COUNT * 5] = {

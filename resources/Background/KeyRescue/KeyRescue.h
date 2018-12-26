@@ -1,18 +1,4 @@
-const unsigned char KeyRescuePalette[13]={
-BLACK,
-VERY_LIGHT_GRAY_BLUE,
-WHITE,
-LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-WHITE,
-VERY_LIGHT_GRAY_BLUE,
-LIGHT_BLUE,
-LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-LIGHT_BLUE,
-WHITE,
-};
+#include "../IcePalette.h"
 
 #define KEYRESCUE_ENEMY_COUNT 13
 static const unsigned char Sprites_KeyRescue[KEYRESCUE_ENEMY_COUNT * 5] = {

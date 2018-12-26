@@ -1,18 +1,4 @@
-const unsigned char IceRunPalette[13]={
-BLACK,
-VERY_LIGHT_GRAY_BLUE,
-WHITE,
-LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-WHITE,
-VERY_LIGHT_GRAY_BLUE,
-LIGHT_BLUE,
-LIGHT_GRAY_BLUE,
-VERY_LIGHT_GRAY_BLUE,
-LIGHT_BLUE,
-WHITE,
-};
+#include "../IcePalette.h"
 
 #define ICERUN_ENEMY_COUNT 12
 static const unsigned char Sprites_IceRun[ICERUN_ENEMY_COUNT * 5] = {

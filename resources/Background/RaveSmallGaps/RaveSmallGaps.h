@@ -1,18 +1,4 @@
-const unsigned char RaveSmallGapsPalette[13]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-DARK_BLUE,
-BLUE,
-LIGHT_BLUE,
-DARK_PURPLE,
-PURPLE,
-LIGHT_PURPLE,
-DARK_GREEN,
-GREEN,
-LIGHT_GREEN,
-};
+#include "../CastlePalette.h"
 
 #define RAVESMALLGAPS_ENEMY_COUNT 19
 static const unsigned char Sprites_RaveSmallGaps[RAVESMALLGAPS_ENEMY_COUNT * 5] = {

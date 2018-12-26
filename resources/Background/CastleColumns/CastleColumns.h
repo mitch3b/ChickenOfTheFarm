@@ -1,18 +1,4 @@
-const unsigned char CastleColumnsPalette[13]={
-BLACK,
-DARK_GRAY,
-GRAY,
-WHITE,
-DARK_TAN,
-DARK_GREEN,
-TAN,
-DARK_PURPLE,
-PURPLE,
-LIGHT_PURPLE,
-DARK_GREEN,
-GREEN,
-LIGHT_GREEN,
-};
+#include "../CastlePalette.h"
 
 #define CASTLECOLUMNS_ENEMY_COUNT 6
 static const unsigned char Sprites_CastleColumns[CASTLECOLUMNS_ENEMY_COUNT * 5] = {
