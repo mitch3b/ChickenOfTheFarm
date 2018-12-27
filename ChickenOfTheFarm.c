@@ -193,14 +193,14 @@ typedef struct {
 #define NUM_LEVELS 25
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,  0,                             0,                                 0,},
-    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
-    {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        GrassPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
-    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
+    {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
+    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
+    //{Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        GrassPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
+    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
     {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              GrassPalette,        Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2,},
     {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            GrassPalette,        Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
     {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             GrassPalette,        Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2,},
-    {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
     {Nametable_KeyRescue_bottom_rle,             Nametable_KeyRescue_top_rle,             IcePalette,          Sprites_KeyRescue,             KEYRESCUE_ENEMY_COUNT,             2,},
     {Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IcePalette,          Sprites_IceRun,                ICERUN_ENEMY_COUNT,                2,},
     {Nametable_ClimbOver_bottom_rle,             Nametable_ClimbOver_top_rle,             IcePalette,          Sprites_ClimbOver,             CLIMBOVER_ENEMY_COUNT,             2,},
@@ -220,12 +220,12 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 };
 
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
+    {0x10, 0xBF, 0},
+    {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x78, 0xBF, 1},
-    {0x10, 0xBF, 1},
+    //{0x10, 0xBF, 1},
     {0x78, 0xBF, 1},
-    {0x10, 0xBF, 1},
-    {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
@@ -244,7 +244,7 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
-    {0x10, 0xCF, 1},
+    {0x10, 0xCF, 0},
 };
 
 #define TONGUE_SOUND_ID     0
@@ -372,6 +372,7 @@ static unsigned char        gSpeed;
 static unsigned char        gSpeedDirection;
 static unsigned char        gStage;
 static unsigned char        gWorld;
+static unsigned char        gTmpWorld;
 static unsigned char        gCounter;
 static unsigned char        gHealth;
 static unsigned char        gIframes;
@@ -407,6 +408,7 @@ static unsigned char        gColorTimer;
 static unsigned char        gColorTimer2;
 static unsigned char        gColorTimerLimit;
 static unsigned char        gTmpDirection;
+static unsigned char        gContinue;
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -892,7 +894,7 @@ void fade_in(void)
     load_palette();
 
     PPU_CTRL = gPpuCtrlBase + gYNametable;
-    if( gStage == 0 || gStage > (NUM_LEVELS-2) || gDisplayLives == 1)
+    if( gStage == 0 || gStage > (NUM_LEVELS-2) || gDisplayLives == 1 || gContinue == 1 )
     {
         PPU_MASK = 0x0E;
     }
@@ -1819,7 +1821,8 @@ void next_stage(void)
             gTongueCounter = 0;
             update_tongue_sprite();
 
-            if(gWorld != LevelProperties[gStage+1].world)
+            gTmpWorld = LevelProperties[gStage+1].world;
+            if(gWorld != gTmpWorld)
             {
                 gDisplayLives = 1;
                 gWorld = LevelProperties[gStage+1].world;
@@ -1835,9 +1838,112 @@ void death(void)
 
     if( gLives == 0 )
     {
-        gStage = 0;
-        gGameState = TITLE_SCREEN_STATE;
-        //pMusicInit(0);
+        fade_out();
+
+        gCurrentMusic = 4;
+        pMusicInit(4);
+
+        PPU_ADDRESS = 0x24;
+        PPU_ADDRESS = 0x00;
+        UnRLE(Nametable_Lives_top_rle);	// uncompresses our data
+
+        gYNametable = 0;
+        PPU_CTRL = gPpuCtrlBase + gYNametable;
+
+        vblank();
+
+        // make the frog area green
+        PPU_ADDRESS = 0x27;
+        PPU_ADDRESS = 0xDB;
+        PPU_DATA = 0x33;
+        PPU_ADDRESS = 0x27;
+        PPU_ADDRESS = 0xE3;
+        PPU_DATA = 0x33;
+
+        gScratchPointer = CastlePalette;
+        load_palette();
+
+        vblank();
+
+        gContinue = 1;
+
+        fade_in();
+
+        PPU_ADDRESS = 0x21;
+        PPU_ADDRESS = 0xAC;
+        PPU_DATA = PATTERN_MINI_FROG_0;
+        gXScroll = 0;
+        gYScroll = 0;
+        gYNametable = 0;
+        PPU_CTRL = gPpuCtrlBase + gYNametable;
+        set_scroll();
+
+        while(1)
+        {
+            vblank();
+            input_poll();
+
+            if(gController1 == gPrevController1)
+            {
+                continue;
+            }
+
+            if((gController1 & BUTTON_START) == BUTTON_START)
+            {
+                if(gContinue == 1)
+                {
+                    while(LevelProperties[gStage-1].world == gWorld)
+                    {
+                        --gStage;
+                    }
+                    gLives = 2;
+                    gDisplayLives = 1;
+                }
+                else
+                {
+                    gDisplayLives = 0;
+
+                    gStage = 0;
+                    gGameState = TITLE_SCREEN_STATE;
+                }
+                gContinue = 0;
+                break;
+            }
+
+            if(gController1 != 0)
+            {
+                gContinue = gContinue ^ 1;
+
+                if(gContinue == 1)
+                {
+                    PPU_ADDRESS = 0x21;
+                    PPU_ADDRESS = 0xAC;
+                }
+                else
+                {
+                    PPU_ADDRESS = 0x22;
+                    PPU_ADDRESS = 0x2C;
+                }
+                PPU_DATA = PATTERN_MINI_FROG_0;
+
+                if(gContinue == 1)
+                {
+                    PPU_ADDRESS = 0x22;
+                    PPU_ADDRESS = 0x2C;
+                }
+                else
+                {
+                    PPU_ADDRESS = 0x21;
+                    PPU_ADDRESS = 0xAC;
+                }
+                PPU_DATA = 0;
+
+                set_scroll();
+            }
+        }
+
+        //fade_out();
+
     }
     else
     {
@@ -3020,6 +3126,7 @@ void init_game_state(void)
     gFrameCounter = 0;
     gLives = 2;
     gDisplayLives = 1;
+    gContinue = 0;
 }
 
 void game_running_sm(void)
