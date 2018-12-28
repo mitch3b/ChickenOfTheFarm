@@ -70,7 +70,8 @@
 #define PORTAL_ID    4
 #define KEY_ID       5
 #define SNAKE_ID     6
-#define ID_COUNT     7
+#define HEART_ID     7
+#define ID_COUNT     8
 
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
@@ -131,6 +132,7 @@ static unsigned char SpriteSize[ID_COUNT] = {
     4,  //PORTAL_ID    4
     1,  //KEY_ID       5
     2,  //SNAKE_ID     6
+    1,  //HEART_ID     7
 };
 
 void spawn_1_by_1_sprite(void);
@@ -150,6 +152,7 @@ void snake_ai_handler(void);
 void invalid_collision_handler(void);
 void enemy_collision_handler(void);
 void mini_frog_collision_handler(void);
+void heart_collision_handler(void);
 void portal_collision_handler(void);
 void key_collision_handler(void);
 
@@ -172,6 +175,7 @@ sprite_properties_t spriteProperties[ID_COUNT] = {
     {     PATTERN_PORTAL_0,  &spawn_portal_sprite, &despawn_portal_sprite,    &item_ai_handler, &portal_collision_handler   }, //PORTAL_ID
     {        PATTERN_KEY_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &key_collision_handler      }, //KEY_ID
     {      PATTERN_SNAKE_0,  &spawn_2_by_1_sprite,      &despawn_2_sprite,   &snake_ai_handler, &enemy_collision_handler    }, //SNAKE_ID
+    {      PATTERN_HEART_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &heart_collision_handler    }, //HEART_ID
 };
 
 typedef struct {
@@ -193,14 +197,14 @@ typedef struct {
 #define NUM_LEVELS 25
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,  0,                             0,                                 0,},
+    {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             GrassPalette,        Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2,},
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
     {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
     {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
     //{Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        GrassPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
     {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
     {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              GrassPalette,        Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2,},
-    {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            GrassPalette,        Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
-    {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             GrassPalette,        Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2,},
+    //{Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            GrassPalette,        Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
     {Nametable_KeyRescue_bottom_rle,             Nametable_KeyRescue_top_rle,             IcePalette,          Sprites_KeyRescue,             KEYRESCUE_ENEMY_COUNT,             2,},
     {Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IcePalette,          Sprites_IceRun,                ICERUN_ENEMY_COUNT,                2,},
     {Nametable_ClimbOver_bottom_rle,             Nametable_ClimbOver_top_rle,             IcePalette,          Sprites_ClimbOver,             CLIMBOVER_ENEMY_COUNT,             2,},
@@ -223,12 +227,12 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 0},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
+    {0x10, 0xBF, 1},
     {0x78, 0xBF, 1},
     //{0x10, 0xBF, 1},
     {0x78, 0xBF, 1},
     {0x10, 0xBF, 1},
-    {0x10, 0xBF, 1},
-    {0x10, 0xBF, 1},
+    //{0x10, 0xBF, 1},
     {0x80, 0x4F, 2},
     {0x10, 0xBF, 2},
     {0x10, 0xBF, 2},
@@ -409,6 +413,8 @@ static unsigned char        gColorTimer2;
 static unsigned char        gColorTimerLimit;
 static unsigned char        gTmpDirection;
 static unsigned char        gContinue;
+static unsigned char        gMiniFrogCount;
+static unsigned char        gMiniFrogCollected;
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -1855,10 +1861,10 @@ void death(void)
         // make the frog area green
         PPU_ADDRESS = 0x27;
         PPU_ADDRESS = 0xDB;
-        PPU_DATA = 0x33;
+        PPU_DATA = 0x22;
         PPU_ADDRESS = 0x27;
         PPU_ADDRESS = 0xE3;
-        PPU_DATA = 0x33;
+        PPU_DATA = 0x22;
 
         gScratchPointer = CastlePalette;
         load_palette();
@@ -1896,6 +1902,7 @@ void death(void)
                     {
                         --gStage;
                     }
+                    gMiniFrogCount = 0;
                     gLives = 2;
                     gDisplayLives = 1;
                 }
@@ -1947,6 +1954,10 @@ void death(void)
     }
     else
     {
+        if( gMiniFrogCollected == 1 )
+        {
+            --gMiniFrogCount;
+        }
         gLives--;
         gDisplayLives = 1;
     }
@@ -2050,6 +2061,7 @@ void put_i_in_collision2_vars(void) {
       break;
 
     case MINI_FROG_ID:
+    case HEART_ID:
     case KEY_ID:
     default:
       x2 = sprites[j + 3];
@@ -2656,9 +2668,25 @@ void mini_frog_collision_handler(void)
   sprites[j + 2] = 0;
   sprites[j + 3] = 0;
 
+  ++gMiniFrogCount;
+  gMiniFrogCollected = 1;
+
+  gCurrentSoundEffect = ITEM_SOUND_ID;
+  gSoundEffectCounter = 0;
+}
+
+void heart_collision_handler(void)
+{
+  //remove the item
+  gSpriteTable.id[i] = INVALID_ID;
+  sprites[j] = 0;
+  sprites[j + 1] = 0;
+  sprites[j + 2] = 0;
+  sprites[j + 3] = 0;
+
   if( gHealth < 8 )
   {
-    gHealth++;
+    ++gHealth;
     draw_health();
   }
 
@@ -3109,6 +3137,7 @@ void init_physics(void)
     gColorTimer = (gHealth << 3);
     gColorTimer2 = 0;
     gTitleScreenColor = 0x11;
+    gMiniFrogCollected = 0;
     update_tongue_sprite();
 }
 
@@ -3127,6 +3156,7 @@ void init_game_state(void)
     gLives = 2;
     gDisplayLives = 1;
     gContinue = 0;
+    gMiniFrogCount = 0;
 }
 
 void game_running_sm(void)
