@@ -198,16 +198,16 @@ typedef struct {
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,  0,                             0,                                 0,},
     {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        GrassPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
-    //{Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            GrassPalette,        Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
+    {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            GrassPalette,        Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
     {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
-    {Nametable_OneArrow_bottom_rle+,              Nametable_OneArrow_top_rle,              GrassPalette,        Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2,},
+    {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              GrassPalette,        Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2,},
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
     {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             GrassPalette,        Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2,},
-    //{Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
+    {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
     {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
     {Nametable_IceStairs_bottom_rle,             Nametable_IceStairs_top_rle,             IcePalette,          Sprites_IceStairs,             ICESTAIRS_ENEMY_COUNT,             2,},
     {Nametable_KeyRescue_bottom_rle,             Nametable_KeyRescue_top_rle,             IcePalette,          Sprites_KeyRescue,             KEYRESCUE_ENEMY_COUNT,             2,},
-    //{Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IcePalette,          Sprites_IceRun,                ICERUN_ENEMY_COUNT,                2,},
+    {Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IcePalette,          Sprites_IceRun,                ICERUN_ENEMY_COUNT,                2,},
     {Nametable_FirstIce_bottom_rle,              Nametable_FirstIce_top_rle,              IcePalette,          Sprites_FirstIce,              FIRSTICE_ENEMY_COUNT,              2,},
     {Nametable_ClimbOver_bottom_rle,             Nametable_ClimbOver_top_rle,             IcePalette,          Sprites_ClimbOver,             CLIMBOVER_ENEMY_COUNT,             2,},
 	{Nametable_SnakeClimb_bottom_rle,            Nametable_SnakeClimb_top_rle,            CastlePalette,       Sprites_SnakeClimb,            SNAKECLIMB_ENEMY_COUNT,            2,},
@@ -215,7 +215,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 	{Nametable_LevelOutfacingShelves_bottom_rle, Nametable_LevelOutfacingShelves_top_rle, CastlePalette,       Sprites_LevelOutfacingShelves, LEVELOUTFACINGSHELVES_ENEMY_COUNT, 2,},
 	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     CastlePalette,       Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,     2,},
 	{Nametable_CastleColumns_bottom_rle,         Nametable_CastleColumns_top_rle,         CastlePalette,       Sprites_CastleColumns,         CASTLECOLUMNS_ENEMY_COUNT,         2,},
-	//{Nametable_RaveTwoTowers_bottom_rle,         Nametable_RaveTwoTowers_top_rle,         CastlePalette,       Sprites_RaveTwoTowers,         RAVETWOTOWERS_ENEMY_COUNT,         2,},
+	{Nametable_RaveTwoTowers_bottom_rle,         Nametable_RaveTwoTowers_top_rle,         CastlePalette,       Sprites_RaveTwoTowers,         RAVETWOTOWERS_ENEMY_COUNT,         2,},
 	{Nametable_RaveSnakeStairs_bottom_rle,       Nametable_RaveSnakeStairs_top_rle,       CastlePalette,       Sprites_RaveSnakeStairs,       RAVESNAKESTAIRS_ENEMY_COUNT,       2,},
 	{Nametable_RaveSmallGaps_bottom_rle,         Nametable_RaveSmallGaps_top_rle,         CastlePalette,       Sprites_RaveSmallGaps,         RAVESMALLGAPS_ENEMY_COUNT,         2,},
 	{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               CastlePalette,       Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,               2,},
@@ -226,16 +226,16 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 0},
     {0x10, 0xBF, 1},
-    //{0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
-    //{0x78, 0xBF, 1},
+    {0x10, 0xBF, 1},
+    {0x78, 0xBF, 1},
     {0x78, 0xBF, 1},
     {0x10, 0xBF, 2},
     {0x80, 0x4F, 2},
-    //{0x10, 0xBF, 2},
+    {0x10, 0xBF, 2},
     {0x20, 0xBF, 2},
     {0x10, 0xBF, 2},
     {0x20, 0xCF, 3},
@@ -243,7 +243,7 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xCF, 3},
     {0x10, 0xCF, 3},
     {0xE0, 0xCF, 3},
-    //{0x10, 0x9F, 4},
+    {0x10, 0x9F, 4},
     {0x70, 0xBF, 4},
     {0x10, 0xBF, 4},
     {0x10, 0xBF, 4},
@@ -323,13 +323,10 @@ unsigned char sprites[256];
 
 #pragma bss-name (pop)
 
-#pragma bss-name (push, "BSS")
-
-// 16 x (15 + 15)
-// TODO should use a bit per block instead of byte, but this is a lot easier at the moment
-unsigned char collision[496];
-
-
+#pragma bss-name (push, "ZEROPAGE")
+static sprites_t            gSpriteTable;
+static unsigned char        gSpriteState[MAX_NUM_SPRITES];
+static unsigned char        gSpriteOffset[MAX_NUM_SPRITES];
 static unsigned char*       gScratchPointer2;
 static unsigned char        gController1;
 static unsigned char        gPrevController1;
@@ -344,7 +341,6 @@ static unsigned char        gYScroll;
 static unsigned char        gYPrevScroll;
 static unsigned char        gYNametable;
 static unsigned char        gYPrevNametable;
-static unsigned char        numKeys;
 static unsigned char        devnull;
 static unsigned char        i;
 static unsigned char        j;
@@ -358,9 +354,6 @@ static unsigned char        gTmp6;
 static unsigned char        gTmp7;
 static unsigned char        gTmp8;
 static unsigned char        gTmp9;
-static unsigned char        gCollisionRight;
-
-// These are probably overkill, but it makes collision detection a lot cleaner
 static unsigned char        x1;
 static unsigned char        y1;
 static unsigned char        width1;
@@ -369,25 +362,40 @@ static unsigned char        x2;
 static unsigned char        y2;
 static unsigned char        width2;
 static unsigned char        height2;
-static unsigned char        gJumping; // 0 if not currently in the air from a jump, 1 if yes
 static unsigned char        gVelocity;
-static unsigned char        gVelocityDirection;
+static FrogAnimationState_t gFrogAnimationState;
+
+#pragma bss-name (pop)
+
+#pragma bss-name (push, "BSS")
+
+// 16 x (15 + 15)
+// TODO should use a bit per block instead of byte, but this is a lot easier at the moment
+unsigned char collision[496];
+
+
+static unsigned char        numKeys;
+static unsigned char        gCollisionRight;
+static unsigned char        gJumping; // 0 if not currently in the air from a jump, 1 if yes
 static unsigned char        gSpeed;
 static unsigned char        gSpeedDirection;
+static TongueState_t        gTongueState;
+static unsigned char        gTongueCounter;
+static unsigned char        gBirdMovement;
+static unsigned char        gSnakeMovement;
+static unsigned char        gVelocityDirection;
+static unsigned char        gSpeedCounter;
+static unsigned char        gVelocityCounter;
+
+// These are probably overkill, but it makes collision detection a lot cleaner
 static unsigned char        gStage;
 static unsigned char        gWorld;
 static unsigned char        gTmpWorld;
 static unsigned char        gCounter;
 static unsigned char        gHealth;
 static unsigned char        gIframes;
-static sprites_t            gSpriteTable;
-static unsigned char        gSpriteState[MAX_NUM_SPRITES];
-static unsigned char        gSpriteOffset[MAX_NUM_SPRITES];
 static unsigned char        gNumSprites;
 static GameState_t          gGameState;
-static FrogAnimationState_t gFrogAnimationState;
-static TongueState_t        gTongueState;
-static unsigned char        gTongueCounter;
 static unsigned char        gFade;
 static unsigned char        gLives;
 static unsigned char        gDisplayLives;
@@ -404,10 +412,6 @@ static unsigned char        gSoundEffectLength;
 static unsigned char        gCurrentSoundEffect;
 static unsigned char        gCurrentMusic;
 static unsigned char        gCurrentMusicTmp;
-static unsigned char        gBirdMovement;
-static unsigned char        gSnakeMovement;
-static unsigned char        gSpeedCounter;
-static unsigned char        gVelocityCounter;
 static unsigned char        gColorTimer;
 static unsigned char        gColorTimer2;
 static unsigned char        gColorTimerLimit;
@@ -1828,7 +1832,7 @@ void next_stage(void)
             update_tongue_sprite();
 
             gTmpWorld = LevelProperties[gStage+1].world;
-            if(gWorld != gTmpWorld)
+            if(gWorld != gTmpWorld && gTmpWorld != 0)
             {
                 gDisplayLives = 1;
                 gWorld = LevelProperties[gStage+1].world;
