@@ -1,6 +1,6 @@
 #include "../CastlePalette.h"
 
-#define FIRSTRAVE_ENEMY_COUNT 9
+#define FIRSTRAVE_ENEMY_COUNT 12
 static const unsigned char Sprites_FirstRave[FIRSTRAVE_ENEMY_COUNT * 5] = {
 //   id, startX, startY, startNametable, direction,
    0x04,   0x10,   0xBF,           0x02,      0x00,
@@ -12,4 +12,7 @@ static const unsigned char Sprites_FirstRave[FIRSTRAVE_ENEMY_COUNT * 5] = {
    0x06,   0xC0,   0xC0,           0x02,      0x00,
    0x06,   0xD0,   0xC0,           0x02,      0x00,
    0x06,   0xE0,   0xC0,           0x02,      0x00,
+   0x01,   0xE8,   0x0C,           0x00,      0x01,
+   0x07,   0x94,   0x44,           0x02,      0x02,
+   0x07,   0x94,   0x54,           0x00,      0x02,
 };

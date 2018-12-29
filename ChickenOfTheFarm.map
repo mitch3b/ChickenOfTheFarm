@@ -9,7 +9,7 @@ main.o:
     MUSIC             Offs=000000  Size=001CB2  Align=00001  Fill=0000
 ChickenOfTheFarm.o:
     CODE              Offs=00000C  Size=004003  Align=00001  Fill=0000
-    RODATA            Offs=000000  Size=001E3A  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=001E08  Align=00001  Fill=0000
     BSS               Offs=000001  Size=0002DE  Align=00001  Fill=0000
     CHARS             Offs=000000  Size=001EF0  Align=00001  Fill=0000
     OAM               Offs=000000  Size=000100  Align=00001  Fill=0000
@@ -45,14 +45,14 @@ OAM                   000200  0002FF  000100  00001
 BSS                   000300  0005DE  0002DF  00001
 STARTUP               008000  00802B  00002C  00001
 CODE                  00802C  00C1B7  00418C  00001
-RODATA                00C1B8  00DFF1  001E3A  00001
+RODATA                00C1B8  00DFBF  001E08  00001
 MUSIC                 00E000  00FCB1  001CB2  00001
 VECTORS               00FFFA  00FFFF  000006  00001
 
 
 Exports list by name:
 ---------------------
-_TileList                 00C8F5 RLA    _Title_UnRLE              00C03B RLA    
+_TileList                 00C9F4 RLA    _Title_UnRLE              00C03B RLA    
 _UnRLE                    00C073 RLA    __STARTUP__               000001 REA    
 _collision                000301 RLA    _gVblank                  000300 RLA    
 _main                     00BF9B RLA    _pMusicInit               00802C RLA    
@@ -77,7 +77,7 @@ _UnRLE                    00C073 RLA    aslax2                    00C14C RLA
 bnega                     00C15B RLA    callax                    00C165 RLA    
 mulax10                   00C16C RLA    mulax3                    00C185 RLA    
 mulax9                    00C196 RLA    shrax2                    00C1AD RLA    
-_TileList                 00C8F5 RLA    
+_TileList                 00C9F4 RLA    
 
 
 Imports list:
@@ -85,44 +85,44 @@ Imports list:
 _TileList (ChickenOfTheFarm.o):
     asm4c.o                   asm4c.s(1)
 _Title_UnRLE (asm4c.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(120)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(116)
 _UnRLE (asm4c.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(119)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(115)
 __STARTUP__ (main.o):
     ChickenOfTheFarm.o        ChickenOfTheFarm.asm(13)
 _collision (ChickenOfTheFarm.o):
     asm4c.o                   asm4c.s(2)
 _gVblank (main.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(116)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(112)
 _main (ChickenOfTheFarm.o):
     main.o                    main.asm(2)
 _pMusicInit (main.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(117)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(113)
 _pMusicPlay (main.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(118)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(114)
 aslax2 (aslax2.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
 bnega (bneg.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
 callax (call.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
 mulax10 (mulax10.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
 mulax3 (mulax3.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
 mulax9 (mulax9.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
 ptr1 (zeropage.o):
     mulax9.o                  runtime/mulax9.s(9)
     mulax3.o                  runtime/mulax3.s(8)
@@ -134,7 +134,7 @@ ptr2 (zeropage.o):
 regsave (zeropage.o):
     ChickenOfTheFarm.o        ChickenOfTheFarm.asm(10)
 shrax2 (shrax2.o):
-    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29226)
+    ChickenOfTheFarm.o        ChickenOfTheFarm.asm(29150)
 sreg (zeropage.o):
     ChickenOfTheFarm.o        ChickenOfTheFarm.asm(10)
 tmp1 (zeropage.o):

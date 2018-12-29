@@ -1,6 +1,6 @@
 #include "../CastlePalette.h"
 
-#define RAVESNAKESTAIRS_ENEMY_COUNT 10
+#define RAVESNAKESTAIRS_ENEMY_COUNT 13
 static const unsigned char Sprites_RaveSnakeStairs[RAVESNAKESTAIRS_ENEMY_COUNT * 5] = {
 //   id, startX, startY, startNametable, direction,
    0x04,   0x00,   0x9F,           0x02,      0x00,
@@ -13,4 +13,7 @@ static const unsigned char Sprites_RaveSnakeStairs[RAVESNAKESTAIRS_ENEMY_COUNT *
    0x06,   0xE0,   0xD0,           0x00,      0x02,
    0x06,   0xC0,   0xF0,           0x00,      0x02,
    0x06,   0xA0,   0x80,           0x00,      0x02,
+   0x01,   0xC4,   0x0C,           0x00,      0x01,
+   0x07,   0x34,   0x54,           0x00,      0x02,
+   0x07,   0x54,   0x54,           0x00,      0x02,
 };

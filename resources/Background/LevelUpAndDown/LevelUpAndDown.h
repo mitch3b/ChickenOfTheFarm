@@ -1,6 +1,6 @@
 #include "../CastlePalette.h"
 
-#define LEVELUPANDDOWN_ENEMY_COUNT 11
+#define LEVELUPANDDOWN_ENEMY_COUNT 14
 static const unsigned char Sprites_LevelUpAndDown[LEVELUPANDDOWN_ENEMY_COUNT * 5] = {
 //   id, startX, startY, startNametable, direction,
    0x02,   0x08,   0xAF,           0x02,      0x00,  //5 right arrows
@@ -14,4 +14,7 @@ static const unsigned char Sprites_LevelUpAndDown[LEVELUPANDDOWN_ENEMY_COUNT * 5
    0x02,   0xF0,   0x4F,           0x00,      0x40,
    0x05,   0x20,   0x0F,           0x00,      0x01,   //key
    0x04,   0x10,   0xCF,           0x02,      0x00,   //Portal
+   0x01,   0xE4,   0x34,           0x00,      0x01,
+   0x07,   0x14,   0x64,           0x00,      0x02,
+   0x07,   0xE4,   0x94,           0x00,      0x02,
 };

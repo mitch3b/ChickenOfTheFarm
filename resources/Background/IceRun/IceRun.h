@@ -1,6 +1,6 @@
 #include "../IcePalette.h"
 
-#define ICERUN_ENEMY_COUNT 12
+#define ICERUN_ENEMY_COUNT 13
 static const unsigned char Sprites_IceRun[ICERUN_ENEMY_COUNT * 5] = {
 //   id, startX, startY, startNametable, direction,
    0x02,   0x30,   0xA3,           0x02,      0x40,
@@ -15,4 +15,5 @@ static const unsigned char Sprites_IceRun[ICERUN_ENEMY_COUNT * 5] = {
    0x05,   0xC0,   0x23,           0x00,      0x01,
    0x03,   0x40,   0x50,           0x00,      0x00,
    0x03,   0xA0,   0x50,           0x00,      0x00,
+   0x01,   0x7C,   0x0C,           0x00,      0x01,
 };

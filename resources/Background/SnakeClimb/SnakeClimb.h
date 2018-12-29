@@ -1,6 +1,6 @@
 #include "../CastlePalette.h"
 
-#define SNAKECLIMB_ENEMY_COUNT 17
+#define SNAKECLIMB_ENEMY_COUNT 20
 static const unsigned char Sprites_SnakeClimb[SNAKECLIMB_ENEMY_COUNT * 5] = {
 //   id, startX, startY, startNametable, direction,
    0x04,   0xE0,   0x2F,           0x00,      0x00,
@@ -20,4 +20,7 @@ static const unsigned char Sprites_SnakeClimb[SNAKECLIMB_ENEMY_COUNT * 5] = {
    0x06,   0x40,   0x17,           0x00,      0x12,
    0x06,   0xB0,   0x17,           0x00,      0x02,
    0x06,   0xF0,   0x17,           0x00,      0x02,
+   0x01,   0x00,   0x30,           0x00,      0x01,
+   0x07,   0x54,   0xB4,           0x00,      0x02,
+   0x07,   0xA4,   0xD4,           0x00,      0x02,
 };
