@@ -1761,6 +1761,29 @@ void load_stage(void)
     load_palette();
     vblank();
 
+    if( gGameState == ENDING_STATE)
+    {
+        // add the number of mini frogs collected
+        PPU_ADDRESS = 0x28;
+        PPU_ADDRESS = 0xEC;
+
+        if( gMiniFrogCount >= 20 )
+        {
+            gMiniFrogCount = gMiniFrogCount - 20;
+            PPU_DATA = PATTERN_NUMBERS_2;
+        }
+        else if( gMiniFrogCount >= 10 )
+        {
+            gMiniFrogCount = gMiniFrogCount - 10;
+            PPU_DATA = PATTERN_NUMBERS_1;
+        }
+        else
+        {
+            PPU_DATA = PATTERN_NUMBERS_0;
+        }
+        PPU_DATA = PATTERN_NUMBERS_0 + gMiniFrogCount;
+    }
+
     if( LevelTable[gStage].numSprites != 0 )
     {
         ClearSprites();
