@@ -197,11 +197,11 @@ typedef struct {
 #define NUM_LEVELS 25
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,  0,                             0,                                 0,},
+    {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
     {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        GrassPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
     {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            GrassPalette,        Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
     {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
     {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              GrassPalette,        Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2,},
-    {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
     {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             GrassPalette,        Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2,},
     {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
     {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,          2,},
@@ -352,8 +352,6 @@ static unsigned char        gTmp4;
 static unsigned char        gTmp5;
 static unsigned char        gTmp6;
 static unsigned char        gTmp7;
-static unsigned char        gTmp8;
-static unsigned char        gTmp9;
 static unsigned char        x1;
 static unsigned char        y1;
 static unsigned char        width1;
@@ -363,6 +361,8 @@ static unsigned char        y2;
 static unsigned char        width2;
 static unsigned char        height2;
 static unsigned char        gVelocity;
+static unsigned char        gSpeed;
+static unsigned char        gSpeedDirection;
 static FrogAnimationState_t gFrogAnimationState;
 
 #pragma bss-name (pop)
@@ -374,11 +374,11 @@ static FrogAnimationState_t gFrogAnimationState;
 unsigned char collision[496];
 
 
+static unsigned char        gTmp8;
+static unsigned char        gTmp9;
 static unsigned char        numKeys;
 static unsigned char        gCollisionRight;
 static unsigned char        gJumping; // 0 if not currently in the air from a jump, 1 if yes
-static unsigned char        gSpeed;
-static unsigned char        gSpeedDirection;
 static TongueState_t        gTongueState;
 static unsigned char        gTongueCounter;
 static unsigned char        gBirdMovement;
@@ -778,7 +778,7 @@ void palettes(void)
 
 void load_palette(void)
 {
-    if( gDisplayLives == 1 || LevelProperties[gStage].world != 4 )
+    if( gDisplayLives == 1 || gContinue == 1 || LevelProperties[gStage].world != 4 )
     {
         SET_COLOR(BACKGROUND0_0, gScratchPointer[0]);
         SET_COLOR(BACKGROUND1_0, gScratchPointer[4]);
@@ -1807,25 +1807,7 @@ void load_stage(void)
 
     gX = LevelProperties[gStage].FrogStartX;
     gY = LevelProperties[gStage].FrogStartY;
-
-    gYNametable = 2;
-    gVelocity = 0;
-    gVelocityDirection = 0;
-    gXScroll = 0;
-    gYScroll = 0;
-    gSpeed = 0;
-    gSpeedDirection = 1;
-    gJumping = 0;
-
-    // Frog direction
-    sprites[1] = 0x00;
-    sprites[2] = 0x00;
-    sprites[5] = 0x01;
-    sprites[6] = 0x00;
-    sprites[9] = 0x02;
-    sprites[10] = 0x00;
-    sprites[13] = 0x03;
-    sprites[14] = 0x00;
+    init_physics();
 
     vblank();
 
@@ -1836,6 +1818,10 @@ void load_stage(void)
     set_scroll();
 
     vblank();
+
+    init_physics();
+    dma_sprites();
+    set_scroll();
 
     vblank();
 
@@ -3065,7 +3051,7 @@ void do_physics(void)
       gTmp7 = sprites[j];
       if((gTmp3 > gTmp7 && (gTmp3 - gTmp7) > 200)
        || (gTmp7 > gTmp3 && (gTmp7 - gTmp3) > 200)
-       || (gTmp7 == 0xFF)) {
+       || (gTmp7 > 0xF7)) {
         spriteProperties[gTmp2].despawn();
       }
 
@@ -3166,6 +3152,7 @@ void init_physics(void)
     gTitleScreenColor = 0x11;
     gMiniFrogCollected = 0;
     update_tongue_sprite();
+    update_frog_sprite();
 }
 
 void init_game_state(void)
@@ -3246,6 +3233,7 @@ void game_running_sm(void)
             {
              vblank();
              input_poll();
+             set_scroll();
             }
             while((gController1 & BUTTON_START) == BUTTON_START);
 
@@ -3253,6 +3241,7 @@ void game_running_sm(void)
             {
              vblank();
              input_poll();
+             set_scroll();
             }
             while((gController1 & BUTTON_START) != BUTTON_START);
 
@@ -3260,6 +3249,7 @@ void game_running_sm(void)
             {
              vblank();
              input_poll();
+             set_scroll();
             }
             while((gController1 & BUTTON_START) == BUTTON_START);
 
