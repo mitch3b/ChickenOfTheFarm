@@ -295,6 +295,7 @@ unsigned char portalSound400C[PORTAL_SOUND_LENGTH] = {0x3F, 0x3F, 0x3F, 0x3F, 0x
 unsigned char portalSound400E[PORTAL_SOUND_LENGTH] = {0x0C, 0x09, 0x07, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x01, 0x01, 0x01, 0x01};
 
 #define MAX_FROG_SPEED 8
+#define FROG_COLLISION_X_BUFFER 2
 
 //
 // GLOBALS
@@ -2748,7 +2749,8 @@ void do_physics(void)
     {
         for( i = 0; (i<<2) < gSpeed; i++ )
         {
-            gTmpX = gX - 1;
+            //Going left so check one left
+            gTmpX = gX + FROG_COLLISION_X_BUFFER - 1;
 
             if( gYNametable == 2 )
             {
@@ -2801,7 +2803,8 @@ void do_physics(void)
     {
         for( i = 0; (i<<2) < gSpeed; i++ )
         {
-            gTmpX = gX + 0x10;
+            //Going right so check one pixel right
+            gTmpX = gX + 0x10 - FROG_COLLISION_X_BUFFER + 1;
 
             if( gYNametable == 2 )
             {
@@ -2856,8 +2859,8 @@ void do_physics(void)
     {
         for( i = 0; (i<<2) < gVelocity; i++ )
         {
-            gTmpX = gX + 0xE;
-            gTmpX2 = gX + 1;
+            gTmpX = gX + FROG_COLLISION_X_BUFFER;
+            gTmpX2 = gX + 0x10 - FROG_COLLISION_X_BUFFER;
 
             if( gYNametable == 2 )
             {
@@ -2949,8 +2952,8 @@ void do_physics(void)
     {
         for( i = 0; (i<<2) < gVelocity; i++ )
         {
-            gTmpX = gX + 0xE;
-            gTmpX2 = gX + 1;
+            gTmpX = gX + FROG_COLLISION_X_BUFFER;
+            gTmpX2 = gX + 0x10 - FROG_COLLISION_X_BUFFER;
 
             if(gYNametable == 2 )
             {
