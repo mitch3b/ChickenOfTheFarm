@@ -295,7 +295,7 @@ unsigned char portalSound400C[PORTAL_SOUND_LENGTH] = {0x3F, 0x3F, 0x3F, 0x3F, 0x
 unsigned char portalSound400E[PORTAL_SOUND_LENGTH] = {0x0C, 0x09, 0x07, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x01, 0x01, 0x01, 0x01};
 
 #define MAX_FROG_SPEED 8
-#define FROG_COLLISION_X_BUFFER 2
+#define FROG_COLLISION_X_BUFFER 1
 #define FROG_COLLISION_Y_BUFFER 1
 
 //
