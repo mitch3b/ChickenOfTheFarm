@@ -76,6 +76,8 @@
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
 
+#define BIRD_SPEED_CONTROL 4
+
 #define TONGUE_EXTEND_DELAY  0
 #define TONGUE_RETRACT_DELAY 4
 
@@ -2454,7 +2456,7 @@ void bird_ai_handler(void)
 
     //Bird in general moves towards the frog
     //Update Y
-    if( sprites[j] != sprites[0] && (gBirdSpeedControl != 0))
+    if( sprites[j] != sprites[0] && (gBirdSpeedControl != 0 || sprites[j+3] == sprites[3]))
     {
         if( sprites[j] < sprites[0])
         {
@@ -2489,7 +2491,7 @@ void bird_ai_handler(void)
     }
 
     //Update X
-    if( sprites[j+3] != sprites[3] && (gBirdSpeedControl != 0))
+    if( sprites[j+3] != sprites[3] && (gBirdSpeedControl != 0 ||  sprites[j] == sprites[0]))
     {
         if( sprites[j+3] < sprites[3])
         {
@@ -3223,7 +3225,7 @@ void game_running_sm(void)
 
         gFrameCounter++;
         gBirdSpeedControl++;
-        if(gBirdSpeedControl > 2) {
+        if(gBirdSpeedControl > BIRD_SPEED_CONTROL) {
           gBirdSpeedControl = 0;
         }
 
