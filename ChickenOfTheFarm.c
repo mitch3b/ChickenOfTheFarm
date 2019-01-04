@@ -296,6 +296,7 @@ unsigned char portalSound400E[PORTAL_SOUND_LENGTH] = {0x0C, 0x09, 0x07, 0x07, 0x
 
 #define MAX_FROG_SPEED 8
 #define FROG_COLLISION_X_BUFFER 2
+#define FROG_COLLISION_Y_BUFFER 1
 
 //
 // GLOBALS
@@ -383,6 +384,7 @@ static unsigned char        gJumping; // 0 if not currently in the air from a ju
 static TongueState_t        gTongueState;
 static unsigned char        gTongueCounter;
 static unsigned char        gBirdMovement;
+static unsigned char        gBirdSpeedControl; //set to 0-2 and bird doesn't move on 0
 static unsigned char        gSnakeMovement;
 static unsigned char        gVelocityDirection;
 static unsigned char        gSpeedCounter;
@@ -2432,15 +2434,21 @@ void bird_ai_handler(void)
 {
   gBirdMovement = 0;
 
+  if((gFrameCounter & 0x8) != 0)
+  {
+      gBirdMovement = 1;
+  }
+
   if(sprites[j+1] != 0) {
     sprite_maintain_y_position();
 
     //Bird in general moves towards the frog
     //Update Y
-    if( sprites[j] != sprites[0])
+    if( sprites[j] != sprites[0] && (gBirdSpeedControl != 0))
     {
         if( sprites[j] < sprites[0])
         {
+            //Frog lower so fly down
             sprites[j] += 1;
             sprites[j+4] += 1;
 
@@ -2455,13 +2463,9 @@ void bird_ai_handler(void)
         }
         else
         {
+            //Frog higher so fly up
             sprites[j] -= 1;
             sprites[j+4] -= 1;
-
-            if((gFrameCounter & 0x8) != 0)
-            {
-                gBirdMovement = 1;
-            }
 
             x1 = sprites[j + 3];
             y1 = sprites[j] + 1;
@@ -2475,11 +2479,11 @@ void bird_ai_handler(void)
     }
 
     //Update X
-    if( sprites[j+3] != sprites[3])
+    if( sprites[j+3] != sprites[3] && (gBirdSpeedControl != 0))
     {
         if( sprites[j+3] < sprites[3])
         {
-            // X
+            // Bird should move right
             sprites[j+3] += 1;
             sprites[j+7] += 1;
 
@@ -2497,7 +2501,7 @@ void bird_ai_handler(void)
         }
         else
         {
-            // X
+            // Bird should move left
             sprites[j+3] -= 1;
             sprites[j+7] -= 1;
 
@@ -2510,6 +2514,13 @@ void bird_ai_handler(void)
               sprites[j+7] += 1;
             }
         }
+    }
+    else {
+      if( sprites[j+3] < sprites[3])
+      {
+          //Make sure bird continues to face right even tho its Y's turn to move
+          gBirdMovement += 0x10;
+      }
     }
 
     // Tiles
@@ -3170,6 +3181,7 @@ void init_game_state(void)
     init_physics();
     gFade = 3;
     gFrameCounter = 0;
+    gBirdSpeedControl = 0;
     gLives = 2;
     gDisplayLives = 1;
     gContinue = 0;
@@ -3183,6 +3195,10 @@ void game_running_sm(void)
         vblank();
 
         gFrameCounter++;
+        gBirdSpeedControl++;
+        if(gBirdSpeedControl > 2) {
+          gBirdSpeedControl = 0;
+        }
 
         if( LevelProperties[gStage].world == 4 )
         {
