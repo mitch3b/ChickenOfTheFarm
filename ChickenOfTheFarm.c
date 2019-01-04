@@ -1970,7 +1970,9 @@ void death(void)
                 break;
             }
 
-            if(gController1 != 0)
+            if(((gController1 & BUTTON_SELECT) == BUTTON_SELECT)
+               || ((gController1 & BUTTON_UP) == BUTTON_UP)
+               || ((gController1 & BUTTON_DOWN) == BUTTON_DOWN))
             {
                 gContinue = gContinue ^ 1;
             }
