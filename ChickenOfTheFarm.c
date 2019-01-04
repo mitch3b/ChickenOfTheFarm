@@ -2768,7 +2768,7 @@ void do_physics(void)
               //x = gX >> 4;
               //y = gY >> 4
               //index[y*16 + x]
-                if( collision[240 + (((gY+1)&0xF0)) + (gTmpX >> 4)] == 0 &&
+                if( collision[240 + (((gY+1+FROG_COLLISION_Y_BUFFER)&0xF0)) + (gTmpX >> 4)] == 0 &&
                     collision[240 + (((gY+0x10)&0xF0)) + (gTmpX >> 4)] == 0 )
                 {
                     gX -= 1;
@@ -2783,7 +2783,7 @@ void do_physics(void)
             {
                 if((gYScroll + gY + 1) >= 0xF0)
                 {
-                    if( collision[240 + (((gYScroll + gY + 1 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                    if( collision[240 + (((gYScroll + gY + 1 - 0xF0 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
                         collision[240 + (((gYScroll + gY + 0x10 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX -= 1;
@@ -2796,7 +2796,7 @@ void do_physics(void)
                 }
                 else
                 {
-                    if( collision[(((gYScroll + gY + 1) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                    if( collision[(((gYScroll + gY + 1 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
                         collision[(((gYScroll + gY + 0x10) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX -= 1;
@@ -2819,7 +2819,7 @@ void do_physics(void)
 
             if( gYNametable == 2 )
             {
-                if( collision[240 + (((gY+1)&0xF0) ) + (gTmpX >> 4)] == 0 &&
+                if( collision[240 + (((gY+1+FROG_COLLISION_Y_BUFFER)&0xF0) ) + (gTmpX >> 4)] == 0 &&
                     collision[240 + (((gY+0x10)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     gX += 1;
@@ -2834,7 +2834,7 @@ void do_physics(void)
             {
                 if((gYScroll + gY + 1) >= 0xF0)
                 {
-                    if( collision[240 + (((gYScroll + gY + 1 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                    if( collision[240 + (((gYScroll + gY + 1 - 0xF0 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
                         collision[240 + (((gYScroll + gY + 0x10 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX += 1;
@@ -2847,7 +2847,7 @@ void do_physics(void)
                 }
                 else
                 {
-                    if( collision[(((gYScroll + gY + 1) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                    if( collision[(((gYScroll + gY + 1 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
                         collision[(((gYScroll + gY + 0x10) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX += 1;
@@ -2876,8 +2876,8 @@ void do_physics(void)
             if( gYNametable == 2 )
             {
                 //Bottom half of level
-                if( collision[240 + (((gY)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
-                    collision[240 + (((gY)&0xF0) ) + (gTmpX >> 4)] == 0 )
+                if( collision[240 + (((gY+FROG_COLLISION_Y_BUFFER)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
+                    collision[240 + (((gY+FROG_COLLISION_Y_BUFFER)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY > MAX_TOP_BUFFER )
                     {
@@ -2900,8 +2900,8 @@ void do_physics(void)
             }
             else if((gYScroll + gY) >= 0xF0 )
             {
-                if( collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
-                    collision[240 + (((gYScroll + gY - 0xF0)&0xF0) ) + (gTmpX >> 4)] == 0 )
+                if( collision[240 + (((gYScroll + gY - 0xF0 + FROG_COLLISION_Y_BUFFER)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
+                    collision[240 + (((gYScroll + gY - 0xF0 + FROG_COLLISION_Y_BUFFER)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY > MAX_TOP_BUFFER)
                     {
@@ -2922,8 +2922,8 @@ void do_physics(void)
             }
             else
             {
-                if( collision[(((gYScroll + gY - 0x100) & 0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
-                    collision[(((gYScroll + gY - 0x100) & 0xF0) ) + (gTmpX >> 4)] == 0 )
+                if( collision[(((gYScroll + gY - 0x100 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
+                    collision[(((gYScroll + gY - 0x100 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                   //Approaching the top. Scroll until we can't anymore
                   if(gY > MAX_TOP_BUFFER || gYScroll == 0) {
