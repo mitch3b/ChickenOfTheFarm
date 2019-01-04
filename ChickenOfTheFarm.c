@@ -64,7 +64,7 @@
 //#define LAST_ENEMY_SPRITE 124 //Reserve 10 sprites for now
 
 #define INVALID_ID   0
-#define MINI_FROG_ID 1
+#define FLY_ID       1
 #define ARROW_ID     2
 #define BIRD_ID      3
 #define PORTAL_ID    4
@@ -126,7 +126,7 @@ typedef struct {
 
 static unsigned char SpriteSize[ID_COUNT] = {
     0,  //INVALID_ID   0
-    1,  //MINI_FROG_ID 1
+    1,  //FLY_ID       1
     1,  //ARROW_ID     2
     2,  //BIRD_ID      3
     4,  //PORTAL_ID    4
@@ -151,7 +151,7 @@ void snake_ai_handler(void);
 
 void invalid_collision_handler(void);
 void enemy_collision_handler(void);
-void mini_frog_collision_handler(void);
+void fly_collision_handler(void);
 void heart_collision_handler(void);
 void portal_collision_handler(void);
 void key_collision_handler(void);
@@ -169,7 +169,7 @@ typedef struct {
 
 sprite_properties_t spriteProperties[ID_COUNT] = {
     {PATTERN_AAA_INVALID_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite, &invalid_ai_handler, &invalid_collision_handler  }, //INVALID_ID
-    {  PATTERN_MINI_FROG_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &mini_frog_collision_handler}, //MINI_FROG_ID
+    {        PATTERN_FLY_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &fly_collision_handler      }, //FLY_ID
     {      PATTERN_ARROW_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,   &arrow_ai_handler, &enemy_collision_handler    }, //ARROW_ID
     {       PATTERN_BIRD_0,  &spawn_2_by_1_sprite,      &despawn_2_sprite,    &bird_ai_handler, &enemy_collision_handler    }, //BIRD_ID
     {     PATTERN_PORTAL_0,  &spawn_portal_sprite, &despawn_portal_sprite,    &item_ai_handler, &portal_collision_handler   }, //PORTAL_ID
@@ -194,13 +194,13 @@ typedef struct {
 } level_additional_properties_t;
 
 
-#define NUM_LEVELS 25
+#define NUM_LEVELS 24
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,  0,                             0,                                 0,},
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                 2,},
     {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        GrassPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,        2,},
     {Nametable_ShortClimb_bottom_rle,            Nametable_ShortClimb_top_rle,            GrassPalette,        Sprites_ShortClimb,            SHORTCLIMB_ENEMY_COUNT,            2,},
-    {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
+    //{Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,               2,},
     {Nametable_OneArrow_bottom_rle,              Nametable_OneArrow_top_rle,              GrassPalette,        Sprites_OneArrow,              ONEARROW_ENEMY_COUNT,              2,},
     {Nametable_BirdClimb_bottom_rle,             Nametable_BirdClimb_top_rle,             GrassPalette,        Sprites_BirdClimb,             BIRDCLIMB_ENEMY_COUNT,             2,},
     {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,            2,},
@@ -228,7 +228,7 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
-    {0x10, 0xBF, 1},
+    //{0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x10, 0xBF, 1},
     {0x78, 0xBF, 1},
@@ -420,6 +420,7 @@ static unsigned char        gTmpDirection;
 static unsigned char        gContinue;
 static unsigned char        gMiniFrogCount;
 static unsigned char        gMiniFrogCollected;
+static unsigned char        gTmpPattern;
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -1811,6 +1812,7 @@ void load_stage(void)
     init_physics();
 
     vblank();
+    input_poll();
 
     draw_health();
 
@@ -1819,12 +1821,14 @@ void load_stage(void)
     set_scroll();
 
     vblank();
+    input_poll();
 
     init_physics();
     dma_sprites();
     set_scroll();
 
     vblank();
+    input_poll();
 
     fade_in();
 }
@@ -1891,17 +1895,48 @@ void death(void)
 
         PPU_ADDRESS = 0x21;
         PPU_ADDRESS = 0xAC;
-        PPU_DATA = PATTERN_MINI_FROG_0;
+        PPU_DATA = PATTERN_FLY_0;
         gXScroll = 0;
         gYScroll = 0;
         gYNametable = 0;
         PPU_CTRL = gPpuCtrlBase + gYNametable;
-        set_scroll();
 
         while(1)
         {
+            set_scroll();
             vblank();
             input_poll();
+            ++gFrameCounter;
+
+            if( (gFrameCounter & 0x8) == 0 )
+            {
+                gTmpPattern = PATTERN_FLY_0;
+            }
+            else
+            {
+                gTmpPattern = PATTERN_FLY2_0;
+            }
+
+            PPU_ADDRESS = 0x21;
+            PPU_ADDRESS = 0xAC;
+            if(gContinue == 1)
+            {
+                PPU_DATA = gTmpPattern;
+            }
+            else
+            {
+                PPU_DATA = 0;
+            }
+            PPU_ADDRESS = 0x22;
+            PPU_ADDRESS = 0x2C;
+            if(gContinue == 1)
+            {
+                PPU_DATA = 0;
+            }
+            else
+            {
+                PPU_DATA = gTmpPattern;
+            }
 
             if(gController1 == gPrevController1)
             {
@@ -1934,35 +1969,10 @@ void death(void)
             if(gController1 != 0)
             {
                 gContinue = gContinue ^ 1;
-
-                if(gContinue == 1)
-                {
-                    PPU_ADDRESS = 0x21;
-                    PPU_ADDRESS = 0xAC;
-                }
-                else
-                {
-                    PPU_ADDRESS = 0x22;
-                    PPU_ADDRESS = 0x2C;
-                }
-                PPU_DATA = PATTERN_MINI_FROG_0;
-
-                if(gContinue == 1)
-                {
-                    PPU_ADDRESS = 0x22;
-                    PPU_ADDRESS = 0x2C;
-                }
-                else
-                {
-                    PPU_ADDRESS = 0x21;
-                    PPU_ADDRESS = 0xAC;
-                }
-                PPU_DATA = 0;
-
-                set_scroll();
             }
         }
 
+        set_scroll();
         //fade_out();
 
     }
@@ -2074,7 +2084,7 @@ void put_i_in_collision2_vars(void) {
       height2 = 16;
       break;
 
-    case MINI_FROG_ID:
+    case FLY_ID:
     case HEART_ID:
     case KEY_ID:
     default:
@@ -2551,6 +2561,18 @@ void item_ai_handler(void)
   {
     //Update Y
     sprite_maintain_y_position();
+
+    if( gSpriteTable.id[i] == FLY_ID )
+    {
+        if((gFrameCounter & 0x8) != 0)
+        {
+            sprites[j+1] = PATTERN_FLY2_0;
+        }
+        else
+        {
+            sprites[j+1] = PATTERN_FLY_0;
+        }
+    }
   }
 }
 
@@ -2673,7 +2695,7 @@ void enemy_collision_handler(void)
   }
 }
 
-void mini_frog_collision_handler(void)
+void fly_collision_handler(void)
 {
   //remove the item
   gSpriteTable.id[i] = INVALID_ID;
@@ -3096,6 +3118,11 @@ void do_physics(void)
               gSpriteState[i] = 0x5A; // set the respawn time to 1.5s
           }
 
+          if( gSpriteTable.id[i] == FLY_ID )
+          {
+              fly_collision_handler();
+          }
+
           gTmp = SpriteSize[gSpriteTable.id[i]];
           for(k = 0; k < gTmp; k++)
           {
@@ -3342,6 +3369,22 @@ void end_screen_sm(void)
         vblank();
 
         input_poll();
+        ++gFrameCounter;
+
+        if( (gFrameCounter & 0x8) == 0 )
+        {
+            gTmpPattern = PATTERN_FLY_0;
+        }
+        else
+        {
+            gTmpPattern = PATTERN_FLY2_0;
+        }
+        PPU_ADDRESS = 0x28;
+        PPU_ADDRESS = 0xEA;
+        PPU_DATA = gTmpPattern;
+        PPU_ADDRESS = 0x28;
+        PPU_ADDRESS = 0xF5;
+        PPU_DATA = gTmpPattern;
 
         // set bits [1:0] to 0 for nametable
         PPU_CTRL = gPpuCtrlBase + gYNametable;
