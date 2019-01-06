@@ -281,10 +281,10 @@ unsigned char pauseSound400A[PAUSE_SOUND_LENGTH] = {0x23, 0x31, 0x5E, 0xF2, 0xF3
 unsigned char pauseSound400B[PAUSE_SOUND_LENGTH] = {0x00, 0x00, 0x00, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x00, 0x00, 0x00};
 
 #define ITEM_SOUND_ID     5
-#define ITEM_SOUND_LENGTH 12
-unsigned char itemSound4000[ITEM_SOUND_LENGTH] = {0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F};
-unsigned char itemSound4001[ITEM_SOUND_LENGTH] = {0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08};
-unsigned char itemSound4002[ITEM_SOUND_LENGTH] = {0x6A, 0x6A, 0x6A, 0x59, 0x6A, 0x4B, 0x59, 0x3F, 0x4B, 0x34, 0x34, 0x34};
+#define ITEM_SOUND_LENGTH 13
+unsigned char itemSound4000[ITEM_SOUND_LENGTH] = {0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F};
+unsigned char itemSound4001[ITEM_SOUND_LENGTH] = {0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08};
+unsigned char itemSound4002[ITEM_SOUND_LENGTH] = {0x6A, 0x6A, 0x6A, 0x59, 0x6A, 0x4B, 0x59, 0x3F, 0x4B, 0x34, 0x34, 0x34, 0x00};
 
 #define PORTAL_SOUND_ID     6
 #define PORTAL_SOUND_LENGTH 12
@@ -339,7 +339,6 @@ static unsigned char        gTmpX;
 static unsigned char        gTmpX2;
 static unsigned char        gX;
 static unsigned char        gY;
-static unsigned long        gXScroll;
 static unsigned char        gYScroll;
 static unsigned char        gYPrevScroll;
 static unsigned char        gYNametable;
@@ -355,6 +354,7 @@ static unsigned char        gTmp4;
 static unsigned char        gTmp5;
 static unsigned char        gTmp6;
 static unsigned char        gTmp7;
+static unsigned char        gTmp8;
 static unsigned char        x1;
 static unsigned char        y1;
 static unsigned char        width1;
@@ -366,7 +366,9 @@ static unsigned char        height2;
 static unsigned char        gVelocity;
 static unsigned char        gSpeed;
 static unsigned char        gSpeedDirection;
+static unsigned char        gSpeedCounter;
 static FrogAnimationState_t gFrogAnimationState;
+static unsigned char        gVblankPrevious;
 
 #pragma bss-name (pop)
 
@@ -377,7 +379,6 @@ static FrogAnimationState_t gFrogAnimationState;
 unsigned char collision[496];
 
 
-static unsigned char        gTmp8;
 static unsigned char        gTmp9;
 static unsigned char        numKeys;
 static unsigned char        gCollisionRight;
@@ -388,7 +389,6 @@ static unsigned char        gBirdMovement;
 static unsigned char        gBirdSpeedControl; //set to 0-2 and bird doesn't move on 0
 static unsigned char        gSnakeMovement;
 static unsigned char        gVelocityDirection;
-static unsigned char        gSpeedCounter;
 static unsigned char        gVelocityCounter;
 
 // These are probably overkill, but it makes collision detection a lot cleaner
@@ -404,7 +404,6 @@ static unsigned char        gFade;
 static unsigned char        gLives;
 static unsigned char        gDisplayLives;
 static const unsigned char* gScratchPointer;
-static unsigned char        gVblankPrevious;
 static unsigned char        gPpuCtrlBase;
 static unsigned char        gTitleScreenColor;
 static unsigned char        gMusicOn;
@@ -420,8 +419,8 @@ static unsigned char        gColorTimer2;
 static unsigned char        gColorTimerLimit;
 static unsigned char        gTmpDirection;
 static unsigned char        gContinue;
-static unsigned char        gMiniFrogCount;
-static unsigned char        gMiniFrogCollected;
+static unsigned char        gFlyCount;
+static unsigned char        gFlyCollected;
 static unsigned char        gTmpPattern;
 extern unsigned char        gVblank;
 
@@ -645,7 +644,7 @@ void set_scroll(void)
     // read 0x2002 to reset the address toggle
     devnull = *((unsigned char*)0x2002);
     // scroll a number of pixels in the X direction
-    *((unsigned char*)0x2005) = gXScroll;
+    *((unsigned char*)0x2005) = 0;
     // scroll a number of pixels in the Y direction
     *((unsigned char*)0x2005) = gYScroll;
     //Could put this only when its set, but this is the safest place
@@ -1731,21 +1730,21 @@ void load_stage(void)
         PPU_ADDRESS = 0x28;
         PPU_ADDRESS = 0xEC;
 
-        if( gMiniFrogCount >= 20 )
+        if( gFlyCount >= 20 )
         {
-            gMiniFrogCount = gMiniFrogCount - 20;
+            gFlyCount = gFlyCount - 20;
             PPU_DATA = PATTERN_NUMBERS_2;
         }
-        else if( gMiniFrogCount >= 10 )
+        else if( gFlyCount >= 10 )
         {
-            gMiniFrogCount = gMiniFrogCount - 10;
+            gFlyCount = gFlyCount - 10;
             PPU_DATA = PATTERN_NUMBERS_1;
         }
         else
         {
             PPU_DATA = PATTERN_NUMBERS_0;
         }
-        PPU_DATA = PATTERN_NUMBERS_0 + gMiniFrogCount;
+        PPU_DATA = PATTERN_NUMBERS_0 + gFlyCount;
     }
 
     if( LevelTable[gStage].numSprites != 0 )
@@ -1857,7 +1856,6 @@ void death(void)
         PPU_ADDRESS = 0x21;
         PPU_ADDRESS = 0xAC;
         PPU_DATA = PATTERN_FLY_0;
-        gXScroll = 0;
         gYScroll = 0;
         gYNametable = 0;
         PPU_CTRL = gPpuCtrlBase + gYNametable;
@@ -1912,7 +1910,7 @@ void death(void)
                     {
                         --gStage;
                     }
-                    gMiniFrogCount = 0;
+                    gFlyCount = 0;
                     gLives = 2;
                     gDisplayLives = 1;
                 }
@@ -1941,9 +1939,9 @@ void death(void)
     }
     else
     {
-        if( gMiniFrogCollected == 1 )
+        if( gFlyCollected == 1 )
         {
-            --gMiniFrogCount;
+            --gFlyCount;
         }
         gLives--;
         gDisplayLives = 1;
@@ -2043,8 +2041,8 @@ void put_i_in_collision2_vars(void) {
     case PORTAL_ID:
       x2 = sprites[j + 3];
       y2 = sprites[j];
-      width2 = 16;
-      height2 = 16;
+      width2 = 15;
+      height2 = 15;
       break;
 
     case FLY_ID:
@@ -2423,10 +2421,10 @@ void bird_ai_handler(void)
             sprites[j] += 1;
             sprites[j+4] += 1;
 
-            x1 = sprites[j + 3];
+            x1 = sprites[j + 3] + 1;
             y1 = sprites[j] + 1;
             height1 = 8;
-            width1 = 15; //Don't count the tip
+            width1 = 13; //Don't count the tip
             if(is_background_collision()) {
               sprites[j] -= 1;
               sprites[j+4] -= 1;
@@ -2438,10 +2436,10 @@ void bird_ai_handler(void)
             sprites[j] -= 1;
             sprites[j+4] -= 1;
 
-            x1 = sprites[j + 3];
+            x1 = sprites[j + 3] + 1;
             y1 = sprites[j] + 1;
             height1 = 8;
-            width1 = 15; //Don't count the tip
+            width1 = 13; //Don't count the tip
             if(is_background_collision()) {
               sprites[j] += 1;
               sprites[j+4] += 1;
@@ -2458,10 +2456,10 @@ void bird_ai_handler(void)
             sprites[j+3] += 1;
             sprites[j+7] += 1;
 
-            x1 = sprites[j + 3];
+            x1 = sprites[j + 3] + 1;
             y1 = sprites[j] + 1;
             height1 = 8;
-            width1 = 15; //Don't count the tip
+            width1 = 13; //Don't count the tip
             if(is_background_collision()) {
               sprites[j+3] -= 1;
               sprites[j+7] -= 1;
@@ -2476,10 +2474,10 @@ void bird_ai_handler(void)
             sprites[j+3] -= 1;
             sprites[j+7] -= 1;
 
-            x1 = sprites[j + 3];
+            x1 = sprites[j + 3] + 1;
             y1 = sprites[j] + 1;
             height1 = 8;
-            width1 = 15; //Don't count the tip
+            width1 = 13; //Don't count the tip
             if(is_background_collision()) {
               sprites[j+3] += 1;
               sprites[j+7] += 1;
@@ -2676,8 +2674,8 @@ void fly_collision_handler(void)
   sprites[j + 2] = 0;
   sprites[j + 3] = 0;
 
-  ++gMiniFrogCount;
-  gMiniFrogCollected = 1;
+  ++gFlyCount;
+  gFlyCollected = 1;
 
   gCurrentSoundEffect = ITEM_SOUND_ID;
   gSoundEffectCounter = 0;
@@ -3111,8 +3109,8 @@ void do_physics(void)
       //Frog collision box
       x1 = sprites[3] + 2;
       y1 = sprites[0] + 1;
-      width1 = 12;
-      height1 = 15;
+      width1 = 11;
+      height1 = 14;
 
       put_i_in_collision2_vars();
 
@@ -3152,7 +3150,7 @@ void init_physics(void)
     gColorTimer = (gHealth << 3);
     gColorTimer2 = 0;
     gTitleScreenColor = 0x11;
-    gMiniFrogCollected = 0;
+    gFlyCollected = 0;
     update_tongue_sprite();
     update_frog_sprite();
 }
@@ -3161,7 +3159,6 @@ void init_game_state(void)
 {
     gX = 0x10;
     gY = 0xCF;
-    gXScroll = 0;
     gYScroll = 0;
     gYNametable = 2;
     gHealth = 8;
@@ -3173,13 +3170,14 @@ void init_game_state(void)
     gLives = 2;
     gDisplayLives = 1;
     gContinue = 0;
-    gMiniFrogCount = 0;
+    gFlyCount = 0;
 }
 
 void game_running_sm(void)
 {
     while( gGameState == GAME_RUNNING_STATE )
     {
+        set_scroll();
         vblank();
 
         gFrameCounter++;
@@ -3230,6 +3228,9 @@ void game_running_sm(void)
 
         if((gController1 & BUTTON_START) == BUTTON_START)
         {
+            PPU_CTRL = gPpuCtrlBase + gYNametable;
+            set_scroll();
+            vblank();
             (*(unsigned char*) 0x4015) = 0xC; // turn off the square wave channels
 
             gCurrentSoundEffect = PAUSE_SOUND_ID;
@@ -3238,25 +3239,28 @@ void game_running_sm(void)
             //Paused so wait until button is released and then pushed again
             do
             {
+             PPU_CTRL = gPpuCtrlBase + gYNametable;
+             set_scroll();
              vblank();
              input_poll();
-             set_scroll();
             }
             while((gController1 & BUTTON_START) == BUTTON_START);
 
             do
             {
+             PPU_CTRL = gPpuCtrlBase + gYNametable;
+             set_scroll();
              vblank();
              input_poll();
-             set_scroll();
             }
             while((gController1 & BUTTON_START) != BUTTON_START);
 
             do
             {
+             PPU_CTRL = gPpuCtrlBase + gYNametable;
+             set_scroll();
              vblank();
              input_poll();
-             set_scroll();
             }
             while((gController1 & BUTTON_START) == BUTTON_START);
 
