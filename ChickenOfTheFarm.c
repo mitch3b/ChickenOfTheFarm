@@ -718,6 +718,13 @@ void ClearSprites(void)
     }
 }
 
+//Copies from sprites array in ram to PPU
+void dma_sprites(void)
+{
+    *((unsigned char*)0x4013) = 0x00;
+    *((unsigned char*)0x4014) = 0x02;
+}
+
 void LoadSprites(void)
 {
     numKeys = 0;
@@ -906,6 +913,8 @@ void fade_in(void)
     gFade = 0;
     load_palette();
 
+    dma_sprites();
+
     PPU_CTRL = gPpuCtrlBase + gYNametable;
     if( gStage == 0 || gStage > (NUM_LEVELS-2) || gDisplayLives == 1 || gContinue == 1 )
     {
@@ -915,6 +924,7 @@ void fade_in(void)
     {
         PPU_MASK = 0x1E;
     }
+
     set_scroll();
 
     gCounter = 20;
@@ -938,12 +948,6 @@ void draw_health(void)
         }
         sprites[43 + (i<<2)] = 0x10;
     }
-}
-
-void dma_sprites(void)
-{
-    *((unsigned char*)0x4013) = 0x00;
-    *((unsigned char*)0x4014) = 0x02;
 }
 
 void input_poll(void)
