@@ -76,7 +76,7 @@
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
 
-#define BIRD_SPEED_CONTROL 4
+#define BIRD_SPEED_CONTROL 2
 
 #define TONGUE_EXTEND_DELAY  0
 #define TONGUE_RETRACT_DELAY 4
@@ -648,8 +648,6 @@ void set_scroll(void)
     // scroll a number of pixels in the Y direction
     *((unsigned char*)0x2005) = gYScroll;
     //Could put this only when its set, but this is the safest place
-    gYPrevScroll = gYScroll;
-    gYPrevNametable = gYNametable;
 }
 
 // TODO not the most efficient but pulling directly from nametables
@@ -934,22 +932,21 @@ void fade_in(void)
 //40, 44, 48, 52, 54, 58, 62, 64
 void draw_health(void)
 {
-    for( i = 0; i < 8; i++)
+    for( gTmp7 = 0; gTmp7 < 8; gTmp7++)
     {
-        sprites[40 + (i<<2)] = 0x0F + (i<<3) + i;
-        sprites[41 + (i<<2)] = PATTERN_HEALTH_0;
-        if( gHealth > i )
+        sprites[40 + (gTmp7<<2)] = 0x0F + (gTmp7<<3) + gTmp7;
+        sprites[41 + (gTmp7<<2)] = PATTERN_HEALTH_0;
+        if( gHealth > gTmp7 )
         {
-            sprites[42 + (i<<2)] = 0x02;
+            sprites[42 + (gTmp7<<2)] = 0x02;
         }
         else
         {
-            sprites[42 + (i<<2)] = 0x03;
+            sprites[42 + (gTmp7<<2)] = 0x03;
         }
-        sprites[43 + (i<<2)] = 0x10;
+        sprites[43 + (gTmp7<<2)] = 0x10;
     }
 }
-
 void input_poll(void)
 {
     // Strobe 0x4016 bit 0 to gather input
@@ -2851,6 +2848,8 @@ void do_physics(void)
     // Vertical Movement
     //
 
+    gYPrevScroll = gYScroll;
+    gYPrevNametable = gYNametable;
     if( gVelocityDirection == 1 ) // moving up
     {
         for( i = 0; (i<<2) < gVelocity; i++ )
@@ -3274,8 +3273,6 @@ void game_running_sm(void)
             (*(unsigned char*) 0x4015) = 0xF; // restore off the square wave channels
         }
 
-        update_sprites();
-
         dma_sprites();
 
         // set bits [1:0] to 0 for nametable
@@ -3283,6 +3280,8 @@ void game_running_sm(void)
         set_scroll();
 
         do_physics();
+
+        update_sprites();
     }
 }
 
