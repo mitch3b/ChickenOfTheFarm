@@ -71,7 +71,8 @@
 #define KEY_ID       5
 #define SNAKE_ID     6
 #define HEART_ID     7
-#define ID_COUNT     8
+#define CHICKEN_ID   8
+#define ID_COUNT     9
 
 
 #define SET_COLOR( index, color )  PPU_ADDRESS = 0x3F; PPU_ADDRESS = index; PPU_DATA = color
@@ -135,21 +136,25 @@ static unsigned char SpriteSize[ID_COUNT] = {
     1,  //KEY_ID       5
     2,  //SNAKE_ID     6
     1,  //HEART_ID     7
+    16, //CHICKEN_ID   8
 };
 
 void spawn_1_by_1_sprite(void);
 void spawn_2_by_1_sprite(void);
 void spawn_portal_sprite(void);
+void spawn_chicken_sprite(void);
 
 void despawn_1_sprite(void);
 void despawn_2_sprite(void);
 void despawn_portal_sprite(void);
+void despawn_chicken_sprite(void);
 
 void invalid_ai_handler(void);
 void arrow_ai_handler(void);
 void bird_ai_handler(void);
 void item_ai_handler(void);
 void snake_ai_handler(void);
+void chicken_ai_handler(void);
 
 void invalid_collision_handler(void);
 void enemy_collision_handler(void);
@@ -170,14 +175,15 @@ typedef struct {
 } sprite_properties_t;
 
 sprite_properties_t spriteProperties[ID_COUNT] = {
-    {PATTERN_AAA_INVALID_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite, &invalid_ai_handler, &invalid_collision_handler  }, //INVALID_ID
-    {        PATTERN_FLY_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &fly_collision_handler      }, //FLY_ID
-    {      PATTERN_ARROW_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,   &arrow_ai_handler, &enemy_collision_handler    }, //ARROW_ID
-    {       PATTERN_BIRD_0,  &spawn_2_by_1_sprite,      &despawn_2_sprite,    &bird_ai_handler, &enemy_collision_handler    }, //BIRD_ID
-    {     PATTERN_PORTAL_0,  &spawn_portal_sprite, &despawn_portal_sprite,    &item_ai_handler, &portal_collision_handler   }, //PORTAL_ID
-    {        PATTERN_KEY_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &key_collision_handler      }, //KEY_ID
-    {      PATTERN_SNAKE_0,  &spawn_2_by_1_sprite,      &despawn_2_sprite,   &snake_ai_handler, &enemy_collision_handler    }, //SNAKE_ID
-    {      PATTERN_HEART_0,  &spawn_1_by_1_sprite,      &despawn_1_sprite,    &item_ai_handler, &heart_collision_handler    }, //HEART_ID
+    {PATTERN_AAA_INVALID_0,  &spawn_1_by_1_sprite,       &despawn_1_sprite, &invalid_ai_handler, &invalid_collision_handler  }, //INVALID_ID
+    {        PATTERN_FLY_0,  &spawn_1_by_1_sprite,       &despawn_1_sprite,    &item_ai_handler, &fly_collision_handler      }, //FLY_ID
+    {      PATTERN_ARROW_0,  &spawn_1_by_1_sprite,       &despawn_1_sprite,   &arrow_ai_handler, &enemy_collision_handler    }, //ARROW_ID
+    {       PATTERN_BIRD_0,  &spawn_2_by_1_sprite,       &despawn_2_sprite,    &bird_ai_handler, &enemy_collision_handler    }, //BIRD_ID
+    {     PATTERN_PORTAL_0,  &spawn_portal_sprite,  &despawn_portal_sprite,    &item_ai_handler, &portal_collision_handler   }, //PORTAL_ID
+    {        PATTERN_KEY_0,  &spawn_1_by_1_sprite,       &despawn_1_sprite,    &item_ai_handler, &key_collision_handler      }, //KEY_ID
+    {      PATTERN_SNAKE_0,  &spawn_2_by_1_sprite,       &despawn_2_sprite,   &snake_ai_handler, &enemy_collision_handler    }, //SNAKE_ID
+    {      PATTERN_HEART_0,  &spawn_1_by_1_sprite,       &despawn_1_sprite,    &item_ai_handler, &heart_collision_handler    }, //HEART_ID
+    {    PATTERN_CHICKEN_0, &spawn_chicken_sprite, &despawn_chicken_sprite, &chicken_ai_handler, &enemy_collision_handler    }, //CHICKEN_ID
 };
 
 typedef struct {
@@ -195,7 +201,7 @@ typedef struct {
 } level_additional_properties_t;
 
 
-#define NUM_LEVELS 25
+#define NUM_LEVELS 26
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,  0,                             0,                                },
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                },
@@ -221,6 +227,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 	{Nametable_RaveSnakeStairs_bottom_rle,       Nametable_RaveSnakeStairs_top_rle,       CastlePalette,       Sprites_RaveSnakeStairs,       RAVESNAKESTAIRS_ENEMY_COUNT,      },
 	{Nametable_RaveTwoTowers_bottom_rle,         Nametable_RaveTwoTowers_top_rle,         CastlePalette,       Sprites_RaveTwoTowers,         RAVETWOTOWERS_ENEMY_COUNT,        },
 	{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               CastlePalette,       Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,              },
+    {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                },
     {Nametable_EndingScreen_bottom_rle,          0,                                       CastlePalette,       0,                             0,                                },
 };
 
@@ -249,6 +256,7 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x70, 0xBF, 4}, // Nametable_RaveSnakeStairs_bottom_rle,
     {0x10, 0x9F, 4}, // Nametable_RaveTwoTowers_bottom_rle,
     {0x10, 0xBF, 4}, // Nametable_RavePit_bottom_rle,
+    {0x10, 0xBF, 5}, // Nametable_Intro_bottom_rle,
     {0x10, 0xCF, 0}, // Nametable_EndingScreen_bottom_rle,
 };
 
@@ -730,6 +738,10 @@ void LoadSprites(void)
     {
         gTmp = *gScratchPointer2++;
         gSpriteTable.id[gTmp2] =             gTmp;
+        if(gTmp == KEY_ID) {
+          numKeys++;
+        }
+
         gTmp = *gScratchPointer2++;
         gSpriteTable.startX[gTmp2] =         gTmp;
         gTmp = *gScratchPointer2++;
@@ -755,9 +767,6 @@ void LoadSprites(void)
             gSpriteOffset[gTmp2] = gSpriteOffset[gTmp2-1] + (SpriteSize[gSpriteTable.id[gTmp2-1]] << 2);
         }
 
-        if(gSpriteTable.id[gTmp2] == KEY_ID) {
-          numKeys++;
-        }
     }
 }
 
@@ -765,23 +774,23 @@ void palettes(void)
 {
     // Sprite 0
     SET_COLOR(SPRITE0_1, DARK_GREEN);
-    SET_COLOR(SPRITE0_2, GREEN);
-    SET_COLOR(SPRITE0_3, WHITE);
+    PPU_DATA = GREEN;
+    PPU_DATA = WHITE;
 
     // Sprite 1
     SET_COLOR(SPRITE1_1, GRAY_BLUE);
-    SET_COLOR(SPRITE1_2, DARK_BLUE);
-    SET_COLOR(SPRITE1_3, LIGHT_ORANGE);
+    PPU_DATA = DARK_BLUE;
+    PPU_DATA = LIGHT_ORANGE;
 
     // Sprite 2
     SET_COLOR(SPRITE2_1, DARK_RED);
-    SET_COLOR(SPRITE2_2, RED);
-    SET_COLOR(SPRITE2_3, WHITE);
+    PPU_DATA = RED;
+    PPU_DATA = WHITE;
 
     // Sprite 3
     SET_COLOR(SPRITE3_1, RED);
-    SET_COLOR(SPRITE3_2, WHITE);
-    SET_COLOR(SPRITE3_3, WHITE);
+    PPU_DATA = WHITE;
+    PPU_DATA = WHITE;
 }
 
 void load_palette(void)
@@ -841,9 +850,11 @@ void load_palette(void)
     else
     {
         SET_COLOR(BACKGROUND0_0, BLACK);
-        SET_COLOR(BACKGROUND0_1, BLACK);
-        SET_COLOR(BACKGROUND0_2, DARK_GRAY);
-        SET_COLOR(BACKGROUND0_3, BLACK);
+        for( gTmp5 = 0; gTmp5 < 15; gTmp5++ )
+        {
+            PPU_DATA = BLACK;
+        }
+        SET_COLOR(BACKGROUND0_1, GRAY_BLUE);
     }
 }
 
@@ -929,7 +940,6 @@ void fade_in(void)
     vblank_counter();
 }
 
-//40, 44, 48, 52, 54, 58, 62, 64
 void draw_health(void)
 {
     for( gTmp7 = 0; gTmp7 < 8; gTmp7++)
@@ -1722,6 +1732,13 @@ void load_stage(void)
     vblank();
 
     gScratchPointer = LevelTable[gStage].palette;
+    if( gStage == NUM_LEVELS - 2 )
+    {
+        SET_COLOR(SPRITE1_1, WHITE);
+        PPU_DATA = RED;
+        PPU_DATA = LIGHT_ORANGE;
+    }
+
     load_palette();
     vblank();
 
@@ -2093,13 +2110,16 @@ void take_hit(void)
  */
 void spawn_1_by_1_sprite(void)
 {
-    sprites[j] = gTmp8;
-    gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
-    sprites[j + 1] = gTmp2;
-    sprites[j + 2] = gSpriteTable.direction[i];
-    if(sprites[j + 3] == 0) {
-      gTmp8 = gSpriteTable.startX[i];
-      sprites[j + 3] = gTmp8;
+    if( gStage != NUM_LEVELS-2 )
+    {
+        sprites[j] = gTmp8;
+        gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
+        sprites[j + 1] = gTmp2;
+        sprites[j + 2] = gSpriteTable.direction[i];
+        if(sprites[j + 3] == 0) {
+          gTmp8 = gSpriteTable.startX[i];
+          sprites[j + 3] = gTmp8;
+        }
     }
 }
 
@@ -2173,14 +2193,10 @@ void spawn_2_by_1_sprite(void)
  */
 void despawn_2_sprite(void)
 {
-    sprites[j] = 0;
-    sprites[j + 1] = 0;
-    sprites[j + 2] = 0;
-    sprites[j + 3] = 0;
-    sprites[j + 4] = 0;
-    sprites[j + 5] = 0;
-    sprites[j + 6] = 0;
-    sprites[j + 7] = 0;
+    for( gTmp5 = 0; gTmp5 < 8; gTmp5++ )
+    {
+        sprites[j+gTmp5] = 0;
+    }
 }
 
 void spawn_portal_sprite(void)
@@ -2214,22 +2230,57 @@ void spawn_portal_sprite(void)
 
 void despawn_portal_sprite(void)
 {
-    sprites[j] = 0;
-    sprites[j + 1] = 0;
-    sprites[j + 2] = 0;
-    sprites[j + 3] = 0;
-    sprites[j + 4] = 0;
-    sprites[j + 5] = 0;
-    sprites[j + 6] = 0;
-    sprites[j + 7] = 0;
-    sprites[j + 8] = 0;
-    sprites[j + 9] = 0;
-    sprites[j + 10] = 0;
-    sprites[j + 11] = 0;
-    sprites[j + 12] = 0;
-    sprites[j + 13] = 0;
-    sprites[j + 14] = 0;
-    sprites[j + 15] = 0;
+    for(gTmp8 = 0; gTmp8 < 16; gTmp8++)
+    {
+        sprites[j + gTmp8] = 0;
+    }
+}
+
+/**
+ * Depends on:
+ * j as an index into sprites
+ * i as an index into gSpriteTable
+ * Overwrites:
+ * gTmp2
+ * gTmp8
+ */
+void spawn_chicken_sprite(void)
+{
+    if( gStage != 1 && gSpriteState[i] != 0xFF )
+    {
+        gTmp6 = gSpriteTable.startX[i];
+        gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
+        for( gTmp7 = 0; gTmp7 < 15; gTmp7++ )
+        {
+            gTmp5 = j+(gTmp7<<2);
+            sprites[gTmp5]    = gTmp8 + ((gTmp7>>2)<<3);
+            sprites[gTmp5+3]  = gTmp6 + ((gTmp7&3)<<3);
+
+            if( gTmp7 > 12 )
+            {
+                sprites[j+1+(gTmp7<<2)] = gTmp2+gTmp7-2;
+            }
+            else if( gTmp7 > 1)
+            {
+                sprites[j+1+(gTmp7<<2)] = gTmp2+gTmp7-1;
+            }
+            else
+            {
+                sprites[j+1+(gTmp7<<2)] = gTmp2+gTmp7;
+            }
+            sprites[j+2+(gTmp7<<2)] = gSpriteTable.direction[i];
+        }
+        sprites[j+1+8] = 0;
+        sprites[j+1+48] = 0;
+    }
+}
+
+void despawn_chicken_sprite(void)
+{
+    for(gTmp8 = 0; gTmp8 < 64; gTmp8++)
+    {
+        sprites[j + gTmp8] = 0;
+    }
 }
 
 /**
@@ -2658,6 +2709,16 @@ void snake_ai_handler(void)
   }
 }
 
+void chicken_ai_handler(void)
+{
+  // check to see if the sprite has spawned first
+  if(sprites[j+1] != 0)
+  {
+    //Update Y
+    sprite_maintain_y_position();
+  }
+}
+
 void enemy_collision_handler(void)
 {
   if(gIframes == 0)
@@ -3067,18 +3128,10 @@ void do_physics(void)
 
         if(is_collision()) {
           //Reset tongue
-          sprites[72] = 0;
-          sprites[73] = 0;
-          sprites[74] = 0;
-          sprites[75] = 0;
-          sprites[76] = 0;
-          sprites[77] = 0;
-          sprites[78] = 0;
-          sprites[79] = 0;
-          sprites[80] = 0;
-          sprites[81] = 0;
-          sprites[82] = 0;
-          sprites[83] = 0;
+          for( gTmp5 = 72; gTmp5 < 84; gTmp5++ )
+          {
+              sprites[gTmp5] = 0;
+          }
           gTongueState = TONGUE_NORMAL;
           gTongueCounter = 0;
           if( gSpriteTable.id[i] == SNAKE_ID )
@@ -3090,10 +3143,15 @@ void do_physics(void)
           {
               gSpriteState[i] = 0x5A; // set the respawn time to 1.5s
           }
-
           if( gSpriteTable.id[i] == FLY_ID )
           {
               fly_collision_handler();
+          }
+          if( gSpriteTable.id[i] == CHICKEN_ID )
+          {
+              gSpriteState[i] = 0xFF;
+              //despawn_chicken_sprite();
+              numKeys = 0;
           }
 
           gTmp = SpriteSize[gSpriteTable.id[i]];
@@ -3273,6 +3331,7 @@ void game_running_sm(void)
             (*(unsigned char*) 0x4015) = 0xF; // restore off the square wave channels
         }
 
+        update_sprites();
         dma_sprites();
 
         // set bits [1:0] to 0 for nametable
@@ -3281,7 +3340,6 @@ void game_running_sm(void)
 
         do_physics();
 
-        update_sprites();
     }
 }
 
