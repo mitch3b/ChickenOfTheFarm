@@ -104,6 +104,24 @@ typedef enum _FrogAnimationState_t
     FROG_LANDING,
 } FrogAnimationState_t;
 
+typedef enum _ChickenAnimationState_t
+{
+    CHICKEN_STATE0 = 0,
+    CHICKEN_STATE1,
+    CHICKEN_STATE2,
+    CHICKEN_STATE3,
+} ChickenAnimationState_t;
+
+typedef enum _ChickenAIState_t
+{
+    CHICKEN_STANDING = 0,
+    CHICKEN_WALKING,
+    CHICKEN_RUNNING,
+    CHICKEN_SPRINTING,
+    CHICKEN_RETREATING,
+    CHICKEN_PECKING,
+} ChickenAIState_t;
+
 typedef enum _TongueState_t
 {
     TONGUE_NORMAL = 0,
@@ -201,7 +219,7 @@ typedef struct {
 } level_additional_properties_t;
 
 
-#define NUM_LEVELS 26
+#define NUM_LEVELS 21
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,  0,                             0,                                },
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                },
@@ -211,7 +229,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,              },
     {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        GrassPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,       },
     {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,           },
-    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,         },
+    //{Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,         },
     {Nametable_FirstIce_bottom_rle,              Nametable_FirstIce_top_rle,              IcePalette,          Sprites_FirstIce,              FIRSTICE_ENEMY_COUNT,             },
     {Nametable_IceStairs_bottom_rle,             Nametable_IceStairs_top_rle,             IcePalette,          Sprites_IceStairs,             ICESTAIRS_ENEMY_COUNT,            },
     {Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IcePalette,          Sprites_IceRun,                ICERUN_ENEMY_COUNT,               },
@@ -223,10 +241,10 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     CastlePalette,       Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,    },
 	{Nametable_CastleColumns_bottom_rle,         Nametable_CastleColumns_top_rle,         CastlePalette,       Sprites_CastleColumns,         CASTLECOLUMNS_ENEMY_COUNT,        },
 	{Nametable_FirstRave_bottom_rle,             Nametable_FirstRave_top_rle,             CastlePalette,       Sprites_FirstRave,             FIRSTRAVE_ENEMY_COUNT,            },
-	{Nametable_RaveSmallGaps_bottom_rle,         Nametable_RaveSmallGaps_top_rle,         CastlePalette,       Sprites_RaveSmallGaps,         RAVESMALLGAPS_ENEMY_COUNT,        },
-	{Nametable_RaveSnakeStairs_bottom_rle,       Nametable_RaveSnakeStairs_top_rle,       CastlePalette,       Sprites_RaveSnakeStairs,       RAVESNAKESTAIRS_ENEMY_COUNT,      },
-	{Nametable_RaveTwoTowers_bottom_rle,         Nametable_RaveTwoTowers_top_rle,         CastlePalette,       Sprites_RaveTwoTowers,         RAVETWOTOWERS_ENEMY_COUNT,        },
-	{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               CastlePalette,       Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,              },
+	//{Nametable_RaveSmallGaps_bottom_rle,         Nametable_RaveSmallGaps_top_rle,         CastlePalette,       Sprites_RaveSmallGaps,         RAVESMALLGAPS_ENEMY_COUNT,        },
+	//{Nametable_RaveSnakeStairs_bottom_rle,       Nametable_RaveSnakeStairs_top_rle,       CastlePalette,       Sprites_RaveSnakeStairs,       RAVESNAKESTAIRS_ENEMY_COUNT,      },
+	//{Nametable_RaveTwoTowers_bottom_rle,         Nametable_RaveTwoTowers_top_rle,         CastlePalette,       Sprites_RaveTwoTowers,         RAVETWOTOWERS_ENEMY_COUNT,        },
+	//{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               CastlePalette,       Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,              },
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                },
     {Nametable_EndingScreen_bottom_rle,          0,                                       CastlePalette,       0,                             0,                                },
 };
@@ -240,7 +258,7 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1}, // Nametable_OpenPit_bottom_rle,
     {0x10, 0xBF, 1}, // Nametable_SmallPlatforms_bottom_rle,
     {0x78, 0xBF, 1}, // Nametable_ArrowClimb_bottom_rle,
-    {0x78, 0xBF, 1}, // Nametable_TwoBirdClimb_bottom_rle,
+    //{0x78, 0xBF, 1}, // Nametable_TwoBirdClimb_bottom_rle,
     {0x20, 0xBF, 2}, // Nametable_FirstIce_bottom_rle,
     {0x10, 0xBF, 2}, // Nametable_IceStairs_bottom_rle,
     {0x10, 0xBF, 2}, // Nametable_IceRun_bottom_rle,
@@ -252,10 +270,10 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xCF, 3}, // Nametable_LevelBackAndForth_bottom_rle,
     {0xE0, 0xCF, 3}, // Nametable_CastleColumns_bottom_rle,
     {0x10, 0xBF, 4}, // Nametable_FirstRave_bottom_rle,
-    {0x10, 0xBF, 4}, // Nametable_RaveSmallGaps_bottom_rle,
-    {0x70, 0xBF, 4}, // Nametable_RaveSnakeStairs_bottom_rle,
-    {0x10, 0x9F, 4}, // Nametable_RaveTwoTowers_bottom_rle,
-    {0x10, 0xBF, 4}, // Nametable_RavePit_bottom_rle,
+    //{0x10, 0xBF, 4}, // Nametable_RaveSmallGaps_bottom_rle,
+    //{0x70, 0xBF, 4}, // Nametable_RaveSnakeStairs_bottom_rle,
+    //{0x10, 0x9F, 4}, // Nametable_RaveTwoTowers_bottom_rle,
+    //{0x10, 0xBF, 4}, // Nametable_RavePit_bottom_rle,
     {0x10, 0xBF, 5}, // Nametable_Intro_bottom_rle,
     {0x10, 0xCF, 0}, // Nametable_EndingScreen_bottom_rle,
 };
@@ -343,6 +361,7 @@ static unsigned char        gController1;
 static unsigned char        gPrevController1;
 static unsigned char        gPrevController1Change;
 static unsigned char        gFrameCounter;
+static unsigned char        gRNG;
 static unsigned char        gTmpX;
 static unsigned char        gTmpX2;
 static unsigned char        gX;
@@ -387,49 +406,56 @@ static unsigned char        gVblankPrevious;
 unsigned char collision[496];
 
 
-static unsigned char        gTmp9;
-static unsigned char        numKeys;
-static unsigned char        gCollisionRight;
-static unsigned char        gJumping; // 0 if not currently in the air from a jump, 1 if yes
-static TongueState_t        gTongueState;
-static unsigned char        gTongueCounter;
-static unsigned char        gBirdMovement;
-static unsigned char        gBirdSpeedControl; //set to 0-2 and bird doesn't move on 0
-static unsigned char        gSnakeMovement;
-static unsigned char        gVelocityDirection;
-static unsigned char        gVelocityCounter;
+static unsigned char           gTmp9;
+static unsigned char           numKeys;
+static unsigned char           gCollisionRight;
+static unsigned char           gJumping; // 0 if not currently in the air from a jump, 1 if yes
+static TongueState_t           gTongueState;
+static unsigned char           gTongueCounter;
+static unsigned char           gBirdMovement;
+static unsigned char           gBirdSpeedControl; //set to 0-2 and bird doesn't move on 0
+static unsigned char           gSnakeMovement;
+static unsigned char           gVelocityDirection;
+static unsigned char           gVelocityCounter;
 
 // These are probably overkill, but it makes collision detection a lot cleaner
-static unsigned char        gStage;
-static unsigned char        gWorld;
-static unsigned char        gTmpWorld;
-static unsigned char        gCounter;
-static unsigned char        gHealth;
-static unsigned char        gIframes;
-static unsigned char        gNumSprites;
-static GameState_t          gGameState;
-static unsigned char        gFade;
-static unsigned char        gLives;
-static unsigned char        gDisplayLives;
-static const unsigned char* gScratchPointer;
-static unsigned char        gPpuCtrlBase;
-static unsigned char        gTitleScreenColor;
-static unsigned char        gMusicOn;
-static unsigned char        gSoundEffectCounter;
-static const unsigned char* gSoundEffect0;
-static const unsigned char* gSoundEffect1;
-static const unsigned char* gSoundEffect2;
-static unsigned char        gSoundEffectLength;
-static unsigned char        gCurrentSoundEffect;
-static unsigned char        gCurrentMusic;
-static unsigned char        gColorTimer;
-static unsigned char        gColorTimer2;
-static unsigned char        gColorTimerLimit;
-static unsigned char        gTmpDirection;
-static unsigned char        gContinue;
-static unsigned char        gFlyCount;
-static unsigned char        gFlyCollected;
-static unsigned char        gTmpPattern;
+static unsigned char           gStage;
+static unsigned char           gWorld;
+static unsigned char           gTmpWorld;
+static unsigned char           gCounter;
+static unsigned char           gHealth;
+static unsigned char           gIframes;
+static unsigned char           gNumSprites;
+static GameState_t             gGameState;
+static unsigned char           gFade;
+static unsigned char           gLives;
+static unsigned char           gDisplayLives;
+static const unsigned char*    gScratchPointer;
+static unsigned char           gPpuCtrlBase;
+static unsigned char           gTitleScreenColor;
+static unsigned char           gMusicOn;
+static unsigned char           gSoundEffectCounter;
+static const unsigned char*    gSoundEffect0;
+static const unsigned char*    gSoundEffect1;
+static const unsigned char*    gSoundEffect2;
+static unsigned char           gSoundEffectLength;
+static unsigned char           gCurrentSoundEffect;
+static unsigned char           gCurrentMusic;
+static unsigned char           gColorTimer;
+static unsigned char           gColorTimer2;
+static unsigned char           gColorTimerLimit;
+static unsigned char           gTmpDirection;
+static unsigned char           gContinue;
+static unsigned char           gFlyCount;
+static unsigned char           gFlyCollected;
+static unsigned char           gTmpPattern;
+static unsigned char           gChickenAnimationCounter;
+static ChickenAnimationState_t gChickenAnimationState;
+static ChickenAIState_t        gChickenAIState;
+static unsigned char           gChickenAICounter;
+static unsigned char           gChickenSpeed;
+static unsigned char           gChickenIframes;
+
 extern unsigned char        gVblank;
 
 extern void pMusicInit(unsigned char);
@@ -1591,6 +1617,28 @@ void update_sprites(void)
     }
 }
 
+void set_chicken_color(void)
+{
+    //gTmp7 = (gChickenIframes >> 2);
+    //SET_COLOR(SPRITE1_1, WHITE + gTmp7);
+    //PPU_DATA = RED + gTmp7;
+    //PPU_DATA = LIGHT_ORANGE + gTmp7;
+    //SET_COLOR(SPRITE1_1, WHITE);
+    //PPU_DATA = RED;
+    //PPU_DATA = LIGHT_ORANGE;
+    if( gChickenIframes != 0 )
+    {
+        gTmp7 = (gChickenIframes >> 2) - 0x10;
+    }
+    else
+    {
+        gTmp7 = 0;
+    }
+    SET_COLOR(SPRITE1_1, WHITE + gTmp7);
+    SET_COLOR(SPRITE1_2, RED + gTmp7);
+    SET_COLOR(SPRITE1_3, LIGHT_ORANGE + gTmp7);
+}
+
 void load_stage(void)
 {
     fade_out();
@@ -1734,9 +1782,7 @@ void load_stage(void)
     gScratchPointer = LevelTable[gStage].palette;
     if( gStage == NUM_LEVELS - 2 )
     {
-        SET_COLOR(SPRITE1_1, WHITE);
-        PPU_DATA = RED;
-        PPU_DATA = LIGHT_ORANGE;
+        set_chicken_color();
     }
 
     load_palette();
@@ -1834,6 +1880,12 @@ void next_stage(void)
     }
 }
 
+void update_rng(void)
+{
+    ++gFrameCounter;
+    gRNG = gRNG + 1 + gFrameCounter | gController1;
+}
+
 void death(void)
 {
     gHealth = 8;
@@ -1883,7 +1935,7 @@ void death(void)
             set_scroll();
             vblank();
             input_poll();
-            ++gFrameCounter;
+            update_rng();
 
             if( (gFrameCounter & 0x8) == 0 )
             {
@@ -2061,6 +2113,13 @@ void put_i_in_collision2_vars(void) {
       y2 = sprites[j];
       width2 = 15;
       height2 = 15;
+      break;
+
+    case CHICKEN_ID:
+      x2 = sprites[j + 3] + 1;
+      y2 = sprites[j] + 2;
+      width2 = 29;
+      height2 = 30;
       break;
 
     case FLY_ID:
@@ -2246,7 +2305,7 @@ void despawn_portal_sprite(void)
  */
 void spawn_chicken_sprite(void)
 {
-    if( gStage != 1 && gSpriteState[i] != 0xFF )
+    if( gStage != 1 && gSpriteState[i] == 0x00 )
     {
         gTmp6 = gSpriteTable.startX[i];
         gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
@@ -2272,6 +2331,9 @@ void spawn_chicken_sprite(void)
         }
         sprites[j+1+8] = 0;
         sprites[j+1+48] = 0;
+        sprites[j+59] += 2;
+        sprites[j+57] = PATTERN_CHICKEN2_14;
+        gSpriteState[i] = 0x18;
     }
 }
 
@@ -2293,7 +2355,7 @@ void despawn_chicken_sprite(void)
 void spawn_check(void)
 {
   // check to see if the sprite has already spawned first
-  if(sprites[j+1] == 0 && gSpriteTable.id[i] != INVALID_ID)
+  if((sprites[j+1] == 0 && gSpriteTable.id[i] != INVALID_ID) || ((gSpriteTable.id[i] == CHICKEN_ID && gSpriteState[i] == 0x00)))
   {
     if(gSpriteTable.startNametable[i] == 2) {
       //bottom half
@@ -2712,10 +2774,165 @@ void snake_ai_handler(void)
 void chicken_ai_handler(void)
 {
   // check to see if the sprite has spawned first
-  if(sprites[j+1] != 0)
+  if(gSpriteState[i] != 0xFF)
   {
-    //Update Y
-    sprite_maintain_y_position();
+      if( gChickenIframes != 0 )
+      {
+          --gChickenIframes;
+      }
+      //Update Y
+      sprite_maintain_y_position();
+
+      if( gChickenAICounter == 0 )
+      {
+          gChickenAICounter = 15;
+          if( gChickenAIState == CHICKEN_PECKING && gFrameCounter >= 16 )
+          {
+              sprites[j+1] = PATTERN_CHICKEN_0;
+              sprites[j+5] = PATTERN_CHICKEN_1;
+              sprites[j+17] = PATTERN_CHICKEN_4;
+              sprites[j+21] = PATTERN_CHICKEN_5;
+              sprites[j+33] = PATTERN_CHICKEN_8;
+          }
+
+          if( gRNG < 16 )
+          {
+              gChickenAIState = CHICKEN_PECKING;
+          }
+          else if ( gRNG < 32 )
+          {
+              gChickenAIState = CHICKEN_SPRINTING;
+          }
+          else if ( gRNG < 80 )
+          {
+              gChickenAIState = CHICKEN_RUNNING;
+          }
+          else if ( gRNG < 128 )
+          {
+              gChickenAIState = CHICKEN_WALKING;
+          }
+          else if ( gRNG < 196 )
+          {
+              gChickenAIState = CHICKEN_RETREATING;
+              gChickenAICounter = gRNG - 128;
+          }
+          else
+          {
+              gChickenAIState = CHICKEN_STANDING;
+          }
+      }
+      else
+      {
+          if( gChickenAICounter == 5 && gChickenAIState == CHICKEN_PECKING )
+          {
+              gChickenSpeed = 0;
+          }
+          --gChickenAICounter;
+      }
+
+      switch( gChickenAIState )
+      {
+          case CHICKEN_PECKING:
+              sprites[j+1] = PATTERN_CHICKEN_PECK_0;
+              sprites[j+5] = PATTERN_CHICKEN_PECK_1;
+              sprites[j+17] = PATTERN_CHICKEN_PECK_4;
+              sprites[j+21] = PATTERN_CHICKEN_PECK_5;
+              sprites[j+33] = PATTERN_CHICKEN_PECK_8;
+          break;
+
+          case CHICKEN_SPRINTING:
+              gChickenSpeed = 3;
+          break;
+
+          case CHICKEN_RUNNING:
+              gChickenSpeed = 2;
+          break;
+
+          case CHICKEN_WALKING:
+              gChickenSpeed = 1;
+          break;
+
+          case CHICKEN_RETREATING:
+              gChickenSpeed = 0xFF;
+          break;
+
+          case CHICKEN_STANDING:
+              gChickenSpeed = 0;
+          break;
+      }
+
+      if( gChickenSpeed != 0 )
+      {
+            x1 = sprites[j + 3] + 1 - gChickenSpeed;
+            y1 = sprites[j];
+            height1 = 32;
+            width1 = 30;
+            if(!is_background_collision())
+            {
+                for( gTmp7 = 0; gTmp7 < 15; gTmp7++ )
+                {
+                    gTmp5 = j+3+(gTmp7<<2);
+                    sprites[gTmp5] = sprites[gTmp5] - gChickenSpeed;
+                }
+            }
+      }
+
+      if( gChickenAnimationCounter == 0 )
+      {
+          gChickenAnimationCounter = 10;
+          switch(gChickenAnimationState)
+          {
+              case CHICKEN_STATE0:
+                  sprites[j+55] += 3;
+                  sprites[j+53] = PATTERN_CHICKEN_14;
+                  sprites[j+59] -= 2;
+                  sprites[j+57] = PATTERN_CHICKEN_14;
+                  gChickenAnimationState = CHICKEN_STATE1;
+              break;
+
+              case CHICKEN_STATE1:
+                  sprites[j+55] += 2;
+                  sprites[j+53] = PATTERN_CHICKEN2_14;
+                  sprites[j+59] -= 3;
+                  sprites[j+57] = PATTERN_CHICKEN_13;
+                  gChickenAnimationCounter = 5;
+                  gChickenAnimationState = CHICKEN_STATE2;
+              break;
+
+              case CHICKEN_STATE2:
+                  if( sprites[j+37] == PATTERN_CHICKEN_9 )
+                  {
+                      sprites[j+37] = PATTERN_CHICKEN2_9;
+                      sprites[j+41] = PATTERN_CHICKEN2_10;
+                  }
+                  else
+                  {
+                      sprites[j+37] = PATTERN_CHICKEN_9;
+                      sprites[j+41] = PATTERN_CHICKEN_10;
+                  }
+                  sprites[j+55] -= 2;
+                  sprites[j+53] = PATTERN_CHICKEN_14;
+                  sprites[j+59] += 3;
+                  sprites[j+57] = PATTERN_CHICKEN_14;
+                  gChickenAnimationState = CHICKEN_STATE3;
+              break;
+
+              case CHICKEN_STATE3:
+                  sprites[j+55] -= 3;
+                  sprites[j+53] = PATTERN_CHICKEN_13;
+                  sprites[j+59] += 2;
+                  sprites[j+57] = PATTERN_CHICKEN2_14;
+                  gChickenAnimationState = CHICKEN_STATE0;
+              break;
+          }
+      }
+      else
+      {
+          if( gChickenSpeed != 0 )
+          {
+              --gChickenAnimationCounter;
+          }
+      }
   }
 }
 
@@ -3138,10 +3355,14 @@ void do_physics(void)
           {
               gSpriteState[i] = 0xFF; // kill the snake
           }
-
+          if( gSpriteTable.id[i] == ARROW_ID )
+          {
+              despawn_1_sprite();
+          }
           if( gSpriteTable.id[i] == BIRD_ID )
           {
               gSpriteState[i] = 0x5A; // set the respawn time to 1.5s
+              despawn_2_sprite();
           }
           if( gSpriteTable.id[i] == FLY_ID )
           {
@@ -3149,19 +3370,17 @@ void do_physics(void)
           }
           if( gSpriteTable.id[i] == CHICKEN_ID )
           {
-              gSpriteState[i] = 0xFF;
-              //despawn_chicken_sprite();
-              numKeys = 0;
-          }
-
-          gTmp = SpriteSize[gSpriteTable.id[i]];
-          for(k = 0; k < gTmp; k++)
-          {
-            //moved offscreen so kill it
-            sprites[j + (k << 2)] = 0;
-            sprites[j + (k << 2) + 1] = 0;
-            sprites[j + (k << 2) + 2] = 0;
-            sprites[j + (k << 2) + 3] = 0;
+              if( gChickenIframes == 0 )
+              {
+                  --gSpriteState[i];
+                  gChickenIframes = 30;
+                  if(gSpriteState[i] == 0x10)
+                  {
+                      despawn_chicken_sprite();
+                      gSpriteState[i] = 0xFF;
+                      numKeys = 0;
+                  }
+              }
           }
 
         }
@@ -3214,6 +3433,12 @@ void init_physics(void)
     gFlyCollected = 0;
     update_tongue_sprite();
     update_frog_sprite();
+    gChickenAnimationCounter = 30;
+    gChickenAICounter = 120;
+    gChickenAIState = CHICKEN_STANDING;
+    gChickenAnimationState = CHICKEN_STATE0;
+    gChickenSpeed = 0;
+    gChickenIframes = 0;
 }
 
 void init_game_state(void)
@@ -3232,6 +3457,7 @@ void init_game_state(void)
     gDisplayLives = 1;
     gContinue = 0;
     gFlyCount = 0;
+    gRNG = 0;
 }
 
 void game_running_sm(void)
@@ -3241,7 +3467,12 @@ void game_running_sm(void)
         set_scroll();
         vblank();
 
-        gFrameCounter++;
+        if( gStage == NUM_LEVELS - 2 )
+        {
+            set_chicken_color();
+        }
+
+        update_rng();
         gBirdSpeedControl++;
         if(gBirdSpeedControl > BIRD_SPEED_CONTROL) {
           gBirdSpeedControl = 0;
@@ -3388,7 +3619,7 @@ void title_screen_sm(void)
         gYScroll = 0;
         set_scroll();
 
-        gFrameCounter++;
+        update_rng();
 
         if( (gController1 & BUTTON_START) != 0 )
         {
@@ -3411,7 +3642,7 @@ void end_screen_sm(void)
         vblank();
 
         input_poll();
-        ++gFrameCounter;
+        update_rng();
 
         if( (gFrameCounter & 0x8) == 0 )
         {
