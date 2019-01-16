@@ -13,8 +13,8 @@ Name                   Start     End    Size  Align
 ----------------------------------------------------
 ZEROPAGE              000000  000014  000015  00001
 BSS                   000700  0007F4  0000F5  00001
-HEADER                00E000  00E07F  000080  00001
-CODE                  00E080  00FD43  001CC4  00001
+HEADER                00E28C  00E30B  000080  00001
+CODE                  00E30C  00FFCF  001CC4  00001
 
 
 Exports list by name:

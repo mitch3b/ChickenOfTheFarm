@@ -219,7 +219,7 @@ typedef struct {
 } level_additional_properties_t;
 
 
-#define NUM_LEVELS 21
+#define NUM_LEVELS 26
 level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_TitleScreen_bottom_rle,           0,                                       TitleScreenPalette,  0,                             0,                                },
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                },
@@ -229,7 +229,7 @@ level_properties_t LevelTable[NUM_LEVELS] = {
     {Nametable_OpenPit_bottom_rle,               Nametable_OpenPit_top_rle,               GrassPalette,        Sprites_OpenPit,               OPENPIT_ENEMY_COUNT,              },
     {Nametable_SmallPlatforms_bottom_rle,        Nametable_SmallPlatforms_top_rle,        GrassPalette,        Sprites_SmallPlatforms,        SMALLPLATFORMS_ENEMY_COUNT,       },
     {Nametable_ArrowClimb_bottom_rle,            Nametable_ArrowClimb_top_rle,            GrassPalette,        Sprites_ArrowClimb,            ARROWCLIMB_ENEMY_COUNT,           },
-    //{Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,         },
+    {Nametable_TwoBirdClimb_bottom_rle,          Nametable_TwoBirdClimb_top_rle,          GrassPalette,        Sprites_TwoBirdClimb,          TWOBIRDCLIMB_ENEMY_COUNT,         },
     {Nametable_FirstIce_bottom_rle,              Nametable_FirstIce_top_rle,              IcePalette,          Sprites_FirstIce,              FIRSTICE_ENEMY_COUNT,             },
     {Nametable_IceStairs_bottom_rle,             Nametable_IceStairs_top_rle,             IcePalette,          Sprites_IceStairs,             ICESTAIRS_ENEMY_COUNT,            },
     {Nametable_IceRun_bottom_rle,                Nametable_IceRun_top_rle,                IcePalette,          Sprites_IceRun,                ICERUN_ENEMY_COUNT,               },
@@ -241,10 +241,10 @@ level_properties_t LevelTable[NUM_LEVELS] = {
 	{Nametable_LevelBackAndForth_bottom_rle,     Nametable_LevelBackAndForth_top_rle,     CastlePalette,       Sprites_LevelBackAndForth,     LEVELBACKANDFORTH_ENEMY_COUNT,    },
 	{Nametable_CastleColumns_bottom_rle,         Nametable_CastleColumns_top_rle,         CastlePalette,       Sprites_CastleColumns,         CASTLECOLUMNS_ENEMY_COUNT,        },
 	{Nametable_FirstRave_bottom_rle,             Nametable_FirstRave_top_rle,             CastlePalette,       Sprites_FirstRave,             FIRSTRAVE_ENEMY_COUNT,            },
-	//{Nametable_RaveSmallGaps_bottom_rle,         Nametable_RaveSmallGaps_top_rle,         CastlePalette,       Sprites_RaveSmallGaps,         RAVESMALLGAPS_ENEMY_COUNT,        },
-	//{Nametable_RaveSnakeStairs_bottom_rle,       Nametable_RaveSnakeStairs_top_rle,       CastlePalette,       Sprites_RaveSnakeStairs,       RAVESNAKESTAIRS_ENEMY_COUNT,      },
-	//{Nametable_RaveTwoTowers_bottom_rle,         Nametable_RaveTwoTowers_top_rle,         CastlePalette,       Sprites_RaveTwoTowers,         RAVETWOTOWERS_ENEMY_COUNT,        },
-	//{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               CastlePalette,       Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,              },
+	{Nametable_RaveSmallGaps_bottom_rle,         Nametable_RaveSmallGaps_top_rle,         CastlePalette,       Sprites_RaveSmallGaps,         RAVESMALLGAPS_ENEMY_COUNT,        },
+	{Nametable_RaveSnakeStairs_bottom_rle,       Nametable_RaveSnakeStairs_top_rle,       CastlePalette,       Sprites_RaveSnakeStairs,       RAVESNAKESTAIRS_ENEMY_COUNT,      },
+	{Nametable_RaveTwoTowers_bottom_rle,         Nametable_RaveTwoTowers_top_rle,         CastlePalette,       Sprites_RaveTwoTowers,         RAVETWOTOWERS_ENEMY_COUNT,        },
+	{Nametable_RavePit_bottom_rle,               Nametable_RavePit_top_rle,               CastlePalette,       Sprites_RavePit,               RAVEPIT_ENEMY_COUNT,              },
     {Nametable_Intro_bottom_rle,                 Nametable_Intro_top_rle,                 GrassPalette,        Sprites_Intro,                 INTRO_ENEMY_COUNT,                },
     {Nametable_EndingScreen_bottom_rle,          0,                                       CastlePalette,       0,                             0,                                },
 };
@@ -258,7 +258,7 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xBF, 1}, // Nametable_OpenPit_bottom_rle,
     {0x10, 0xBF, 1}, // Nametable_SmallPlatforms_bottom_rle,
     {0x78, 0xBF, 1}, // Nametable_ArrowClimb_bottom_rle,
-    //{0x78, 0xBF, 1}, // Nametable_TwoBirdClimb_bottom_rle,
+    {0x78, 0xBF, 1}, // Nametable_TwoBirdClimb_bottom_rle,
     {0x20, 0xBF, 2}, // Nametable_FirstIce_bottom_rle,
     {0x10, 0xBF, 2}, // Nametable_IceStairs_bottom_rle,
     {0x10, 0xBF, 2}, // Nametable_IceRun_bottom_rle,
@@ -270,10 +270,10 @@ level_additional_properties_t LevelProperties[NUM_LEVELS] = {
     {0x10, 0xCF, 3}, // Nametable_LevelBackAndForth_bottom_rle,
     {0xE0, 0xCF, 3}, // Nametable_CastleColumns_bottom_rle,
     {0x10, 0xBF, 4}, // Nametable_FirstRave_bottom_rle,
-    //{0x10, 0xBF, 4}, // Nametable_RaveSmallGaps_bottom_rle,
-    //{0x70, 0xBF, 4}, // Nametable_RaveSnakeStairs_bottom_rle,
-    //{0x10, 0x9F, 4}, // Nametable_RaveTwoTowers_bottom_rle,
-    //{0x10, 0xBF, 4}, // Nametable_RavePit_bottom_rle,
+    {0x10, 0xBF, 4}, // Nametable_RaveSmallGaps_bottom_rle,
+    {0x70, 0xBF, 4}, // Nametable_RaveSnakeStairs_bottom_rle,
+    {0x10, 0x9F, 4}, // Nametable_RaveTwoTowers_bottom_rle,
+    {0x10, 0xBF, 4}, // Nametable_RavePit_bottom_rle,
     {0x10, 0xBF, 5}, // Nametable_Intro_bottom_rle,
     {0x10, 0xCF, 0}, // Nametable_EndingScreen_bottom_rle,
 };
@@ -406,7 +406,6 @@ static unsigned char        gVblankPrevious;
 unsigned char collision[496];
 
 
-static unsigned char           gTmp9;
 static unsigned char           numKeys;
 static unsigned char           gCollisionRight;
 static unsigned char           gJumping; // 0 if not currently in the air from a jump, 1 if yes
@@ -570,77 +569,63 @@ void PlaySoundEffects(void)
     }
 }
 
-void ppuinit(void)
-{
-    // from NESDev:
-    // +---------+----------------------------------------------------------+
-    // |  $2000  | PPU Control Register #1 (W)                              |
-    // |         |                                                          |
-    // |         |    D7: Execute NMI on VBlank                             |
-    // |         |           0 = Disabled                                   |
-    // |         |           1 = Enabled                                    |
-    // |         |    D6: PPU Master/Slave Selection --+                    |
-    // |         |           0 = Master                +-- UNUSED           |
-    // |         |           1 = Slave               --+                    |
-    // |         |    D5: Sprite Size                                       |
-    // |         |           0 = 8x8                                        |
-    // |         |           1 = 8x16                                       |
-    // |         |    D4: Background Pattern Table Address                  |
-    // |         |           0 = $0000 (VRAM)                               |
-    // |         |           1 = $1000 (VRAM)                               |
-    // |         |    D3: Sprite Pattern Table Address                      |
-    // |         |           0 = $0000 (VRAM)                               |
-    // |         |           1 = $1000 (VRAM)                               |
-    // |         |    D2: PPU Address Increment                             |
-    // |         |           0 = Increment by 1                             |
-    // |         |           1 = Increment by 32                            |
-    // |         | D1-D0: Name Table Address                                |
-    // |         |         00 = $2000 (VRAM)                                |
-    // |         |         01 = $2400 (VRAM)                                |
-    // |         |         10 = $2800 (VRAM)                                |
-    // |         |         11 = $2C00 (VRAM)                                |
-    // +---------+----------------------------------------------------------+
-    // +---------+----------------------------------------------------------+
-    // |  $2001  | PPU Control Register #2 (W)                              |
-    // |         |                                                          |
-    // |         | D7-D5: Full Background Colour (when D0 == 1)             |
-    // |         |         000 = None  +------------+                       |
-    // |         |         001 = Green              | NOTE: Do not use more |
-    // |         |         010 = Blue               |       than one type   |
-    // |         |         100 = Red   +------------+                       |
-    // |         | D7-D5: Colour Intensity (when D0 == 0)                   |
-    // |         |         000 = None            +--+                       |
-    // |         |         001 = Intensify green    | NOTE: Do not use more |
-    // |         |         010 = Intensify blue     |       than one type   |
-    // |         |         100 = Intensify red   +--+                       |
-    // |         |    D4: Sprite Visibility                                 |
-    // |         |           0 = sprites not displayed                      |
-    // |         |           1 = sprites visible                            |
-    // |         |    D3: Background Visibility                             |
-    // |         |           0 = Background not displayed                   |
-    // |         |           1 = Background visible                         |
-    // |         |    D2: Sprite Clipping                                   |
-    // |         |           0 = sprites invisible in left 8-pixel column   |
-    // |         |           1 = No clipping                                |
-    // |         |    D1: Background Clipping                               |
-    // |         |           0 = BG invisible in left 8-pixel column        |
-    // |         |           1 = No clipping                                |
-    // |         |    D0: Display Type                                      |
-    // |         |           0 = Colour display                             |
-    // |         |           1 = Monochrome display                         |
-    // +---------+----------------------------------------------------------+
-
-    // Set PPU registers
-    PPU_CTRL = 0x84;
-    PPU_MASK = 0x0E;
-}
-
-void ppudisable(void)
-{
-    // Disable graphics
-    PPU_CTRL = 0x80;
-    PPU_MASK = 0x00;
-}
+// from NESDev:
+// +---------+----------------------------------------------------------+
+// |  $2000  | PPU Control Register #1 (W)                              |
+// |         |                                                          |
+// |         |    D7: Execute NMI on VBlank                             |
+// |         |           0 = Disabled                                   |
+// |         |           1 = Enabled                                    |
+// |         |    D6: PPU Master/Slave Selection --+                    |
+// |         |           0 = Master                +-- UNUSED           |
+// |         |           1 = Slave               --+                    |
+// |         |    D5: Sprite Size                                       |
+// |         |           0 = 8x8                                        |
+// |         |           1 = 8x16                                       |
+// |         |    D4: Background Pattern Table Address                  |
+// |         |           0 = $0000 (VRAM)                               |
+// |         |           1 = $1000 (VRAM)                               |
+// |         |    D3: Sprite Pattern Table Address                      |
+// |         |           0 = $0000 (VRAM)                               |
+// |         |           1 = $1000 (VRAM)                               |
+// |         |    D2: PPU Address Increment                             |
+// |         |           0 = Increment by 1                             |
+// |         |           1 = Increment by 32                            |
+// |         | D1-D0: Name Table Address                                |
+// |         |         00 = $2000 (VRAM)                                |
+// |         |         01 = $2400 (VRAM)                                |
+// |         |         10 = $2800 (VRAM)                                |
+// |         |         11 = $2C00 (VRAM)                                |
+// +---------+----------------------------------------------------------+
+// +---------+----------------------------------------------------------+
+// |  $2001  | PPU Control Register #2 (W)                              |
+// |         |                                                          |
+// |         | D7-D5: Full Background Colour (when D0 == 1)             |
+// |         |         000 = None  +------------+                       |
+// |         |         001 = Green              | NOTE: Do not use more |
+// |         |         010 = Blue               |       than one type   |
+// |         |         100 = Red   +------------+                       |
+// |         | D7-D5: Colour Intensity (when D0 == 0)                   |
+// |         |         000 = None            +--+                       |
+// |         |         001 = Intensify green    | NOTE: Do not use more |
+// |         |         010 = Intensify blue     |       than one type   |
+// |         |         100 = Intensify red   +--+                       |
+// |         |    D4: Sprite Visibility                                 |
+// |         |           0 = sprites not displayed                      |
+// |         |           1 = sprites visible                            |
+// |         |    D3: Background Visibility                             |
+// |         |           0 = Background not displayed                   |
+// |         |           1 = Background visible                         |
+// |         |    D2: Sprite Clipping                                   |
+// |         |           0 = sprites invisible in left 8-pixel column   |
+// |         |           1 = No clipping                                |
+// |         |    D1: Background Clipping                               |
+// |         |           0 = BG invisible in left 8-pixel column        |
+// |         |           1 = No clipping                                |
+// |         |    D0: Display Type                                      |
+// |         |           0 = Colour display                             |
+// |         |           1 = Monochrome display                         |
+// +---------+----------------------------------------------------------+
 
 void apuinit(void)
 {
@@ -687,45 +672,40 @@ void set_scroll(void)
 // TODO not the most efficient but pulling directly from nametables
 // This method goes through the top nametable then the bottom. It only needs the top left corner of
 // every 2x2 block so grab every other on a row, then skip the next row entirely. Repeat.
+void loadCollisionHelper(void)
+{
+  for(i = 0 ; i < 240 ;) {
+    gTmp4 = PPU_DATA;
+    collision[i + gTmp6] =  (gTmp4 != PATTERN_BLANK_0) ? 0x01 : 0x00;
+    j = PPU_DATA;
+
+    i++;
+    if((i & 0xF) == 0) {
+      for(j = 0; j < 32 ; j++) {
+        gTmp4 = PPU_DATA;
+      }
+    }
+  }
+}
 void loadCollisionFromNametables(void)
 {
   PPU_ADDRESS = 0x20; // address of nametable #0
   PPU_ADDRESS = 0x00;
 
   //First read is always invalid
-  i = *((unsigned char*)0x2007);
+  i = PPU_DATA;
+  gTmp6 = 0;
 
-  for(i = 0 ; i < 240 ;) {
-    gTmp4 = *((unsigned char*)0x2007);
-    collision[i] =  (gTmp4 != PATTERN_BLANK_0) ? 0x01 : 0x00;
-    j = *((unsigned char*)0x2007);
-
-    i++;
-    if(i % 16 == 0) {
-      for(j = 0; j < 32 ; j++) {
-        gTmp4 = *((unsigned char*)0x2007);
-      }
-    }
-  }
+  loadCollisionHelper();
 
   PPU_ADDRESS = 0x28; // address of nametable #2
   PPU_ADDRESS = 0x00;
 
   //First read is always invalid
-  i = *((unsigned char*)0x2007);
+  i = PPU_DATA;
+  gTmp6 = 240;
 
-  for(i = 0 ; i < 240 ;) {
-    gTmp4 = *((unsigned char*)0x2007);
-    collision[i + 240] =  (gTmp4 != PATTERN_BLANK_0) ? 0x01 : 0x00;
-    j = *((unsigned char*)0x2007);
-
-    i++;
-    if(i % 16 == 0) {
-      for(j = 0; j < 32 ; j++) {
-        gTmp4 = *((unsigned char*)0x2007);
-      }
-    }
-  }
+  loadCollisionHelper();
 
   for(i = 0; i < 16; i++)
   {
@@ -741,13 +721,6 @@ void ClearSprites(void)
         sprites[i] = 0x00;
     }
     sprites[255] = 0x00;
-
-    gScratchPointer2 = (unsigned char*)sprites;
-    for(gTmp9 = 0; gTmp9 < (MAX_NUM_SPRITES * SPRITES_T_MEMBER_COUNT); gTmp9++)
-    {
-        gScratchPointer2 = 0;
-        gScratchPointer2++;
-    }
 }
 
 //Copies from sprites array in ram to PPU
@@ -804,84 +777,103 @@ void palettes(void)
     PPU_DATA = WHITE;
 
     // Sprite 1
-    SET_COLOR(SPRITE1_1, GRAY_BLUE);
+    //SET_COLOR(SPRITE1_1, GRAY_BLUE);
+    PPU_DATA = BLACK;
+    PPU_DATA = GRAY_BLUE;
     PPU_DATA = DARK_BLUE;
     PPU_DATA = LIGHT_ORANGE;
 
     // Sprite 2
-    SET_COLOR(SPRITE2_1, DARK_RED);
+    //SET_COLOR(SPRITE2_1, DARK_RED);
+    PPU_DATA = BLACK;
+    PPU_DATA = DARK_RED;
     PPU_DATA = RED;
     PPU_DATA = WHITE;
 
     // Sprite 3
-    SET_COLOR(SPRITE3_1, RED);
+    //SET_COLOR(SPRITE3_1, RED);
+    PPU_DATA = BLACK;
+    PPU_DATA = RED;
     PPU_DATA = WHITE;
     PPU_DATA = WHITE;
 }
 
 void load_palette(void)
 {
+    SET_COLOR(BACKGROUND0_0, BLACK);//gScratchPointer[0]);
     if( gDisplayLives == 1 || gContinue == 1 || LevelProperties[gStage].world != 4 )
     {
-        SET_COLOR(BACKGROUND0_0, gScratchPointer[0]);
-        SET_COLOR(BACKGROUND1_0, gScratchPointer[4]);
-        SET_COLOR(BACKGROUND2_0, gScratchPointer[7]);
-        SET_COLOR(BACKGROUND3_0, gScratchPointer[10]);
-
-        if( gFade > 0 )
+        if( gFade == 3 )
         {
-            SET_COLOR(BACKGROUND0_1, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND1_1, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND2_1, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND3_1, gScratchPointer[0]);
+            for( i = 0; i < 16; i++ )
+            {
+                PPU_DATA = BLACK;
+            }
         }
-        else
+        if( gFade == 2 )
         {
-            SET_COLOR(BACKGROUND0_1, gScratchPointer[1 ]);
-            SET_COLOR(BACKGROUND1_1, gScratchPointer[4 ]);
-            SET_COLOR(BACKGROUND2_1, gScratchPointer[7 ]);
-            SET_COLOR(BACKGROUND3_1, gScratchPointer[10]);
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[1];
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[4];
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[7];
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[10];
         }
-
-        if( gFade > 1 )
+        if( gFade == 1 )
         {
-            SET_COLOR(BACKGROUND0_2, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND1_2, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND2_2, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND3_2, gScratchPointer[0]);
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[1];
+            PPU_DATA = gScratchPointer[2];
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[4];
+            PPU_DATA = gScratchPointer[5];
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[7];
+            PPU_DATA = gScratchPointer[8];
+            PPU_DATA = BLACK;
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[10];
+            PPU_DATA = gScratchPointer[11];
         }
-        else
+        if( gFade == 0 )
         {
-            SET_COLOR(BACKGROUND0_2, gScratchPointer[2  - gFade]);
-            SET_COLOR(BACKGROUND1_2, gScratchPointer[5  - gFade]);
-            SET_COLOR(BACKGROUND2_2, gScratchPointer[8  - gFade]);
-            SET_COLOR(BACKGROUND3_2, gScratchPointer[11 - gFade]);
-        }
-
-        if( gFade > 2 )
-        {
-            SET_COLOR(BACKGROUND0_3, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND1_3, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND2_3, gScratchPointer[0]);
-            SET_COLOR(BACKGROUND3_3, gScratchPointer[0]);
-        }
-        else
-        {
-            SET_COLOR(BACKGROUND0_3, gScratchPointer[3  - gFade]);
-            SET_COLOR(BACKGROUND1_3, gScratchPointer[6  - gFade]);
-            SET_COLOR(BACKGROUND2_3, gScratchPointer[9  - gFade]);
-            SET_COLOR(BACKGROUND3_3, gScratchPointer[12 - gFade]);
+            PPU_DATA = gScratchPointer[1];
+            PPU_DATA = gScratchPointer[2];
+            PPU_DATA = gScratchPointer[3];
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[4];
+            PPU_DATA = gScratchPointer[5];
+            PPU_DATA = gScratchPointer[6];
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[7];
+            PPU_DATA = gScratchPointer[8];
+            PPU_DATA = gScratchPointer[9];
+            PPU_DATA = BLACK;
+            PPU_DATA = gScratchPointer[10];
+            PPU_DATA = gScratchPointer[11];
+            PPU_DATA = gScratchPointer[12];
         }
     }
     else
     {
-        SET_COLOR(BACKGROUND0_0, BLACK);
         for( gTmp5 = 0; gTmp5 < 15; gTmp5++ )
         {
             PPU_DATA = BLACK;
         }
         SET_COLOR(BACKGROUND0_1, GRAY_BLUE);
     }
+    SET_COLOR(BACKGROUND0_0, BLACK);//gScratchPointer[0]);
 }
 
 void fade_out(void)
@@ -970,17 +962,18 @@ void draw_health(void)
 {
     for( gTmp7 = 0; gTmp7 < 8; gTmp7++)
     {
-        sprites[40 + (gTmp7<<2)] = 0x0F + (gTmp7<<3) + gTmp7;
-        sprites[41 + (gTmp7<<2)] = PATTERN_HEALTH_0;
+        gTmp6 = gTmp7<<2;
+        sprites[40 + gTmp6] = 0x0F + (gTmp7<<3) + gTmp7;
+        sprites[41 + gTmp6] = PATTERN_HEALTH_0;
         if( gHealth > gTmp7 )
         {
-            sprites[42 + (gTmp7<<2)] = 0x02;
+            sprites[42 + gTmp6] = 0x02;
         }
         else
         {
-            sprites[42 + (gTmp7<<2)] = 0x03;
+            sprites[42 + gTmp6] = 0x03;
         }
-        sprites[43 + (gTmp7<<2)] = 0x10;
+        sprites[43 + gTmp6] = 0x10;
     }
 }
 void input_poll(void)
@@ -1510,12 +1503,12 @@ void update_tongue_sprite(void)
 
 void update_sprites(void)
 {
-    if(gController1 & BUTTON_UP)
-    {
-    }
-    if(gController1 & BUTTON_DOWN)
-    {
-    }
+    //if(gController1 & BUTTON_UP)
+    //{
+    //}
+    //if(gController1 & BUTTON_DOWN)
+    //{
+    //}
     if(gController1 & BUTTON_LEFT)
     {
         if( gSpeedDirection == 0 )
@@ -1574,20 +1567,20 @@ void update_sprites(void)
             ++gSpeedCounter;
         }
     }
-    if(gController1 & BUTTON_B)
-    {
-      // Currently does nothing
-    }
+    //if(gController1 & BUTTON_B)
+    //{
+    //  // Currently does nothing
+    //}
     // Only if new press (else you could just hold jump to jump over and over)
     if(((gController1 & BUTTON_A) > 0) && ((gPrevController1Change & BUTTON_A) == 0))
     {
         big_jump();
     }
-    if(!((gController1 & BUTTON_A) || (gController1 & BUTTON_B)))
-    {
-        // Stop making the sound
-        //*((unsigned char*)0x4000) = 0x30;
-    }
+    //if(!((gController1 & BUTTON_A) || (gController1 & BUTTON_B)))
+    //{
+    //    // Stop making the sound
+    //    //*((unsigned char*)0x4000) = 0x30;
+    //}
 
     update_frog_sprite();
     update_tongue_sprite();
@@ -1619,13 +1612,6 @@ void update_sprites(void)
 
 void set_chicken_color(void)
 {
-    //gTmp7 = (gChickenIframes >> 2);
-    //SET_COLOR(SPRITE1_1, WHITE + gTmp7);
-    //PPU_DATA = RED + gTmp7;
-    //PPU_DATA = LIGHT_ORANGE + gTmp7;
-    //SET_COLOR(SPRITE1_1, WHITE);
-    //PPU_DATA = RED;
-    //PPU_DATA = LIGHT_ORANGE;
     if( gChickenIframes != 0 )
     {
         gTmp7 = (gChickenIframes >> 2) - 0x10;
@@ -2194,10 +2180,10 @@ void spawn_1_by_1_sprite(void)
  */
 void despawn_1_sprite(void)
 {
-    sprites[j] = 0;
-    sprites[j + 1] = 0;
-    sprites[j + 2] = 0;
-    sprites[j + 3] = 0;
+    for( gTmp5 = 0; gTmp5 < 4; gTmp5++ )
+    {
+        sprites[j+gTmp5] = 0;
+    }
 }
 
 /**
@@ -2538,31 +2524,27 @@ void bird_ai_handler(void)
         if( sprites[j] < sprites[0])
         {
             //Frog lower so fly down
-            sprites[j] += 1;
-            sprites[j+4] += 1;
 
             x1 = sprites[j + 3] + 1;
-            y1 = sprites[j] + 1;
+            y1 = sprites[j] + 2;
             height1 = 8;
             width1 = 13; //Don't count the tip
-            if(is_background_collision()) {
-              sprites[j] -= 1;
-              sprites[j+4] -= 1;
+            if(!is_background_collision()) {
+              sprites[j] += 1;
+              sprites[j+4] += 1;
             }
         }
         else
         {
             //Frog higher so fly up
-            sprites[j] -= 1;
-            sprites[j+4] -= 1;
 
             x1 = sprites[j + 3] + 1;
-            y1 = sprites[j] + 1;
+            y1 = sprites[j];
             height1 = 8;
             width1 = 13; //Don't count the tip
-            if(is_background_collision()) {
-              sprites[j] += 1;
-              sprites[j+4] += 1;
+            if(!is_background_collision()) {
+              sprites[j] -= 1;
+              sprites[j+4] -= 1;
             }
         }
     }
@@ -2573,16 +2555,14 @@ void bird_ai_handler(void)
         if( sprites[j+3] < sprites[3])
         {
             // Bird should move right
-            sprites[j+3] += 1;
-            sprites[j+7] += 1;
 
-            x1 = sprites[j + 3] + 1;
+            x1 = sprites[j + 3] + 2;
             y1 = sprites[j] + 1;
             height1 = 8;
             width1 = 13; //Don't count the tip
-            if(is_background_collision()) {
-              sprites[j+3] -= 1;
-              sprites[j+7] -= 1;
+            if(!is_background_collision()) {
+              sprites[j+3] += 1;
+              sprites[j+7] += 1;
             }
 
             gBirdMovement += 0x10;
@@ -2591,16 +2571,14 @@ void bird_ai_handler(void)
         else
         {
             // Bird should move left
-            sprites[j+3] -= 1;
-            sprites[j+7] -= 1;
 
-            x1 = sprites[j + 3] + 1;
+            x1 = sprites[j + 3];
             y1 = sprites[j] + 1;
             height1 = 8;
             width1 = 13; //Don't count the tip
-            if(is_background_collision()) {
-              sprites[j+3] += 1;
-              sprites[j+7] += 1;
+            if(!is_background_collision()) {
+              sprites[j+3] -= 1;
+              sprites[j+7] -= 1;
             }
         }
     }
@@ -2684,8 +2662,6 @@ void snake_ai_handler(void)
     (*(unsigned char*) 0x2F0) = gSpriteState[i];
 
     //Update Y
-    sprites[j] = sprites[j] +     gTmp;
-    sprites[j+4] = sprites[j+4] + gTmp;
 
     if((gFrameCounter & 0x8) != 0)
     {
@@ -2693,12 +2669,12 @@ void snake_ai_handler(void)
     }
 
     x1 = sprites[j + 3];
-    y1 = sprites[j];
+    y1 = sprites[j] + gTmp;
     height1 = 8;
     width1 = 15; //Don't count the tip
-    if(is_background_collision()) {
-      sprites[j] =   sprites[j] -   gTmp;
-      sprites[j+4] = sprites[j+4] - gTmp;
+    if(!is_background_collision()) {
+      sprites[j] = sprites[j] +     gTmp;
+      sprites[j+4] = sprites[j+4] + gTmp;
 
       // reset the snake falling speed
       gSpriteState[i] = 1;
@@ -2714,16 +2690,17 @@ void snake_ai_handler(void)
     //Update X
     if( (gSpriteTable.direction[i] & 0x10) == 0x10 )
     {
-        sprites[j+3] += 1;
-        sprites[j+7] += 1;
 
-        x1 = sprites[j + 3];
+        x1 = sprites[j + 3] + 1;
         y1 = sprites[j];
         height1 = 8;
         width1 = 15; //Don't count the tip
-        if(is_background_collision()) {
-          sprites[j+3] -= 1;
-          sprites[j+7] -= 1;
+        if(!is_background_collision()) {
+          sprites[j+3] += 1;
+          sprites[j+7] += 1;
+        }
+        else
+        {
           gSpriteTable.direction[i] ^= 0x10;
         }
 
@@ -2731,16 +2708,16 @@ void snake_ai_handler(void)
     }
     else
     {
-        sprites[j+3] = sprites[j+3] - 1;
-        sprites[j+7] = sprites[j+7] - 1;
-
-        x1 = sprites[j + 3];
+        x1 = sprites[j + 3] - 1;
         y1 = sprites[j];
         height1 = 8;
         width1 = 15; //Don't count the tip
-        if(is_background_collision()) {
-          sprites[j+3] += 1;
-          sprites[j+7] += 1;
+        if(!is_background_collision()) {
+          sprites[j+3] = sprites[j+3] - 1;
+          sprites[j+7] = sprites[j+7] - 1;
+        }
+        else
+        {
           gSpriteTable.direction[i] ^= 0x10;
         }
     }
@@ -2780,7 +2757,7 @@ void snake_ai_handler(void)
 void chicken_ai_handler(void)
 {
   // check to see if the sprite has spawned first
-  if(gSpriteState[i] != 0xFF)
+  if(gSpriteState[i] != 0xFF && gStage != 1)
   {
       if( gChickenIframes != 0 )
       {
@@ -2954,10 +2931,7 @@ void fly_collision_handler(void)
 {
   //remove the item
   gSpriteTable.id[i] = INVALID_ID;
-  sprites[j] = 0;
-  sprites[j + 1] = 0;
-  sprites[j + 2] = 0;
-  sprites[j + 3] = 0;
+  despawn_1_sprite();
 
   ++gFlyCount;
   gFlyCollected = 1;
@@ -2970,10 +2944,7 @@ void heart_collision_handler(void)
 {
   //remove the item
   gSpriteTable.id[i] = INVALID_ID;
-  sprites[j] = 0;
-  sprites[j + 1] = 0;
-  sprites[j + 2] = 0;
-  sprites[j + 3] = 0;
+  despawn_1_sprite();
 
   if( gHealth < 8 )
   {
@@ -3005,10 +2976,7 @@ void portal_collision_handler(void)
 void key_collision_handler(void)
 {
   gSpriteTable.id[i] = INVALID_ID;
-  sprites[j] = 0;
-  sprites[j + 1] = 0;
-  sprites[j + 2] = 0;
-  sprites[j + 3] = 0;
+  despawn_1_sprite();
 
   numKeys--;
 
@@ -3388,7 +3356,6 @@ void do_physics(void)
                   }
               }
           }
-
         }
       }
 
@@ -3417,7 +3384,7 @@ void init_globals(void)
 {
     gGameState = TITLE_SCREEN_STATE;
     gDisplayLives = 0;
-    gPpuCtrlBase = 0x94;
+    gPpuCtrlBase = 0x90;
     gMusicOn = 0;
     gSoundEffectCounter = 0xFF;
 }
@@ -3684,7 +3651,9 @@ void main(void)
     PPU_CTRL = 0;
     PPU_MASK = 0;
 
-    ppudisable();
+    // Disable graphics
+    PPU_CTRL = 0x80;
+    PPU_MASK = 0x00;
 
     init_globals();
     init_game_state();
