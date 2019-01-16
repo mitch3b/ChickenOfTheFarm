@@ -1829,6 +1829,12 @@ void load_stage(void)
         pMusicInit(2);
     }
 
+    if( gCurrentMusic != 1 && gStage == (NUM_LEVELS - 2) )
+    {
+        gCurrentMusic = 1;
+        pMusicInit(1);
+    }
+
     loadCollisionFromNametables();
 
     gX = LevelProperties[gStage].FrogStartX;

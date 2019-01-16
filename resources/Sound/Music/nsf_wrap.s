@@ -10,9 +10,9 @@
 .word LOAD
 .word INIT
 .word PLAY
-.byte "ft driver                      ", 0	; Name, 32 bytes
-.byte "                               ", 0	; Artist, 32 bytes
-.byte "                               ", 0	; Copyright, 32 bytes
+.byte "Chicken of the Farm            ", 0	; Name, 32 bytes
+.byte "Mitch3a(music) link_7777(sfx)  ", 0	; Artist, 32 bytes
+.byte "2019                           ", 0	; Copyright, 32 bytes
 .word $411A									; NTSC speed
 .byte 0, 0, 0, 0, 0, 0, 0, 0				; Bank values
 .word $4E20									; PAL speed
@@ -34,5 +34,5 @@
 .endif
 ;.byte 0										; Sound chip, 2 = VRC7, 4 = FDS
 .byte 0,0,0,0								; Reserved
-;	
+;
 .include "driver.s"
