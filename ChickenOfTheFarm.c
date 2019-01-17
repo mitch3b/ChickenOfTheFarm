@@ -2676,15 +2676,15 @@ void snake_ai_handler(void)
       sprites[j] = sprites[j] +     gTmp;
       sprites[j+4] = sprites[j+4] + gTmp;
 
-      // reset the snake falling speed
-      gSpriteState[i] = 1;
+      if( gSpriteState[i] < 15 && (gFrameCounter & 1) == 0 )
+      {
+          ++gSpriteState[i];
+      }
     }
     else
     {
-        if( gSpriteState[i] < 15 && (gFrameCounter & 1) == 0 )
-        {
-            ++gSpriteState[i];
-        }
+      // reset the snake falling speed
+      gSpriteState[i] = 1;
     }
 
     //Update X
