@@ -1893,6 +1893,7 @@ void death(void)
         PPU_ADDRESS = 0x00;
         UnRLE(Nametable_Lives_top_rle);	// uncompresses our data
 
+        gYScroll = 0;
         gYNametable = 0;
         PPU_CTRL = gPpuCtrlBase + gYNametable;
 
