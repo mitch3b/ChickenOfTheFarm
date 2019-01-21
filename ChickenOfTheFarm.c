@@ -144,14 +144,33 @@ chicken_move_t ChickenMove0[MOVE_COUNT_0] = {{CHICKEN_STANDING,   120},
 
 #define MOVE_COUNT_1 4
 chicken_move_t ChickenMove1[MOVE_COUNT_1] = {{CHICKEN_WALKING|CHICKEN_FLYING,    120},
-                                             {CHICKEN_PECKING,     15},
-                                             {CHICKEN_RETREATING, 120},
+                                             {CHICKEN_PECKING,     30},
+                                             {CHICKEN_RETREATING, 130},
                                              {CHICKEN_INVALID,      0},};
 
-#define MOVE_TOTAL 2
+#define MOVE_COUNT_2 6
+chicken_move_t ChickenMove2[MOVE_COUNT_2] = {{CHICKEN_RUNNING|CHICKEN_FLYING,    40},
+                                             {CHICKEN_PECKING,     30},
+                                             {CHICKEN_RUNNING|CHICKEN_FLYING,    40},
+                                             {CHICKEN_PECKING,     30},
+                                             {CHICKEN_RETREATING, 150},
+                                             {CHICKEN_INVALID,      0},};
+
+#define MOVE_COUNT_3 7
+chicken_move_t ChickenMove3[MOVE_COUNT_3] = {{CHICKEN_SPRINTING|CHICKEN_FLYING,    20},
+                                             {CHICKEN_RUNNING,     30},
+                                             {CHICKEN_PECKING,     15},
+                                             {CHICKEN_RETREATING,  65},
+                                             {CHICKEN_PECKING,     15},
+                                             {CHICKEN_RETREATING,  65},
+                                             {CHICKEN_INVALID,      0},};
+
+#define MOVE_TOTAL 4
 chicken_move_t* ChickenMoveList[MOVE_TOTAL] = {
   ChickenMove0,
   ChickenMove1,
+  ChickenMove2,
+  ChickenMove3,
 };
 
 //According to nesdev, better to have arrays of attributes than arrays of objects: https://forums.nesdev.com/viewtopic.php?f=2&t=17465&start=0
@@ -886,6 +905,7 @@ void load_palette(void)
             PPU_DATA = gScratchPointer[11];
             PPU_DATA = gScratchPointer[12];
         }
+        SET_COLOR(BACKGROUND0_0, BLACK);//gScratchPointer[0]);
     }
     else
     {
@@ -893,9 +913,8 @@ void load_palette(void)
         {
             PPU_DATA = BLACK;
         }
-        SET_COLOR(BACKGROUND0_1, GRAY_BLUE);
+        SET_COLOR(BACKGROUND0_1, DARK_GRAY_BLUE);
     }
-    SET_COLOR(BACKGROUND0_0, BLACK);//gScratchPointer[0]);
 
     PPU_CTRL = gPpuCtrlBase + gYNametable;
     set_scroll();
@@ -1629,7 +1648,7 @@ void set_chicken_color(void)
 {
     if( gChickenIframes != 0 )
     {
-        gTmp7 = (gChickenIframes >> 2) - 0x10;
+        gTmp7 = (gChickenIframes >> 3) - 0x10;
     }
     else
     {
@@ -2339,7 +2358,7 @@ void spawn_chicken_sprite(void)
         sprites[j+1+48] = 0;
         sprites[j+59] += 2;
         sprites[j+57] = PATTERN_CHICKEN2_14;
-        gSpriteState[i] = 0x18;
+        gSpriteState[i] = 0x20;
     }
 }
 
@@ -2543,44 +2562,49 @@ void bird_ai_handler(void)
         if( sprites[j] < sprites[0])
         {
             //Frog lower so fly down
-            gTmp5 = 1;
+            gTmp4 = 1;
         }
         else
         {
-            gTmp5 = 0xFF;
+            gTmp4 = 0xFF;
         }
 
         x1 = sprites[j + 3] + 1;
-        y1 = sprites[j] + 1 + gTmp5;
+        y1 = sprites[j] + 1 + gTmp4;
         if(!is_background_collision()) {
-          sprites[j]   = sprites[j]   + gTmp5;
-          sprites[j+4] = sprites[j+4] + gTmp5;
+          sprites[j]   = sprites[j]   + gTmp4;
+          sprites[j+4] = sprites[j+4] + gTmp4;
         }
     }
 
     //Update X
     if( sprites[j+3] != sprites[3] && (gBirdSpeedControl != 0 ||  sprites[j] == sprites[0]))
     {
-        if( sprites[j+3] < sprites[3])
+        gTmp4 = sprites[j+3]+1;
+        gTmp = sprites[3]+1;
+
+        if( gTmp4 < gTmp )
         {
             // Bird should move right
-            gTmp5 = 1;
+            gTmp4 = 1;
             gBirdMovement += 0x10;
         }
         else
         {
-            gTmp5 = 0xFF;
+            gTmp4 = 0xFF;
         }
 
-        x1 = sprites[j + 3] + 1 + gTmp5;
+        x1 = sprites[j + 3] + 1 + gTmp4;
         y1 = sprites[j] + 1;
         if(!is_background_collision()) {
-          sprites[j+3] = sprites[j+3] + gTmp5;
-          sprites[j+7] = sprites[j+7] + gTmp5;
+          sprites[j+3] = sprites[j+3] + gTmp4;
+          sprites[j+7] = sprites[j+7] + gTmp4;
         }
     }
     else {
-      if( sprites[j+3] < sprites[3])
+      gTmp4 = sprites[j+3]+1;
+      gTmp = sprites[3]+1;
+      if( gTmp4 < gTmp )
       {
           //Make sure bird continues to face right even tho its Y's turn to move
           gBirdMovement += 0x10;
@@ -2771,14 +2795,14 @@ void chicken_ai_handler(void)
 
           if( gChickenAIState == CHICKEN_INVALID )
           {
-              gpChickenMove = ChickenMoveList[gRNG & 1];
+              gpChickenMove = ChickenMoveList[gRNG & 3];
               gChickenAIState = gpChickenMove->state;
               gChickenAICounter = gpChickenMove->count;
           }
       }
       else
       {
-          if( gChickenAICounter == 5 && gChickenAIState == CHICKEN_PECKING )
+          if( gChickenAIState == CHICKEN_PECKING )
           {
               gChickenSpeed = 0;
               gChickenVelocity = 0xF8;
@@ -2868,6 +2892,11 @@ void chicken_ai_handler(void)
                                 gTmp5 = j+(gTmp7<<2);
                                 sprites[gTmp5] = sprites[gTmp5] - gTmp4;
                             }
+                            break;
+                        }
+                        else
+                        {
+                            gChickenVelocity = 0;
                             break;
                         }
                         if( gChickenVelocity == 0xFC )
@@ -3399,7 +3428,7 @@ void do_physics(void)
               if( gChickenIframes == 0 )
               {
                   --gSpriteState[i];
-                  gChickenIframes = 30;
+                  gChickenIframes = 60;
                   if(gSpriteState[i] == 0x10)
                   {
                       despawn_chicken_sprite();
@@ -3606,6 +3635,8 @@ void title_screen_sm(void)
         PPU_MASK = 0x00;
         SET_COLOR(BACKGROUND2_3, gTitleScreenColor);
 
+        palettes();
+
         if( (gFrameCounter & 0x40) == 0 )
         {
             SET_COLOR(BACKGROUND1_1, LIGHT_TAN);
@@ -3703,8 +3734,6 @@ void main(void)
     init_globals();
     init_game_state();
 
-
-    palettes();
 
     PPU_CTRL = 0x80;
 
