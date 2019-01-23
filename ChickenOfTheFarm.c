@@ -2997,6 +2997,11 @@ void enemy_collision_handler(void)
   if(gIframes == 0)
   {
     take_hit();
+
+    if( gSpriteTable.id[i] == CHICKEN_ID )
+    {
+        take_hit();
+    }
   }
 }
 
