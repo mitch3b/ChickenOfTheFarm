@@ -486,6 +486,8 @@ static unsigned char           gContinue;
 static unsigned char           gFlyCount;
 static unsigned char           gFlyCountCurrentWorld;
 static unsigned char           gFlyCollected;
+static unsigned char           gFlyOnes;
+static unsigned char           gFlyMax;
 static unsigned char           gTmpPattern;
 static unsigned char           gChickenAnimationCounter;
 static ChickenAnimationState_t gChickenAnimationState;
@@ -891,8 +893,16 @@ void load_palette(void)
         if( gFade == 0 )
         {
             PPU_DATA = gScratchPointer[1];
-            PPU_DATA = gScratchPointer[2];
-            PPU_DATA = gScratchPointer[3];
+            if( gGameState == ENDING_STATE && gFlyMax == 1 )
+            {
+                PPU_DATA = DARK_ORANGE;
+                PPU_DATA = LIGHT_ORANGE;
+            }
+            else
+            {
+                PPU_DATA = gScratchPointer[2];
+                PPU_DATA = gScratchPointer[3];
+            }
             PPU_DATA = BLACK;
             PPU_DATA = gScratchPointer[4];
             PPU_DATA = gScratchPointer[5];
@@ -1663,6 +1673,26 @@ void set_chicken_color(void)
     PPU_DATA = LIGHT_ORANGE + gTmp7;
 }
 
+void fly_count(void)
+{
+    if( gFlyCount >= 20 )
+    {
+        gFlyOnes = gFlyCount - 20;
+        PPU_DATA = PATTERN_NUMBERS_2;
+    }
+    else if( gFlyCount >= 10 )
+    {
+        gFlyOnes = gFlyCount - 10;
+        PPU_DATA = PATTERN_NUMBERS_1;
+    }
+    else
+    {
+        gFlyOnes = gFlyCount;
+        PPU_DATA = 0x00;//PATTERN_NUMBERS_0;
+    }
+    PPU_DATA = PATTERN_NUMBERS_0 + gFlyOnes;
+}
+
 void load_stage(void)
 {
     fade_out();
@@ -1701,8 +1731,6 @@ void load_stage(void)
         PPU_ADDRESS = 0xE3;
         PPU_DATA = 0xFF;
         PPU_DATA = 0xFF;
-        PPU_DATA = 0xFF;
-        PPU_DATA = 0xFF;
 
         PPU_ADDRESS = 0x2A;
         PPU_ADDRESS = 0x0C;
@@ -1736,6 +1764,16 @@ void load_stage(void)
             PPU_DATA = PATTERN_FROG_2;
             PPU_DATA = PATTERN_FROG_3;
         }
+
+        // Display the fly counter
+        PPU_ADDRESS = 0x2B;
+        PPU_ADDRESS = 0xEB;
+        PPU_DATA = 0xAA;
+        PPU_ADDRESS = 0x2A;
+        PPU_ADDRESS = 0xAE;
+        PPU_DATA = PATTERN_FLY_0;
+        PPU_DATA = 0x00;
+        fly_count();
 
         gScratchPointer = CastlePalette;
         load_palette();
@@ -1814,25 +1852,15 @@ void load_stage(void)
 
     if( gGameState == ENDING_STATE)
     {
+        if( gFlyCount == 23 )
+        {
+            gFlyMax = 1;
+        }
         // add the number of mini frogs collected
         PPU_ADDRESS = 0x28;
         PPU_ADDRESS = 0xEC;
 
-        if( gFlyCount >= 20 )
-        {
-            gFlyCount = gFlyCount - 20;
-            PPU_DATA = PATTERN_NUMBERS_2;
-        }
-        else if( gFlyCount >= 10 )
-        {
-            gFlyCount = gFlyCount - 10;
-            PPU_DATA = PATTERN_NUMBERS_1;
-        }
-        else
-        {
-            PPU_DATA = PATTERN_NUMBERS_0;
-        }
-        PPU_DATA = PATTERN_NUMBERS_0 + gFlyCount;
+        fly_count();
     }
 
     if( LevelTable[gStage].numSprites != 0 )
@@ -2346,17 +2374,17 @@ void spawn_chicken_sprite(void)
 
             if( gTmp7 > 12 )
             {
-                sprites[j+1+(gTmp7<<2)] = gTmp2+gTmp7-2;
+                sprites[gTmp5 + 1] = gTmp2+gTmp7-2;
             }
             else if( gTmp7 > 1)
             {
-                sprites[j+1+(gTmp7<<2)] = gTmp2+gTmp7-1;
+                sprites[gTmp5 + 1] = gTmp2+gTmp7-1;
             }
             else
             {
-                sprites[j+1+(gTmp7<<2)] = gTmp2+gTmp7;
+                sprites[gTmp5 + 1] = gTmp2+gTmp7;
             }
-            sprites[j+2+(gTmp7<<2)] = gSpriteTable.direction[i];
+            sprites[gTmp5 + 2] = gSpriteTable.direction[i];
         }
         sprites[j+1+8] = 0;
         sprites[j+1+48] = 0;
@@ -3524,6 +3552,7 @@ void init_game_state(void)
     gDisplayLives = 1;
     gContinue = 0;
     gFlyCount = 0;
+    gFlyMax = 0;
     gFlyCountCurrentWorld = 0;
     gRNG = 0;
 }
@@ -3704,6 +3733,18 @@ void end_screen_sm(void)
         input_poll();
         update_rng();
 
+        if( gFlyMax == 1 )
+        {
+            if( (gFrameCounter & 0x40) == 0 )
+            {
+                SET_COLOR(BACKGROUND0_2, ORANGE);
+            }
+            else
+            {
+                SET_COLOR(BACKGROUND0_2, DARK_ORANGE);
+            }
+        }
+
         if( (gFrameCounter & 0x8) == 0 )
         {
             gTmpPattern = PATTERN_FLY_0;
@@ -3725,6 +3766,7 @@ void end_screen_sm(void)
 
         if( (gController1 & BUTTON_START) != 0 )
         {
+            gFlyMax = 0;
             gStage = 0;
             gGameState = TITLE_SCREEN_STATE;
             //pMusicInit(0);
