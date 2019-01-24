@@ -997,9 +997,12 @@ void draw_health(void)
     for( gTmp7 = 0; gTmp7 < 8; gTmp7++)
     {
         gTmp6 = gTmp7<<2;
+        //sprites[40 + gTmp6] = 0x4E - (gTmp7*9);
+        //sprites[40 + gTmp6] = 0x4E - (gTmp7<<3) - gTmp7;
         sprites[40 + gTmp6] = 0x0F + (gTmp7<<3) + gTmp7;
         sprites[41 + gTmp6] = PATTERN_HEALTH_0;
-        if( gHealth > gTmp7 )
+        //gTmp9 = 8 - gTmp7;
+        if( gHealth+gTmp7 >= 8 )
         {
             sprites[42 + gTmp6] = 0x02;
         }
@@ -2117,25 +2120,24 @@ int is_background_collision(void) {
 }
 
 void put_i_in_collision2_vars(void) {
+  // default
+  x2 = sprites[j + 3];
+  y2 = sprites[j];
+
   switch(gSpriteTable.id[i])
   {
     case ARROW_ID:
-      x2 = sprites[j + 3];
       y2 =  sprites[j] + 4;
       width2 = 8;
       height2 = 1;
       break;
 
     case BIRD_ID:
-      x2 = sprites[j+3];
-      y2 =  sprites[j];
       width2 = 16;
       height2 = 8;
       break;
 
     case PORTAL_ID:
-      x2 = sprites[j + 3];
-      y2 = sprites[j];
       width2 = 15;
       height2 = 15;
       break;
@@ -2151,8 +2153,6 @@ void put_i_in_collision2_vars(void) {
     case HEART_ID:
     case KEY_ID:
     default:
-      x2 = sprites[j + 3];
-      y2 = sprites[j];
       width2 = 8;
       height2 = 8;
       break;
