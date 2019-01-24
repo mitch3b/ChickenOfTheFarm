@@ -112,16 +112,6 @@ typedef enum _ChickenAnimationState_t
     CHICKEN_STATE3,
 } ChickenAnimationState_t;
 
-typedef enum _ChickenAIState_t
-{
-    CHICKEN_STANDING = 0,
-    CHICKEN_WALKING,
-    CHICKEN_RUNNING,
-    CHICKEN_SPRINTING,
-    CHICKEN_RETREATING,
-    CHICKEN_PECKING,
-} ChickenAIState_t;
-
 typedef enum _TongueState_t
 {
     TONGUE_NORMAL = 0,
@@ -134,6 +124,54 @@ typedef enum _TongueState_t
 }
 TongueState_t;
 
+#define CHICKEN_INVALID    0x00
+#define CHICKEN_STANDING   0x01
+#define CHICKEN_WALKING    0x02
+#define CHICKEN_RUNNING    0x04
+#define CHICKEN_SPRINTING  0x08
+#define CHICKEN_RETREATING 0x10
+#define CHICKEN_PECKING    0x20
+#define CHICKEN_FLYING     0x40
+
+typedef struct {
+  unsigned char state;
+  unsigned char count;
+} chicken_move_t;
+
+#define MOVE_COUNT_0 2
+chicken_move_t ChickenMove0[MOVE_COUNT_0] = {{CHICKEN_STANDING,   120},
+                                             {CHICKEN_INVALID,      0},};
+
+#define MOVE_COUNT_1 4
+chicken_move_t ChickenMove1[MOVE_COUNT_1] = {{CHICKEN_WALKING|CHICKEN_FLYING,    120},
+                                             {CHICKEN_PECKING,     30},
+                                             {CHICKEN_RETREATING, 130},
+                                             {CHICKEN_INVALID,      0},};
+
+#define MOVE_COUNT_2 6
+chicken_move_t ChickenMove2[MOVE_COUNT_2] = {{CHICKEN_RUNNING|CHICKEN_FLYING,    40},
+                                             {CHICKEN_PECKING,     30},
+                                             {CHICKEN_RUNNING|CHICKEN_FLYING,    40},
+                                             {CHICKEN_PECKING,     30},
+                                             {CHICKEN_RETREATING, 150},
+                                             {CHICKEN_INVALID,      0},};
+
+#define MOVE_COUNT_3 7
+chicken_move_t ChickenMove3[MOVE_COUNT_3] = {{CHICKEN_SPRINTING|CHICKEN_FLYING,    20},
+                                             {CHICKEN_RUNNING,     30},
+                                             {CHICKEN_PECKING,     15},
+                                             {CHICKEN_RETREATING,  65},
+                                             {CHICKEN_PECKING,     15},
+                                             {CHICKEN_RETREATING,  65},
+                                             {CHICKEN_INVALID,      0},};
+
+#define MOVE_TOTAL 4
+chicken_move_t* ChickenMoveList[MOVE_TOTAL] = {
+  ChickenMove0,
+  ChickenMove1,
+  ChickenMove2,
+  ChickenMove3,
+};
 
 //According to nesdev, better to have arrays of attributes than arrays of objects: https://forums.nesdev.com/viewtopic.php?f=2&t=17465&start=0
 typedef struct {
@@ -176,7 +214,6 @@ void chicken_ai_handler(void);
 
 void invalid_collision_handler(void);
 void enemy_collision_handler(void);
-void chicken_collision_handler(void);
 void fly_collision_handler(void);
 void heart_collision_handler(void);
 void portal_collision_handler(void);
@@ -202,7 +239,7 @@ sprite_properties_t spriteProperties[ID_COUNT] = {
     {        PATTERN_KEY_0,  &spawn_1_by_1_sprite,       &despawn_1_sprite,    &item_ai_handler, &key_collision_handler      }, //KEY_ID
     {      PATTERN_SNAKE_0,  &spawn_2_by_1_sprite,       &despawn_2_sprite,   &snake_ai_handler, &enemy_collision_handler    }, //SNAKE_ID
     {      PATTERN_HEART_0,  &spawn_1_by_1_sprite,       &despawn_1_sprite,    &item_ai_handler, &heart_collision_handler    }, //HEART_ID
-    {    PATTERN_CHICKEN_0, &spawn_chicken_sprite, &despawn_chicken_sprite, &chicken_ai_handler, &chicken_collision_handler    }, //CHICKEN_ID
+    {    PATTERN_CHICKEN_0, &spawn_chicken_sprite, &despawn_chicken_sprite, &chicken_ai_handler, &enemy_collision_handler    }, //CHICKEN_ID
 };
 
 typedef struct {
@@ -451,13 +488,15 @@ static unsigned char           gFlyCollected;
 static unsigned char           gTmpPattern;
 static unsigned char           gChickenAnimationCounter;
 static ChickenAnimationState_t gChickenAnimationState;
-static ChickenAIState_t        gChickenAIState;
+static unsigned char           gChickenAIState;
 static unsigned char           gChickenAICounter;
 static unsigned char           gChickenSpeed;
+static unsigned char           gChickenVelocity;
+static unsigned char           gChickenVelocityCounter;
 static unsigned char           gChickenIframes;
+static chicken_move_t*         gpChickenMove;
 
 extern unsigned char        gVblank;
-static unsigned char        gTmp9;
 
 extern void pMusicInit(unsigned char);
 extern void pMusicPlay(void);
@@ -866,6 +905,7 @@ void load_palette(void)
             PPU_DATA = gScratchPointer[11];
             PPU_DATA = gScratchPointer[12];
         }
+        SET_COLOR(BACKGROUND0_0, BLACK);//gScratchPointer[0]);
     }
     else
     {
@@ -873,9 +913,11 @@ void load_palette(void)
         {
             PPU_DATA = BLACK;
         }
-        SET_COLOR(BACKGROUND0_1, GRAY_BLUE);
+        SET_COLOR(BACKGROUND0_1, DARK_GRAY_BLUE);
     }
-    SET_COLOR(BACKGROUND0_0, BLACK);//gScratchPointer[0]);
+
+    PPU_CTRL = gPpuCtrlBase + gYNametable;
+    set_scroll();
 }
 
 void fade_out(void)
@@ -889,8 +931,6 @@ void fade_out(void)
     gFade = 1;
     load_palette();
 
-    PPU_CTRL = gPpuCtrlBase + gYNametable;
-    set_scroll();
 
     gCounter = 20;
     vblank_counter();
@@ -898,8 +938,6 @@ void fade_out(void)
     gFade = 2;
     load_palette();
 
-    PPU_CTRL = gPpuCtrlBase + gYNametable;
-    set_scroll();
 
     gCounter = 20;
     vblank_counter();
@@ -907,8 +945,6 @@ void fade_out(void)
     gFade = 3;
     load_palette();
 
-    PPU_CTRL = gPpuCtrlBase + gYNametable;
-    set_scroll();
 
     gCounter = 20;
     vblank_counter();
@@ -923,7 +959,6 @@ void fade_in(void)
     gFade = 2;
     load_palette();
 
-    PPU_CTRL = gPpuCtrlBase + gYNametable;
     PPU_MASK = 0x0E;
     set_scroll();
 
@@ -932,9 +967,6 @@ void fade_in(void)
 
     gFade = 1;
     load_palette();
-
-    PPU_CTRL = gPpuCtrlBase + gYNametable;
-    set_scroll();
 
     gCounter = 20;
     vblank_counter();
@@ -967,8 +999,7 @@ void draw_health(void)
         gTmp6 = gTmp7<<2;
         sprites[40 + gTmp6] = 0x0F + (gTmp7<<3) + gTmp7;
         sprites[41 + gTmp6] = PATTERN_HEALTH_0;
-        gTmp9 = 8 - gTmp7;
-        if( gHealth >= gTmp9 )
+        if( gHealth > gTmp7 )
         {
             sprites[42 + gTmp6] = 0x02;
         }
@@ -1617,15 +1648,15 @@ void set_chicken_color(void)
 {
     if( gChickenIframes != 0 )
     {
-        gTmp7 = (gChickenIframes >> 2) - 0x10;
+        gTmp7 = (gChickenIframes >> 3) - 0x10;
     }
     else
     {
         gTmp7 = 0;
     }
     SET_COLOR(SPRITE1_1, WHITE + gTmp7);
-    SET_COLOR(SPRITE1_2, RED + gTmp7);
-    SET_COLOR(SPRITE1_3, LIGHT_ORANGE + gTmp7);
+    PPU_DATA = RED + gTmp7;
+    PPU_DATA = LIGHT_ORANGE + gTmp7;
 }
 
 void load_stage(void)
@@ -1846,9 +1877,6 @@ void load_stage(void)
     dma_sprites();
     set_scroll();
 
-    vblank();
-    input_poll();
-
     fade_in();
 }
 
@@ -1878,7 +1906,7 @@ void next_stage(void)
 void update_rng(void)
 {
     ++gFrameCounter;
-    gRNG = gRNG + 1 + gFrameCounter | gController1;
+    gRNG = (gRNG + *((unsigned char*)0xA) + gFrameCounter) ^ gController1;
 }
 
 void death(void)
@@ -1896,6 +1924,7 @@ void death(void)
         PPU_ADDRESS = 0x00;
         UnRLE(Nametable_Lives_top_rle);	// uncompresses our data
 
+        gYScroll = 0;
         gYNametable = 0;
         PPU_CTRL = gPpuCtrlBase + gYNametable;
 
@@ -2055,12 +2084,13 @@ int is_background_collision(void) {
   }
   else
   {
+      gTmp5 = gYScroll + y1;
       if((gYScroll + y1 + 1) >= 0xF0)
       {
-          if( collision[240 + (((gYScroll + y1 - 0xF0) & 0xF0) ) + (x1 >> 4)] == 0 &&
-              collision[240 + (((gYScroll + y1 + height1 - 0xF0) & 0xF0) ) + (x1 >> 4)] == 0 &&
-              collision[240 + (((gYScroll + y1 - 0xF0) & 0xF0) ) + (gCollisionRight >> 4)] == 0 &&
-              collision[240 + (((gYScroll + y1 + height1 - 0xF0) & 0xF0) ) + (gCollisionRight >> 4)] == 0 )
+          if( collision[240 + (((gTmp5 - 0xF0) & 0xF0) ) + (x1 >> 4)] == 0 &&
+              collision[240 + (((gTmp5 + height1 - 0xF0) & 0xF0) ) + (x1 >> 4)] == 0 &&
+              collision[240 + (((gTmp5 - 0xF0) & 0xF0) ) + (gCollisionRight >> 4)] == 0 &&
+              collision[240 + (((gTmp5 + height1 - 0xF0) & 0xF0) ) + (gCollisionRight >> 4)] == 0 )
           {
               return 0;
           }
@@ -2071,10 +2101,10 @@ int is_background_collision(void) {
       }
       else
       {
-          if( collision[(((gYScroll + y1) & 0xF0) ) + (x1 >> 4)] == 0 &&
-              collision[(((gYScroll + y1 + height1) & 0xF0) ) + (x1 >> 4)] == 0 &&
-              collision[(((gYScroll + y1) & 0xF0) ) + (gCollisionRight >> 4)] == 0 &&
-              collision[(((gYScroll + y1 + height1) & 0xF0) ) + (gCollisionRight >> 4)] == 0 )
+          if( collision[(((gTmp5) & 0xF0) ) + (x1 >> 4)] == 0 &&
+              collision[(((gTmp5 + height1) & 0xF0) ) + (x1 >> 4)] == 0 &&
+              collision[(((gTmp5) & 0xF0) ) + (gCollisionRight >> 4)] == 0 &&
+              collision[(((gTmp5 + height1) & 0xF0) ) + (gCollisionRight >> 4)] == 0 )
           {
               return 0;
           }
@@ -2300,7 +2330,7 @@ void despawn_portal_sprite(void)
  */
 void spawn_chicken_sprite(void)
 {
-    if( gStage != 1 && gSpriteState[i] == 0x00 )
+    if( gStage != 1 && gSpriteState[i] == 0x00 && gTmp8 == 0xAF )
     {
         gTmp6 = gSpriteTable.startX[i];
         gTmp2 = spriteProperties[gSpriteTable.id[i]].pattern;
@@ -2328,7 +2358,7 @@ void spawn_chicken_sprite(void)
         sprites[j+1+48] = 0;
         sprites[j+59] += 2;
         sprites[j+57] = PATTERN_CHICKEN2_14;
-        gSpriteState[i] = 0x18;
+        gSpriteState[i] = 0x20;
     }
 }
 
@@ -2338,6 +2368,9 @@ void despawn_chicken_sprite(void)
     {
         sprites[j + gTmp8] = 0;
     }
+    gSpriteState[i] = 0x00;
+    gChickenAnimationCounter = 10;
+    gChickenAnimationState = CHICKEN_STATE0;
 }
 
 /**
@@ -2520,6 +2553,8 @@ void bird_ai_handler(void)
   if(sprites[j+1] != 0) {
     sprite_maintain_y_position();
 
+    height1 = 8;
+    width1 = 13; //Don't count the tip
     //Bird in general moves towards the frog
     //Update Y
     if( sprites[j] != sprites[0] && (gBirdSpeedControl != 0 || sprites[j+3] == sprites[3]))
@@ -2527,66 +2562,49 @@ void bird_ai_handler(void)
         if( sprites[j] < sprites[0])
         {
             //Frog lower so fly down
-
-            x1 = sprites[j + 3] + 1;
-            y1 = sprites[j] + 2;
-            height1 = 8;
-            width1 = 13; //Don't count the tip
-            if(!is_background_collision()) {
-              sprites[j] += 1;
-              sprites[j+4] += 1;
-            }
+            gTmp4 = 1;
         }
         else
         {
-            //Frog higher so fly up
+            gTmp4 = 0xFF;
+        }
 
-            x1 = sprites[j + 3] + 1;
-            y1 = sprites[j];
-            height1 = 8;
-            width1 = 13; //Don't count the tip
-            if(!is_background_collision()) {
-              sprites[j] -= 1;
-              sprites[j+4] -= 1;
-            }
+        x1 = sprites[j + 3] + 1;
+        y1 = sprites[j] + 1 + gTmp4;
+        if(!is_background_collision()) {
+          sprites[j]   = sprites[j]   + gTmp4;
+          sprites[j+4] = sprites[j+4] + gTmp4;
         }
     }
 
     //Update X
     if( sprites[j+3] != sprites[3] && (gBirdSpeedControl != 0 ||  sprites[j] == sprites[0]))
     {
-        if( sprites[j+3] < sprites[3])
+        gTmp4 = sprites[j+3]+1;
+        gTmp = sprites[3]+1;
+
+        if( gTmp4 < gTmp )
         {
             // Bird should move right
-
-            x1 = sprites[j + 3] + 2;
-            y1 = sprites[j] + 1;
-            height1 = 8;
-            width1 = 13; //Don't count the tip
-            if(!is_background_collision()) {
-              sprites[j+3] += 1;
-              sprites[j+7] += 1;
-            }
-
+            gTmp4 = 1;
             gBirdMovement += 0x10;
-
         }
         else
         {
-            // Bird should move left
+            gTmp4 = 0xFF;
+        }
 
-            x1 = sprites[j + 3];
-            y1 = sprites[j] + 1;
-            height1 = 8;
-            width1 = 13; //Don't count the tip
-            if(!is_background_collision()) {
-              sprites[j+3] -= 1;
-              sprites[j+7] -= 1;
-            }
+        x1 = sprites[j + 3] + 1 + gTmp4;
+        y1 = sprites[j] + 1;
+        if(!is_background_collision()) {
+          sprites[j+3] = sprites[j+3] + gTmp4;
+          sprites[j+7] = sprites[j+7] + gTmp4;
         }
     }
     else {
-      if( sprites[j+3] < sprites[3])
+      gTmp4 = sprites[j+3]+1;
+      gTmp = sprites[3]+1;
+      if( gTmp4 < gTmp )
       {
           //Make sure bird continues to face right even tho its Y's turn to move
           gBirdMovement += 0x10;
@@ -2679,15 +2697,15 @@ void snake_ai_handler(void)
       sprites[j] = sprites[j] +     gTmp;
       sprites[j+4] = sprites[j+4] + gTmp;
 
-      // reset the snake falling speed
-      gSpriteState[i] = 1;
+      if( gSpriteState[i] < 15 && (gFrameCounter & 1) == 0 )
+      {
+          ++gSpriteState[i];
+      }
     }
     else
     {
-        if( gSpriteState[i] < 15 && (gFrameCounter & 1) == 0 )
-        {
-            ++gSpriteState[i];
-        }
+      // reset the snake falling speed
+      gSpriteState[i] = 1;
     }
 
     //Update X
@@ -2760,7 +2778,7 @@ void snake_ai_handler(void)
 void chicken_ai_handler(void)
 {
   // check to see if the sprite has spawned first
-  if(gSpriteState[i] != 0xFF && gStage != 1)
+  if(gSpriteState[i] != 0xFF && gSpriteState[i] != 0x00 && gStage != 1)
   {
       if( gChickenIframes != 0 )
       {
@@ -2771,84 +2789,136 @@ void chicken_ai_handler(void)
 
       if( gChickenAICounter == 0 )
       {
-          gChickenAICounter = 15;
-          if( gChickenAIState == CHICKEN_PECKING && gFrameCounter >= 16 )
-          {
-              sprites[j+1] = PATTERN_CHICKEN_0;
-              sprites[j+5] = PATTERN_CHICKEN_1;
-              sprites[j+17] = PATTERN_CHICKEN_4;
-              sprites[j+21] = PATTERN_CHICKEN_5;
-              sprites[j+33] = PATTERN_CHICKEN_8;
-          }
+          gpChickenMove++;
+          gChickenAIState = gpChickenMove->state;
+          gChickenAICounter = gpChickenMove->count;
 
-          if( gRNG < 16 )
+          if( gChickenAIState == CHICKEN_INVALID )
           {
-              gChickenAIState = CHICKEN_PECKING;
-          }
-          else if ( gRNG < 32 )
-          {
-              gChickenAIState = CHICKEN_SPRINTING;
-          }
-          else if ( gRNG < 80 )
-          {
-              gChickenAIState = CHICKEN_RUNNING;
-          }
-          else if ( gRNG < 128 )
-          {
-              gChickenAIState = CHICKEN_WALKING;
-          }
-          else if ( gRNG < 196 )
-          {
-              gChickenAIState = CHICKEN_RETREATING;
-              gChickenAICounter = gRNG - 128;
-          }
-          else
-          {
-              gChickenAIState = CHICKEN_STANDING;
+              gpChickenMove = ChickenMoveList[gRNG & 3];
+              gChickenAIState = gpChickenMove->state;
+              gChickenAICounter = gpChickenMove->count;
           }
       }
       else
       {
-          if( gChickenAICounter == 5 && gChickenAIState == CHICKEN_PECKING )
+          if( gChickenAIState == CHICKEN_PECKING )
           {
               gChickenSpeed = 0;
+              gChickenVelocity = 0xF8;
           }
           --gChickenAICounter;
       }
 
-      switch( gChickenAIState )
+      if( gChickenAIState & CHICKEN_FLYING && gChickenAICounter & 0x8)
       {
-          case CHICKEN_PECKING:
-              sprites[j+1] = PATTERN_CHICKEN_PECK_0;
-              sprites[j+5] = PATTERN_CHICKEN_PECK_1;
-              sprites[j+17] = PATTERN_CHICKEN_PECK_4;
-              sprites[j+21] = PATTERN_CHICKEN_PECK_5;
-              sprites[j+33] = PATTERN_CHICKEN_PECK_8;
-          break;
+          sprites[j+5] =  PATTERN_CHICKEN2_1;
+          sprites[j+9] =  PATTERN_CHICKEN2_2;
+          sprites[j+13] = PATTERN_CHICKEN2_3;
+          sprites[j+21] = PATTERN_CHICKEN2_5;
+          sprites[j+25] = PATTERN_CHICKEN2_6;
+          sprites[j+29] = PATTERN_CHICKEN2_7;
+      }
+      else if( gChickenAIState & CHICKEN_PECKING )
+      {
+          sprites[j+1] =  PATTERN_CHICKEN_PECK_0;
+          sprites[j+5] =  PATTERN_CHICKEN_PECK_1;
+          sprites[j+17] = PATTERN_CHICKEN_PECK_4;
+          sprites[j+21] = PATTERN_CHICKEN_PECK_5;
+          sprites[j+33] = PATTERN_CHICKEN_PECK_8;
+      }
+      else
+      {
+          sprites[j+1] =  PATTERN_CHICKEN_0;
+          sprites[j+5] =  PATTERN_CHICKEN_1;
+          sprites[j+9] =  PATTERN_CHICKEN_2;
+          sprites[j+13] = PATTERN_CHICKEN_3;
+          sprites[j+17] = PATTERN_CHICKEN_4;
+          sprites[j+21] = PATTERN_CHICKEN_5;
+          sprites[j+25] = PATTERN_CHICKEN_6;
+          sprites[j+29] = PATTERN_CHICKEN_7;
+          sprites[j+33] = PATTERN_CHICKEN_8;
+      }
 
-          case CHICKEN_SPRINTING:
-              gChickenSpeed = 3;
-          break;
+      if( gChickenAIState & CHICKEN_SPRINTING )
+      {
+          gChickenSpeed = 3;
+          gChickenVelocity = 3;
+      }
 
-          case CHICKEN_RUNNING:
-              gChickenSpeed = 2;
-          break;
+      if( gChickenAIState & CHICKEN_RUNNING )
+      {
+          gChickenSpeed = 2;
+          gChickenVelocity = 2;
+      }
 
-          case CHICKEN_WALKING:
-              gChickenSpeed = 1;
-          break;
+      if( gChickenAIState & CHICKEN_WALKING )
+      {
+          gChickenSpeed = 1;
+          gChickenVelocity = 1;
+      }
 
-          case CHICKEN_RETREATING:
-              gChickenSpeed = 0xFF;
-          break;
+      if( gChickenAIState & CHICKEN_RETREATING )
+      {
+          gChickenSpeed = 0xFF;
+          gChickenVelocity = 0xFC;
+      }
 
-          case CHICKEN_STANDING:
-              gChickenSpeed = 0;
-          break;
+      if( gChickenAIState & CHICKEN_STANDING )
+      {
+          gChickenSpeed = 0;
+          gChickenVelocity = 0xFC;
+      }
+
+      if( gChickenVelocity != 0 )
+      {
+            // Y movement
+            if( sprites[j] - gChickenVelocity >= 0x77)
+            {
+                if( gChickenVelocityCounter == 4 || gChickenVelocity == 0xFC )
+                {
+                    gChickenVelocityCounter = 0;
+
+                    for( gTmp4 = gChickenVelocity; gTmp4 != 0; )
+                    {
+                        x1 = sprites[j + 3] + 1;
+                        y1 = sprites[j] - gTmp4;
+                        height1 = 32;
+                        width1 = 30;
+                        if(!is_background_collision())
+                        {
+                            for( gTmp7 = 0; gTmp7 < 15; gTmp7++ )
+                            {
+                                gTmp5 = j+(gTmp7<<2);
+                                sprites[gTmp5] = sprites[gTmp5] - gTmp4;
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            gChickenVelocity = 0;
+                            break;
+                        }
+                        if( gChickenVelocity == 0xFC )
+                        {
+                            gTmp4++;
+                        }
+                        else
+                        {
+                            gTmp4--;
+                        }
+                    }
+                }
+                else
+                {
+                    gChickenVelocityCounter++;
+                }
+            }
       }
 
       if( gChickenSpeed != 0 )
       {
+            // X movement
             x1 = sprites[j + 3] + 1 - gChickenSpeed;
             y1 = sprites[j];
             height1 = 32;
@@ -2927,30 +2997,11 @@ void enemy_collision_handler(void)
   if(gIframes == 0)
   {
     take_hit();
-  }
-}
 
-void chicken_collision_handler(void) {
-  if( gHealth > 0 )
-  {
-      if( gStage != 0 && (gIframes == 0))
-      {
-        gCurrentSoundEffect = DAMAGE_SOUND_ID;
-        gSoundEffectCounter = 0;
-
-          --gHealth;
-          gSpeedDirection ^= 1;
-      }
-      draw_health();
-      if( gHealth == 0 )
-      {
-          death();
-      }
-      else
-      {
-          gIframes = 20;
-          gSpeed = 25;
-      }
+    if( gSpriteTable.id[i] == CHICKEN_ID )
+    {
+        take_hit();
+    }
   }
 }
 
@@ -3042,10 +3093,11 @@ void do_physics(void)
             }
             else
             {
+                gTmp5 = gYScroll + gY;
                 if((gYScroll + gY + 1) >= 0xF0)
                 {
-                    if( collision[240 + (((gYScroll + gY + 1 - 0xF0 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
-                        collision[240 + (((gYScroll + gY + 0x10 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 )
+                    if( collision[240 + (((gTmp5 + 1 - 0xF0 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                        collision[240 + (((gTmp5 + 0x10 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX -= 1;
                         small_jump();
@@ -3057,8 +3109,8 @@ void do_physics(void)
                 }
                 else
                 {
-                    if( collision[(((gYScroll + gY + 1 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
-                        collision[(((gYScroll + gY + 0x10) & 0xF0) ) + (gTmpX >> 4)] == 0 )
+                    if( collision[(((gTmp5 + 1 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                        collision[(((gTmp5 + 0x10) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX -= 1;
                         small_jump();
@@ -3093,10 +3145,11 @@ void do_physics(void)
             }
             else
             {
+                gTmp5 = gYScroll + gY;
                 if((gYScroll + gY + 1) >= 0xF0)
                 {
-                    if( collision[240 + (((gYScroll + gY + 1 - 0xF0 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
-                        collision[240 + (((gYScroll + gY + 0x10 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 )
+                    if( collision[240 + (((gTmp5 + 1 - 0xF0 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                        collision[240 + (((gTmp5 + 0x10 - 0xF0) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX += 1;
                         small_jump();
@@ -3108,8 +3161,8 @@ void do_physics(void)
                 }
                 else
                 {
-                    if( collision[(((gYScroll + gY + 1 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
-                        collision[(((gYScroll + gY + 0x10) & 0xF0) ) + (gTmpX >> 4)] == 0 )
+                    if( collision[(((gTmp5 + 1 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 &&
+                        collision[(((gTmp5 + 0x10) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                     {
                         gX += 1;
                         small_jump();
@@ -3135,6 +3188,7 @@ void do_physics(void)
         {
             gTmpX = gX + FROG_COLLISION_X_BUFFER;
             gTmpX2 = gX + 0x10 - FROG_COLLISION_X_BUFFER;
+            gTmp5 = gYScroll + gY + FROG_COLLISION_Y_BUFFER;
 
             if( gYNametable == 2 )
             {
@@ -3163,8 +3217,8 @@ void do_physics(void)
             }
             else if((gYScroll + gY) >= 0xF0 )
             {
-                if( collision[240 + (((gYScroll + gY - 0xF0 + FROG_COLLISION_Y_BUFFER)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
-                    collision[240 + (((gYScroll + gY - 0xF0 + FROG_COLLISION_Y_BUFFER)&0xF0) ) + (gTmpX >> 4)] == 0 )
+                if( collision[240 + (((gTmp5 - 0xF0)&0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
+                    collision[240 + (((gTmp5 - 0xF0)&0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                     if(gY > MAX_TOP_BUFFER)
                     {
@@ -3185,8 +3239,8 @@ void do_physics(void)
             }
             else
             {
-                if( collision[(((gYScroll + gY - 0x100 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
-                    collision[(((gYScroll + gY - 0x100 + FROG_COLLISION_Y_BUFFER) & 0xF0) ) + (gTmpX >> 4)] == 0 )
+                if( collision[(((gTmp5 - 0x100) & 0xF0) ) + ((gTmpX2) >> 4)] == 0 &&
+                    collision[(((gTmp5 - 0x100) & 0xF0) ) + (gTmpX >> 4)] == 0 )
                 {
                   //Approaching the top. Scroll until we can't anymore
                   if(gY > MAX_TOP_BUFFER || gYScroll == 0) {
@@ -3335,6 +3389,11 @@ void do_physics(void)
       // In case item/enemy needs to be respawned
       spawn_check();
 
+      if( gTmp2 == CHICKEN_ID && gTmp7 > 0xE0 )
+      {
+          spriteProperties[gTmp2].despawn();
+      }
+
       //Tongue collision box
       if(gTongueState != TONGUE_NORMAL) {
         x1 = sprites[75];
@@ -3374,7 +3433,7 @@ void do_physics(void)
               if( gChickenIframes == 0 )
               {
                   --gSpriteState[i];
-                  gChickenIframes = 30;
+                  gChickenIframes = 60;
                   if(gSpriteState[i] == 0x10)
                   {
                       despawn_chicken_sprite();
@@ -3433,11 +3492,14 @@ void init_physics(void)
     gFlyCollected = 0;
     update_tongue_sprite();
     update_frog_sprite();
-    gChickenAnimationCounter = 30;
+    gChickenAnimationCounter = 10;
     gChickenAICounter = 120;
+    gpChickenMove = ChickenMove0;
     gChickenAIState = CHICKEN_STANDING;
     gChickenAnimationState = CHICKEN_STATE0;
     gChickenSpeed = 0;
+    gChickenVelocity = 0;
+    gChickenVelocityCounter = 0;
     gChickenIframes = 0;
 }
 
@@ -3487,11 +3549,9 @@ void game_running_sm(void)
                 // Flashing colors
                 //PPU_MASK = 0x00;
                 SET_COLOR(BACKGROUND0_1, BLACK);
-                SET_COLOR(BACKGROUND0_2, BLACK);
-                SET_COLOR(BACKGROUND0_3, BLACK);
-                //SET_COLOR((BACKGROUND0_1 + gColorTimer2), (gTitleScreenColor + (gColorTimer2 << 4)));
+                PPU_DATA = BLACK;
+                PPU_DATA = BLACK;
                 SET_COLOR((BACKGROUND0_1 + gColorTimer2), gTitleScreenColor);
-                //SET_COLOR((BACKGROUND0_1 + gColorTimer2), gTitleScreenColor);
 
                 gColorTimer = 0;
 
@@ -3528,33 +3588,25 @@ void game_running_sm(void)
             gCurrentSoundEffect = PAUSE_SOUND_ID;
             gSoundEffectCounter = 0;
 
+            gTmp5 = 0;
             //Paused so wait until button is released and then pushed again
             do
             {
-             PPU_CTRL = gPpuCtrlBase + gYNametable;
-             set_scroll();
-             vblank();
-             input_poll();
-            }
-            while((gController1 & BUTTON_START) == BUTTON_START);
+                PPU_CTRL = gPpuCtrlBase + gYNametable;
+                set_scroll();
+                vblank();
+                input_poll();
 
-            do
-            {
-             PPU_CTRL = gPpuCtrlBase + gYNametable;
-             set_scroll();
-             vblank();
-             input_poll();
+                if( (gTmp5 == 0 || gTmp5 == 2) && (gController1 & BUTTON_START) != BUTTON_START )
+                {
+                    gTmp5++;
+                }
+                if( gTmp5 == 1 && (gController1 & BUTTON_START) == BUTTON_START )
+                {
+                    gTmp5++;
+                }
             }
-            while((gController1 & BUTTON_START) != BUTTON_START);
-
-            do
-            {
-             PPU_CTRL = gPpuCtrlBase + gYNametable;
-             set_scroll();
-             vblank();
-             input_poll();
-            }
-            while((gController1 & BUTTON_START) == BUTTON_START);
+            while(gTmp5 != 3);
 
             gCurrentSoundEffect = PAUSE_SOUND_ID;
             gSoundEffectCounter = 0;
@@ -3587,6 +3639,8 @@ void title_screen_sm(void)
         // Flashing colors
         PPU_MASK = 0x00;
         SET_COLOR(BACKGROUND2_3, gTitleScreenColor);
+
+        palettes();
 
         if( (gFrameCounter & 0x40) == 0 )
         {
@@ -3685,8 +3739,6 @@ void main(void)
     init_globals();
     init_game_state();
 
-
-    palettes();
 
     PPU_CTRL = 0x80;
 
