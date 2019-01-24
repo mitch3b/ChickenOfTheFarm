@@ -484,6 +484,7 @@ static unsigned char           gColorTimerLimit;
 static unsigned char           gTmpDirection;
 static unsigned char           gContinue;
 static unsigned char           gFlyCount;
+static unsigned char           gFlyCountCurrentWorld;
 static unsigned char           gFlyCollected;
 static unsigned char           gTmpPattern;
 static unsigned char           gChickenAnimationCounter;
@@ -1898,6 +1899,7 @@ void next_stage(void)
             gTmpWorld = LevelProperties[gStage+1].world;
             if(gWorld != gTmpWorld && gTmpWorld != 0)
             {
+                gFlyCountCurrentWorld = 0;
                 gDisplayLives = 1;
                 gWorld = LevelProperties[gStage+1].world;
             }
@@ -2007,17 +2009,18 @@ void death(void)
                     {
                         --gStage;
                     }
-                    gFlyCount = 0;
+                    gFlyCount = gFlyCount - gFlyCountCurrentWorld;
                     gLives = 2;
                     gDisplayLives = 1;
                 }
                 else
                 {
                     gDisplayLives = 0;
-
+                    gFlyCount = 0;
                     gStage = 0;
                     gGameState = TITLE_SCREEN_STATE;
                 }
+                gFlyCountCurrentWorld = 0;
                 gContinue = 0;
                 break;
             }
@@ -2039,6 +2042,7 @@ void death(void)
         if( gFlyCollected == 1 )
         {
             --gFlyCount;
+            --gFlyCountCurrentWorld;
         }
         gLives--;
         gDisplayLives = 1;
@@ -3012,6 +3016,7 @@ void fly_collision_handler(void)
   despawn_1_sprite();
 
   ++gFlyCount;
+  ++gFlyCountCurrentWorld;
   gFlyCollected = 1;
 
   gCurrentSoundEffect = ITEM_SOUND_ID;
@@ -3519,6 +3524,7 @@ void init_game_state(void)
     gDisplayLives = 1;
     gContinue = 0;
     gFlyCount = 0;
+    gFlyCountCurrentWorld = 0;
     gRNG = 0;
 }
 
